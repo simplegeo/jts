@@ -1,0 +1,16 @@
+jts for Debian
+--------------
+
+As upstream only distributes as binary/source combination zip file 
+I do repackaging to remove the binary parts:
+
+- unzip jts-<version>.zip into a jts-<version> directory
+- rm -Rf lib - to remove the prebuild and dependency runtime libraries
+- rm -Rf doc/javadoc - to remove the javadoc 
+- build the jts_<version>.orig.tar.gz
+
+ -- Wolfgang Baer <WBaer@gmx.de>, Thu, 27 Jan 2005 10:38:29 +0100
+
+Removed PDF documentation and oracle stuff starting from 1.7
+
+ -- Francesco Paolo Lovergine <frankie@debian.org>, Sat, 16 Jun 2007 00:31:55 +0100

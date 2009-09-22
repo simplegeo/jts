@@ -1,0 +1,36 @@
+Source: jts
+Section: libs
+Priority: optional
+Maintainer: Debian GIS Project <pkg-grass-devel@lists.alioth.debian.org>
+Uploaders: Francesco Paolo Lovergine <frankie@debian.org>
+Build-Depends: debhelper (>= 7), cdbs, ant, default-jdk
+Standards-Version: 3.8.3
+Homepage: http://www.vividsolutions.com/jts/jtshome.htm
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-grass/packages/jts/
+Vcs-Svn: svn://svn.debian.org/pkg-grass/packages/jts/
+
+Package: libjts-java
+Architecture: all
+Section: java
+Depends: default-jre-headless | default-jre, ${misc:Depends}
+Suggests: libjts-java-doc
+Description: Java Topology Suite 
+ JTS is a java library which provides:
+  * an implementation of the spatial data model defined 
+    in the OGC Simple Features Specification for SQL (SFS)
+  * a complete, consistent, implementation of fundamental 2D spatial algorithms
+  * an explicit precision model, with algorithms that gracefully handle 
+    situations that result in dimensional collapse
+  * robust implementations of key computational geometric operations
+  * I/O in Well-Known Text format
+
+Package: libjts-java-doc
+Architecture: all
+Section: doc
+Depends: ${misc:Depends}
+Suggests: libjts-java
+Description: Documentation for the Java Topology Suite JTS
+ Documentation for programmers:
+  * javadoc for libjts-java
+  * developer guide
+  * technical Specifications etc

@@ -1,0 +1,88 @@
+<project name="JTS" default="compile" basedir="..">
+
+<!-- ========== Component Declarations ==================================== -->
+
+
+  <!-- The name of this component -->
+  <property name="component.name"          value="jts"/>
+
+  <!-- The base directory for compilation targets -->
+  <property name="build.home"              value="${basedir}/target"/>
+
+  <!-- The base directory for component sources -->
+  <property name="source.home"             value="${basedir}/src"/>
+
+  <!-- The base directory for component configuration files -->
+  <property name="conf.home"               value="${basedir}/src"/>
+
+<!-- ========== Compiler Defaults ========================================= -->
+
+
+  <!-- Should Java compilations set the 'debug' compiler option? -->
+  <property name="compile.debug"           value="true"/>
+
+  <!-- Should Java compilations set the 'deprecation' compiler option? -->
+  <property name="compile.deprecation"     value="false"/>
+
+  <!-- Should Java compilations set the 'optimize' compiler option? -->
+  <property name="compile.optimize"        value="false"/>
+
+  <!-- Construct compile classpath -->
+  <path id="compile.classpath">
+    <pathelement location="${build.home}/classes"/>
+  </path>
+
+
+<!-- ========== Executable Targets ======================================== -->
+  
+  <target name="prepare" description="Prepare build directory">
+    <mkdir dir="${build.home}"/>
+    <mkdir dir="${build.home}/classes"/>
+    <mkdir dir="${build.home}/conf"/>
+    <mkdir dir="${build.home}/docs"/>
+    <mkdir dir="${build.home}/docs/api"/>
+    <mkdir dir="${build.home}/docs/examples"/>
+  </target>
+
+  <target name="static" depends="prepare"
+   description="Copy static files to build directory">
+    <tstamp/>
+    <copy todir="${build.home}/conf" filtering="on">
+      <fileset dir="${conf.home}" includes="*.MF"/>
+      <fileset dir="${conf.home}" includes="*.properties"/>
+    </copy>
+    <copy todir="${build.home}/docs/examples" filtering="on">
+      <fileset dir="${source.home}" includes="**/jtsexample/**"/>
+    </copy>
+  </target>
+
+  <target name="compile" depends="static">
+    <javac srcdir="${source.home}" destdir="${build.home}/classes"
+           debug="${compile.debug}" deprecation="${compile.deprecation}"
+           optimize="${compile.optimize}" verbose="no" source="1.3" nowarn="yes">
+	<exclude name="**/jtsexample/**"/>
+        <classpath refid="compile.classpath"/>
+    </javac>
+
+    <mkdir dir="${build.home}/classes/META-INF"/>
+
+    <jar jarfile="${build.home}/${component.name}.jar"
+         basedir="${build.home}/classes"
+         manifest="${build.home}/conf/MANIFEST.MF">
+      <include name="com/vividsolutions/**" />
+    </jar>
+
+  </target>
+
+  <target name="clean" description="Clean build and distribution directories">
+    <delete dir="${build.home}"/>
+  </target>
+
+  <target name="all" depends="clean,compile"
+   description="Clean and compile all components">  
+	<javadoc packagenames="com.vividsolutions.jts.*" sourcepath="${source.home}" 
+		destdir="${build.home}/docs/api" defaultexcludes="yes">
+    	</javadoc>      
+  </target>
+
+</project>
