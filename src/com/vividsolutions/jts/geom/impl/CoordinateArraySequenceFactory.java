@@ -1,4 +1,3 @@
-
 /*
 * The JTS Topology Suite is a collection of Java classes that
 * implement the fundamental operations required to validate a given
@@ -30,7 +29,7 @@
 *
 *     (250)385-6040
 *     www.vividsolutions.com
- */
+*/
 package com.vividsolutions.jts.geom.impl;
 
 import java.io.Serializable;

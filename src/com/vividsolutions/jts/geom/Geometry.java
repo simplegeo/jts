@@ -36,6 +36,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import com.vividsolutions.jts.algorithm.*;
+import com.vividsolutions.jts.geom.util.*;
 import com.vividsolutions.jts.io.WKTWriter;
 import com.vividsolutions.jts.operation.*;
 import com.vividsolutions.jts.operation.buffer.BufferOp;
@@ -409,7 +410,10 @@ public abstract class Geometry
    *  Returns the minimum distance between this <code>Geometry</code>
    *  and the <code>Geometry</code> g
    *
-   *@param  g  the <code>Geometry</code> from which to compute the distance
+   * @param  g  the <code>Geometry</code> from which to compute the distance
+   * @return the distance between the geometries
+   * @return 0 if either input geometry is empty
+   * @throws IllegalArgumentException if g is null
    */
   public double distance(Geometry g)
   {
@@ -814,7 +818,8 @@ public abstract class Geometry
    * <p>
    * The <code>overlaps</code> predicate has the following equivalent definitions:
    * <ul>
-   * <li>The geometries have some but not all points in common,
+   * <li>The geometries have at least one point each not shared by the other
+   * (or equivalently neither covers the other),
    * they have the same dimension,
    * and the intersection of the interiors of the two geometries has
    * the same dimension as the geometries themselves.
@@ -999,6 +1004,7 @@ public abstract class Geometry
 	 * <p>
 	 * The buffer operation always returns a polygonal result. The negative or
 	 * zero-distance buffer of lines and points is always an empty {@link Polygon}.
+	 * This is also the result for the buffers of degenerate (zero-area) polygons.
 	 * 
 	 * @param distance
 	 *          the width of the buffer (may be positive, negative or 0)
@@ -1028,6 +1034,7 @@ public abstract class Geometry
 	 * <p>
 	 * The buffer operation always returns a polygonal result. The negative or
 	 * zero-distance buffer of lines and points is always an empty {@link Polygon}.
+	 * This is also the result for the buffers of degenerate (zero-area) polygons.
 	 * 
 	 * @param distance
 	 *          the width of the buffer (may be positive, negative or 0)
@@ -1068,6 +1075,7 @@ public abstract class Geometry
 	 * <p>
 	 * The buffer operation always returns a polygonal result. The negative or
 	 * zero-distance buffer of lines and points is always an empty {@link Polygon}.
+	 * This is also the result for the buffers of degenerate (zero-area) polygons.
    *
    *@param  distance  the width of the buffer (may be positive, negative or 0)
    *@param quadrantSegments the number of line segments used to represent a quadrant of a circle
@@ -1127,14 +1135,17 @@ public abstract class Geometry
   public abstract Geometry reverse();
   
   /**
-   *  Computes a <code>Geometry</code> representing the points shared by this
-   *  <code>Geometry</code> and <code>other</code>.
+   * Computes a <code>Geometry</code> representing the points shared by this
+   * <code>Geometry</code> and <code>other</code>.
+   * {@link GeometryCollection}s support intersection with 
+   * homogeneous collection types, with the semantics that
+   * the result is a {@link GeometryCollection} of the
+   * intersection of each element of the target with the argument. 
    *
-   * @param  other  the <code>Geometry</code> with which to compute the
-   *      intersection
-   * @return        the points common to the two <code>Geometry</code>s
+   * @param  other the <code>Geometry</code> with which to compute the intersection
+   * @return the points common to the two <code>Geometry</code>s
    * @throws TopologyException if a robustness error occurs
-   * @throws IllegalArgumentException if either input is a non-empty GeometryCollection
+   * @throws IllegalArgumentException if the argument is a non-empty GeometryCollection
    */
   public Geometry intersection(Geometry other)
   {
@@ -1145,6 +1156,20 @@ public abstract class Geometry
     if (this.isEmpty()) return this.getFactory().createGeometryCollection(null);
     if (other.isEmpty()) return this.getFactory().createGeometryCollection(null);
 
+    // compute for GCs
+    if (isGeometryCollection(this)) {
+      final Geometry g2 = other;
+      return GeometryCollectionMapper.map(
+          (GeometryCollection) this,
+          new GeometryCollectionMapper.MapOp() {
+        public Geometry map(Geometry g) {
+          return g.intersection(g2);
+        }
+      });
+    }
+//    if (isGeometryCollection(other))
+//      return other.intersection(this);
+    
     checkNotGeometryCollection(this);
     checkNotGeometryCollection(other);
     return SnapIfNeededOverlayOp.overlayOp(this, other, OverlayOp.INTERSECTION);
@@ -1187,6 +1212,9 @@ public abstract class Geometry
    */
   public Geometry difference(Geometry other)
   {
+    // mod to handle empty cases better - return type of input
+    //if (this.isEmpty() || other.isEmpty()) return (Geometry) clone();
+    
     // special case: if A.isEmpty ==> empty; if B.isEmpty ==> A
     if (this.isEmpty()) return this.getFactory().createGeometryCollection(null);
     if (other.isEmpty()) return (Geometry) clone();
@@ -1484,6 +1512,10 @@ public abstract class Geometry
     }
   }
 
+  protected boolean isGeometryCollection(Geometry g)
+  {
+    return g.getClass().equals(com.vividsolutions.jts.geom.GeometryCollection.class);
+  }
 
   /**
    *  Returns the minimum and maximum x and y values in this <code>Geometry</code>

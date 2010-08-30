@@ -43,9 +43,13 @@ import com.vividsolutions.jts.util.Debug;
 
 
 /**
+ * Computes the intersection of line segments,
+ * and adds the intersection to the edges containing the segments.
+ * 
  * @version 1.7
  */
-public class SegmentIntersector {
+public class SegmentIntersector 
+{
 
   public static boolean isAdjacentSegments(int i1, int i2)
   {

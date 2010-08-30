@@ -248,9 +248,9 @@ public class Polygon
   public double getArea()
   {
     double area = 0.0;
-    area += Math.abs(CGAlgorithms.signedArea(shell.getCoordinates()));
+    area += Math.abs(CGAlgorithms.signedArea(shell.getCoordinateSequence()));
     for (int i = 0; i < holes.length; i++) {
-      area -= Math.abs(CGAlgorithms.signedArea(holes[i].getCoordinates()));
+      area -= Math.abs(CGAlgorithms.signedArea(holes[i].getCoordinateSequence()));
     }
     return area;
   }

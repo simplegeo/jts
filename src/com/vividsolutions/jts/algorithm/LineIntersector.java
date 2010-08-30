@@ -53,11 +53,29 @@ import com.vividsolutions.jts.io.WKTWriter;
  *
  * @version 1.7
  */
-public abstract class LineIntersector {
-
+public abstract class LineIntersector 
+{
+/**
+ * These are deprecated, due to ambiguous naming
+ */
   public final static int DONT_INTERSECT = 0;
   public final static int DO_INTERSECT = 1;
   public final static int COLLINEAR = 2;
+  
+  /**
+   * Indicates that line segments do not intersect
+   */
+  public final static int NO_INTERSECTION = 0;
+  
+  /**
+   * Indicates that line segments intersect in a single point
+   */
+  public final static int POINT_INTERSECTION = 1;
+  
+  /**
+   * Indicates that line segments intersect in a line segment
+   */
+  public final static int COLLINEAR_INTERSECTION = 2;
 
   /**
    * Computes the "edge distance" of an intersection point p along a segment.
@@ -186,7 +204,7 @@ public abstract class LineIntersector {
         Coordinate p1, Coordinate p2);
 
   protected boolean isCollinear() {
-    return result == COLLINEAR;
+    return result == COLLINEAR_INTERSECTION;
   }
 
   /**
@@ -245,7 +263,7 @@ public abstract class LineIntersector {
    * @return true if the input geometries intersect
    */
   public boolean hasIntersection() {
-    return result != DONT_INTERSECT;
+    return result != NO_INTERSECTION;
   }
 
   /**

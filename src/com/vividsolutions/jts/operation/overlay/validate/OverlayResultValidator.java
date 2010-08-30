@@ -116,8 +116,8 @@ public class OverlayResultValidator
 
   private void addTestPts(Geometry g)
   {
-    OffsetPointGenerator ptGen = new OffsetPointGenerator(g, 5 * boundaryDistanceTolerance);
-    testCoords.addAll(ptGen.getPoints());
+    OffsetPointGenerator ptGen = new OffsetPointGenerator(g);
+    testCoords.addAll(ptGen.getPoints(5 * boundaryDistanceTolerance));
   }
 
   private boolean checkValid(int overlayOp)

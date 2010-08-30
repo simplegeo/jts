@@ -157,11 +157,15 @@ public class CGAlgorithms
    *
    * @param ring an array of Coordinates forming a ring
    * @return true if the ring is oriented counter-clockwise.
+   * @throws IllegalArgumentException if there are too few points to determine orientation (< 3)
    */
   public static boolean isCCW(Coordinate[] ring) {
     // # of points without closing endpoint
     int nPts = ring.length - 1;
-
+    // sanity check
+    if (nPts < 3)
+    	throw new IllegalArgumentException("Ring has fewer than 3 points, so orientation cannot be determined");
+    
     // find highest point
     Coordinate hiPt = ring[0];
     int hiIndex = 0;
@@ -286,6 +290,7 @@ public class CGAlgorithms
       Math.abs(s) *
       Math.sqrt(((B.x - A.x) * (B.x - A.x) + (B.y - A.y) * (B.y - A.y)));
   }
+  
   /**
    * Computes the perpendicular distance from a point p
    * to the (infinite) line containing the points AB
@@ -315,6 +320,29 @@ public class CGAlgorithms
       Math.sqrt(((B.x - A.x) * (B.x - A.x) + (B.y - A.y) * (B.y - A.y)));
   }
 
+  /**
+   * Computes the distance from a point to a sequence
+   * of line segments.
+   * 
+   * @param p a point
+   * @param line a sequence of contiguous line segments defined by their vertices
+   * @return the minimum distance between the point and the line segments
+   */
+	public static double distancePointLine(Coordinate p, Coordinate[] line)
+	{
+		if (line.length == 0) 
+			throw new IllegalArgumentException("Line array must contain at least one vertex");
+		// this handles the case of length = 1
+		double minDistance = p.distance(line[0]);
+		for (int i = 0; i < line.length - 1; i++) {
+			double dist = CGAlgorithms.distancePointLine(p, line[i], line[i+1]);
+			if (dist < minDistance) {
+				minDistance = dist;
+			}
+		}
+		return minDistance;
+	}
+	
   /**
    * Computes the distance from a line segment AB to a line segment CD
    *
@@ -383,8 +411,13 @@ limiting conditions:
   }
 
   /**
-   * Returns the signed area for a ring.  The area is positive if
-   * the ring is oriented CW.
+   * Computes the signed area for a ring.      
+   * The signed area is positive if
+   * the ring is oriented CW, negative if the ring is oriented CCW,
+   * and zero if the ring is degenerate or flat. 
+   * 
+   * @param ring the coordinates forming the ring
+   * @return the signed area of the ring
    */
   public static double signedArea(Coordinate[] ring)
   {
@@ -401,18 +434,66 @@ limiting conditions:
   }
 
   /**
+   * Computes the signed area for a ring.      
+   * The signed area is positive if
+   * the ring is oriented CW, negative if the ring is oriented CCW,
+   * and zero if the ring is degenerate or flat. 
+   * 
+   * @param ring the coordinates forming the ring
+   * @return the signed area of the ring
+   */
+  public static double signedArea(CoordinateSequence ring)
+  {
+    int n = ring.size();
+    if (n < 3) return 0.0;
+         double sum = 0.0;
+    Coordinate p = new Coordinate();
+    ring.getCoordinate(0, p);
+    double bx = p.x;
+    double by = p.y;
+         for (int i = 1; i < n; i++) {
+      ring.getCoordinate(i, p);
+      double cx = p.x;
+      double cy = p.y;
+      sum += (bx + cx) * (cy - by);
+             bx = cx;
+      by = cy;
+    }
+    return -sum  / 2.0;
+  } 
+  
+  /**
    * Computes the length of a linestring specified by a sequence of points.
    *
    * @param pts the points specifying the linestring
    * @return the length of the linestring
    */
-  public static double length(CoordinateSequence pts) {
-      if (pts.size() < 1) return 0.0;
-      double sum = 0.0;
-      for (int i = 1; i < pts.size(); i++) {
-        sum += pts.getCoordinate(i).distance(pts.getCoordinate(i - 1));
-      }
-      return sum;
+  public static double length(CoordinateSequence pts) 
+  {
+    // optimized for processing CoordinateSequences
+    int n = pts.size();
+    if (n <= 1) return 0.0;
+    
+    double len = 0.0;
+    
+    Coordinate p = new Coordinate();
+    pts.getCoordinate(0, p);
+    double x0 = p.x;
+    double y0 = p.y;
+    
+    for (int i = 1; i < n; i++) {
+      pts.getCoordinate(i, p);
+      double x1 = p.x;
+      double y1 = p.y;
+      double dx = x1 - x0;
+      double dy = y1 - y0;
+
+      len += Math.sqrt(dx * dx + dy * dy);
+      
+      x0 = x1;
+      y0 = y1;
+    }
+    return len;
   }
 
 }

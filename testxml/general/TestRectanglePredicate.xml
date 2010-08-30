@@ -207,7 +207,7 @@
     POLYGON((0 0, 100 0, 100 100, 0 100, 0 0)) 
   </a>
   <b>
-    MULTIPOINT(50 100, 60 60) 
+    MULTIPOINT((50 100), (60 60)) 
   </b>
 <test>  <op name="intersects" arg1="A" arg2="B">   true   </op> </test>
 <test>  <op name="contains" arg1="A" arg2="B">   true   </op> </test>

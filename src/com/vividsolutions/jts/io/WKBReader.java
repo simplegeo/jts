@@ -40,8 +40,9 @@ import com.vividsolutions.jts.geom.*;
  * Supports use of an {@link InStream}, which allows easy use
  * with arbitary byte stream sources.
  * <p>
- * This class reads the format describe in {@link WKBWriter}.  It also partiually handles
- * the Extended WKB format used by PostGIS (by reading SRID values)
+ * This class reads the format describe in {@link WKBWriter}.  
+ * It also partiually handles
+ * the Extended WKB format used by PostGIS, by parsing and storing SRID values.
  * <p>
  * This class is designed to support reuse of a single instance to read multiple
  * geometries. This class is not thread-safe; each thread should create its own
@@ -53,8 +54,10 @@ public class WKBReader
 {
   /**
    * Converts a hexadecimal string to a byte array.
+   * The hexadecimal digit symbols are case-insensitive.
    *
    * @param hex a string containing hex digits
+   * @return an array of bytes with the value of the hex string
    */
   public static byte[] hexToBytes(String hex)
   {
@@ -104,11 +107,11 @@ public class WKBReader
   }
 
   /**
-   * Reads a single {@link Geometry} from a byte array.
+   * Reads a single {@link Geometry} in WKB format from a byte array.
    *
    * @param bytes the byte array to read from
    * @return the geometry read
-   * @throws ParseException if a parse exception occurs
+   * @throws ParseException if the WKB is ill-formed
    */
   public Geometry read(byte[] bytes) throws ParseException
   {
@@ -123,12 +126,12 @@ public class WKBReader
   }
 
   /**
-   * Reads a {@link Geometry} from an {@link InStream).
+   * Reads a {@link Geometry} in binary WKB format from an {@link InStream).
    *
    * @param is the stream to read from
    * @return the Geometry read
-   * @throws IOException
-   * @throws ParseException
+   * @throws IOException if the underlying stream creates an error
+   * @throws ParseException if the WKB is ill-formed
    */
   public Geometry read(InStream is)
   throws IOException, ParseException

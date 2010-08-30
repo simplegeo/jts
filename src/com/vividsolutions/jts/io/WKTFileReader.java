@@ -15,7 +15,9 @@ import com.vividsolutions.jts.geom.*;
  */
 public class WKTFileReader 
 {
-	private File file;
+	private File file = null;
+  private Reader reader;
+//  private Reader fileReader = new FileReader(file);
 	private WKTReader wktReader;
 	private int count = 0;
 	private int limit = -1;
@@ -31,7 +33,7 @@ public class WKTFileReader
 	public WKTFileReader(File file, WKTReader wktReader)
 	{
 		this.file = file;
-		this.wktReader = wktReader;
+    this.wktReader = wktReader;
 	}
 	
   /**
@@ -40,11 +42,23 @@ public class WKTFileReader
    * @param filename the name of the file to read from
    * @param wktReader the geometry reader to use
    */
-	public WKTFileReader(String filename, WKTReader wktReader)
-	{
-		this(new File(filename), wktReader);
-	}
-	
+  public WKTFileReader(String filename, WKTReader wktReader)
+  {
+    this(new File(filename), wktReader);
+  }
+  
+  /**
+   * Creates a new <tt>WKTFileReader</tt>, given a {@link Reader} to read from.
+   * 
+   * @param reader the reader to read from
+   * @param wktReader the geometry reader to use
+   */
+  public WKTFileReader(Reader reader, WKTReader wktReader)
+  {
+    this.reader = reader;
+    this.wktReader = wktReader;
+  }
+  
 	/**
 	 * Sets the maximum number of geometries to read.
    * 
@@ -77,17 +91,20 @@ public class WKTFileReader
 	public List read() 
 	throws IOException, ParseException 
 	{
+    // do this here so that constructors don't throw exceptions
+    if (file != null)
+      reader = new FileReader(file);
+    
 		count = 0;
-		FileReader fileReader = new FileReader(file);
 		try {
-			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			BufferedReader bufferedReader = new BufferedReader(reader);
 			try {
 				return read(bufferedReader);
 			} finally {
 				bufferedReader.close();
 			}
 		} finally {
-			fileReader.close();
+			reader.close();
 		}
 	}
 	
@@ -110,13 +127,15 @@ public class WKTFileReader
 		return true;
 	}
 	
+  private static final int MAX_LOOKAHEAD = 1000;
+  
   /**
 	 * Tests if reader is at EOF.
 	 */
 	private boolean isAtEndOfFile(BufferedReader bufferedReader)
 			throws IOException 
 			{
-		bufferedReader.mark(1000);
+		bufferedReader.mark(MAX_LOOKAHEAD);
 
 		StreamTokenizer tokenizer = new StreamTokenizer(bufferedReader);
 		int type = tokenizer.nextToken();

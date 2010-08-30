@@ -70,11 +70,18 @@ public class SimpleSnapRounder
     scaleFactor = pm.getScale();
   }
 
+  /**
+	 * @return a Collection of NodedSegmentStrings representing the substrings
+	 * 
+	 */
   public Collection getNodedSubstrings()
   {
     return  NodedSegmentString.getNodedSubstrings(nodedSegStrings);
   }
 
+  /**
+   * @param inputSegmentStrings a Collection of NodedSegmentStrings
+   */
   public void computeNodes(Collection inputSegmentStrings)
   {
     this.nodedSegStrings = inputSegmentStrings;
@@ -103,7 +110,7 @@ public class SimpleSnapRounder
 
   /**
    * Computes all interior intersections in the collection of {@link SegmentString}s,
-   * and returns their @link Coordinate}s.
+   * and returns their {@link Coordinate}s.
    *
    * Does NOT node the segStrings.
    *
@@ -184,33 +191,4 @@ public class SimpleSnapRounder
     }
   }
 
-  /**
-   * Adds a new node (equal to the snap pt) to the segment
-   * if the segment passes through the hot pixel
-   *
-   * @param hotPix
-   * @param segStr
-   * @param segIndex
-   * @return <code>true</code> if a node was added
-   */
-  /* refactored to HotPixel
-  public static boolean addSnappedNode(
-      HotPixel hotPix,
-      NodedSegmentString segStr,
-      int segIndex
-      )
-  {
-    Coordinate p0 = segStr.getCoordinate(segIndex);
-    Coordinate p1 = segStr.getCoordinate(segIndex + 1);
-
-    if (hotPix.intersects(p0, p1)) {
-      //System.out.println("snapped: " + snapPt);
-      //System.out.println("POINT (" + snapPt.x + " " + snapPt.y + ")");
-      segStr.addIntersection(hotPix.getCoordinate(), segIndex);
-
-      return true;
-    }
-    return false;
-  }
-*/
 }

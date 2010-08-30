@@ -46,6 +46,21 @@ public class CoordinateArrays {
   private final static Coordinate[] coordArrayType = new Coordinate[0];
 
   /**
+   * Tests whether an array of {@link Coordinate}s forms a ring,
+   * by checking length and closure. 
+   * Self-intersection is not checked.
+   * 
+   * @param pts an array of Coordinates
+   * @return true if the coordinate form a ring.
+   */
+  public static boolean isRing(Coordinate[] pts)
+  {
+    if (pts.length < 4) return false;
+    if (! pts[0].equals2D(pts[pts.length -1])) return false;
+    return true;
+  }
+    
+  /**
    * Finds a point in a list of points which is not contained in another list of points
    * @param testPts the {@link Coordinate}s to test
    * @param pts an array of {@link Coordinate}s to test the input points against
@@ -215,6 +230,24 @@ public class CoordinateArrays {
       copy[i] = new Coordinate(coordinates[i]);
     }
     return copy;
+  }
+
+  /**
+   * Creates a deep copy of a given section of a source {@link Coordinate) array
+   * into a destination Coordinate array.
+   * The destination array must be an appropriate size to receive
+   * the copied coordinates.
+   *
+   * @param src an array of Coordinates
+   * @param srcStart the index to start copying from
+   * @param dest the 
+   * @param destStart the destination index to start copying to
+   * @param length the number of items to copy
+   */
+  public static void copyDeep(Coordinate[] src, int srcStart, Coordinate[] dest, int destStart, int length) {
+    for (int i = 0; i < length; i++) {
+      dest[destStart + i] = new Coordinate(src[srcStart + i]);
+    }
   }
 
   /**

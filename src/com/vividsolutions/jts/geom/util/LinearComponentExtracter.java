@@ -34,6 +34,7 @@
 package com.vividsolutions.jts.geom.util;
 
 import java.util.*;
+
 import com.vividsolutions.jts.geom.*;
 
 /**
@@ -44,6 +45,72 @@ import com.vividsolutions.jts.geom.*;
 public class LinearComponentExtracter
   implements GeometryComponentFilter
 {
+  /**
+   * Extracts the linear components from a single {@link Geometry}
+   * and adds them to the provided {@link Collection}.
+   *
+   * @param geoms the Collection of geometries from which to extract linear components
+   * @param lines the collection to add the extracted linear components to
+   * @return the collection of linear components (LineStrings or LinearRings)
+   */
+  public static Collection getLines(Collection geoms, Collection lines)
+  {
+  	for (Iterator i = geoms.iterator(); i.hasNext(); ) {
+  		Geometry g = (Geometry) i.next();
+  		getLines(g, lines);
+  	}
+    return lines;
+  }
+
+  /**
+   * Extracts the linear components from a single {@link Geometry}
+   * and adds them to the provided {@link Collection}.
+   *
+   * @param geoms the Collection of geometries from which to extract linear components
+   * @param lines the collection to add the extracted linear components to
+   * @return the collection of linear components (LineStrings or LinearRings)
+   */
+  public static Collection getLines(Collection geoms, Collection lines, boolean forceToLineString)
+  {
+  	for (Iterator i = geoms.iterator(); i.hasNext(); ) {
+  		Geometry g = (Geometry) i.next();
+  		getLines(g, lines, forceToLineString);
+  	}
+    return lines;
+  }
+
+  /**
+   * Extracts the linear components from a single {@link Geometry}
+   * and adds them to the provided {@link Collection}.
+   *
+   * @param geom the geometry from which to extract linear components
+   * @param lines the Collection to add the extracted linear components to
+   * @return the Collection of linear components (LineStrings or LinearRings)
+   */
+  public static Collection getLines(Geometry geom, Collection lines)
+  {
+  	if (geom instanceof LineString) {
+  		lines.add(geom);
+  	}
+  	else {
+      geom.apply(new LinearComponentExtracter(lines));
+  	}
+    return lines;
+  }
+
+  /**
+   * Extracts the linear components from a single {@link Geometry}
+   * and adds them to the provided {@link Collection}.
+   *
+   * @param geom the geometry from which to extract linear components
+   * @param lines the Collection to add the extracted linear components to
+   * @return the Collection of linear components (LineStrings or LinearRings)
+   */
+  public static Collection getLines(Geometry geom, Collection lines, boolean forceToLineString)
+  {
+    geom.apply(new LinearComponentExtracter(lines, forceToLineString));
+    return lines;
+  }
 
   /**
    * Extracts the linear components from a single geometry.
@@ -61,19 +128,43 @@ public class LinearComponentExtracter
     return lines;
   }
 
-  private List lines;
-
+  private Collection lines;
+  private boolean isForcedToLineString = false;
+  
   /**
    * Constructs a LineExtracterFilter with a list in which to store LineStrings found.
    */
-  public LinearComponentExtracter(List lines)
+  public LinearComponentExtracter(Collection lines)
   {
     this.lines = lines;
   }
 
+  /**
+   * Constructs a LineExtracterFilter with a list in which to store LineStrings found.
+   */
+  public LinearComponentExtracter(Collection lines, boolean isForcedToLineString)
+  {
+    this.lines = lines;
+    this.isForcedToLineString = isForcedToLineString;
+  }
+
+  public void setForceToLineString(boolean isForcedToLineString)
+  {
+  	this.isForcedToLineString = isForcedToLineString;
+  }
+  
   public void filter(Geometry geom)
   {
-    if (geom instanceof LineString) lines.add(geom);
+  	if (isForcedToLineString && geom instanceof LinearRing) {
+  		LineString line = geom.getFactory().createLineString( ((LinearRing) geom).getCoordinateSequence());
+  		lines.add(line);
+  		return;
+  	}
+  	// if not being forced, and this is a linear component
+  	if (geom instanceof LineString) 
+  		lines.add(geom);
+  	
+  	// else this is not a linear component, so skip it
   }
 
 }

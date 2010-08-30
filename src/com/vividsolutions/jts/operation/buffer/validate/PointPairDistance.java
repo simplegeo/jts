@@ -33,7 +33,6 @@
 package com.vividsolutions.jts.operation.buffer.validate;
 
 import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.io.*;
 
 /**
  * Contains a pair of points and the distance between them.
@@ -110,10 +109,5 @@ public class PointPairDistance {
     double dist = p0.distance(p1);
     if (dist < distance)
       initialize(p0, p1, dist);
-  }
-  
-  public String toString()
-  {
-  	return WKTWriter.toLineString(pt[0], pt[1]);
   }
 }

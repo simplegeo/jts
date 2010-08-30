@@ -65,6 +65,10 @@ import com.vividsolutions.jts.operation.overlay.OverlayOp;
  * al identical points (producing a set with no duplicates).
  * </ul>
  * 
+ * <tt>UnaryUnion</tt> always operates on the individual components of MultiGeometries.
+ * So it is possible to use it to "clean" invalid self-intersecting MultiPolygons
+ * (although the polygon components must all still be individually valid.)
+ * 
  * @author mbdavis
  *
  */
@@ -146,7 +150,12 @@ public class UnaryUnionOp
 			return null;
 		}
 		
-		
+		/**
+		 * For points and lines, only a single union operation is 
+		 * required, since the OGC model allowings self-intersecting 
+		 * MultiPoint and MultiLineStrings.
+		 * This is not the case for polygons, so Cascaded Union is required.
+		 */
 		Geometry unionPoints = null;
 		if (points.size() > 0) {
 			Geometry ptGeom = geomFact.buildGeometry(points);

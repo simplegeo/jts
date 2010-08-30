@@ -50,10 +50,18 @@ import com.vividsolutions.jts.geom.Coordinate;
  *
  * @version 1.7
  */
-public class Quadrant {
+public class Quadrant 
+{
+	public static final int NE = 0;
+	public static final int NW = 1;
+	public static final int SW = 2;
+	public static final int SE = 3;
+	
   /**
    * Returns the quadrant of a directed line segment (specified as x and y
    * displacements, which cannot both be 0).
+   * 
+   * @throws IllegalArgumentException if the displacements are both 0
    */
   public static int quadrant(double dx, double dy)
   {
@@ -61,28 +69,40 @@ public class Quadrant {
       throw new IllegalArgumentException("Cannot compute the quadrant for point ( "+ dx + ", " + dy + " )" );
     if (dx >= 0.0) {
       if (dy >= 0.0)
-        return 0;
+        return NE;
       else
-        return 3;
+        return SE;
     }
     else {
     	if (dy >= 0.0)
-    		return 1;
+    		return NW;
     	else
-    		return 2;
+    		return SW;
     }
   }
 
   /**
    * Returns the quadrant of a directed line segment from p0 to p1.
+   * 
+   * @throws IllegalArgumentException if the points are equal
    */
   public static int quadrant(Coordinate p0, Coordinate p1)
   {
-    double dx = p1.x - p0.x;
-    double dy = p1.y - p0.y;
-    if (dx == 0.0 && dy == 0.0)
+    if (p1.x == p0.x && p1.y == p0.y)
       throw new IllegalArgumentException("Cannot compute the quadrant for two identical points " + p0);
-    return quadrant(dx, dy);
+    
+    if (p1.x >= p0.x) {
+      if (p1.y >= p0.y)
+        return NE;
+      else
+        return SE;
+    }
+    else {
+    	if (p1.y >= p0.y)
+    		return NW;
+    	else
+    		return SW;
+    }
   }
 
   /**
@@ -124,8 +144,8 @@ public class Quadrant {
    */
   public static boolean isInHalfPlane(int quad, int halfPlane)
   {
-    if (halfPlane == 3) {
-      return quad == 3 || quad == 0;
+    if (halfPlane == SE) {
+      return quad == SE || quad == SW;
     }
     return quad == halfPlane || quad == halfPlane + 1;
   }
@@ -135,6 +155,6 @@ public class Quadrant {
    */
   public static boolean isNorthern(int quad)
   {
-    return quad == 0 || quad == 1;
+    return quad == NE || quad == NW;
   }
 }

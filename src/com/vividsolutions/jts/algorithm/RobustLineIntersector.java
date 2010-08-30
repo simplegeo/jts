@@ -64,11 +64,11 @@ public class RobustLineIntersector
         if (p.equals(p1) || p.equals(p2)) {
           isProper = false;
         }
-        result = DO_INTERSECT;
+        result = POINT_INTERSECTION;
         return;
       }
     }
-    result = DONT_INTERSECT;
+    result = NO_INTERSECTION;
   }
 
   protected int computeIntersect(
@@ -78,7 +78,7 @@ public class RobustLineIntersector
 
     // first try a fast test to see if the envelopes of the lines intersect
     if (! Envelope.intersects(p1, p2, q1, q2))
-      return DONT_INTERSECT;
+      return NO_INTERSECTION;
 
     // for each endpoint, compute which side of the other segment it lies
     // if both endpoints lie on the same side of the other segment,
@@ -87,14 +87,14 @@ public class RobustLineIntersector
     int Pq2 = CGAlgorithms.orientationIndex(p1, p2, q2);
 
     if ((Pq1>0 && Pq2>0) || (Pq1<0 && Pq2<0)) {
-      return DONT_INTERSECT;
+      return NO_INTERSECTION;
     }
 
     int Qp1 = CGAlgorithms.orientationIndex(q1, q2, p1);
     int Qp2 = CGAlgorithms.orientationIndex(q1, q2, p2);
 
     if ((Qp1>0 && Qp2>0) || (Qp1<0 && Qp2<0)) {
-        return DONT_INTERSECT;
+        return NO_INTERSECTION;
     }
 
     boolean collinear = Pq1 == 0
@@ -166,7 +166,7 @@ public class RobustLineIntersector
       isProper = true;
       intPt[0] = intersection(p1, p2, q1, q2);
     }
-    return DO_INTERSECT;
+    return POINT_INTERSECTION;
   }
 
   private int computeCollinearIntersection(Coordinate p1, Coordinate p2,
@@ -179,34 +179,34 @@ public class RobustLineIntersector
     if (p1q1p2 && p1q2p2) {
       intPt[0] = q1;
       intPt[1] = q2;
-      return COLLINEAR;
+      return COLLINEAR_INTERSECTION;
     }
     if (q1p1q2 && q1p2q2) {
       intPt[0] = p1;
       intPt[1] = p2;
-      return COLLINEAR;
+      return COLLINEAR_INTERSECTION;
     }
     if (p1q1p2 && q1p1q2) {
       intPt[0] = q1;
       intPt[1] = p1;
-      return q1.equals(p1) && !p1q2p2 && !q1p2q2 ? DO_INTERSECT : COLLINEAR;
+      return q1.equals(p1) && !p1q2p2 && !q1p2q2 ? POINT_INTERSECTION : COLLINEAR_INTERSECTION;
     }
     if (p1q1p2 && q1p2q2) {
       intPt[0] = q1;
       intPt[1] = p2;
-      return q1.equals(p2) && !p1q2p2 && !q1p1q2 ? DO_INTERSECT : COLLINEAR;
+      return q1.equals(p2) && !p1q2p2 && !q1p1q2 ? POINT_INTERSECTION : COLLINEAR_INTERSECTION;
     }
     if (p1q2p2 && q1p1q2) {
       intPt[0] = q2;
       intPt[1] = p1;
-      return q2.equals(p1) && !p1q1p2 && !q1p2q2 ? DO_INTERSECT : COLLINEAR;
+      return q2.equals(p1) && !p1q1p2 && !q1p2q2 ? POINT_INTERSECTION : COLLINEAR_INTERSECTION;
     }
     if (p1q2p2 && q1p2q2) {
       intPt[0] = q2;
       intPt[1] = p2;
-      return q2.equals(p2) && !p1q1p2 && !q1p1q2 ? DO_INTERSECT : COLLINEAR;
+      return q2.equals(p2) && !p1q1p2 && !q1p1q2 ? POINT_INTERSECTION : COLLINEAR_INTERSECTION;
     }
-    return DONT_INTERSECT;
+    return NO_INTERSECTION;
   }
 
   /**

@@ -88,7 +88,27 @@ public class CoordinateList
   public Coordinate getCoordinate(int i) { return (Coordinate) get(i); }
 
 
-  /** Add an array of coordinates
+  /** 
+   * Adds a section of an array of coordinates to the list.
+   * @param coord The coordinates
+   * @param allowRepeated if set to false, repeated coordinates are collapsed
+   * @param start the index to start from
+   * @param end the index to add up to but not including
+   * @return true (as by general collection contract)
+   */
+  public boolean add(Coordinate[] coord, boolean allowRepeated, int start, int end)
+  {
+    int inc = 1;
+    if (start > end) inc = -1;
+    
+    for (int i = start; i != end; i += inc) {
+      add(coord[i], allowRepeated);
+    }
+    return true;
+  }
+
+  /** 
+   * Adds an array of coordinates to the list.
    * @param coord The coordinates
    * @param allowRepeated if set to false, repeated coordinates are collapsed
    * @param direction if false, the array is added in reverse order
@@ -110,7 +130,8 @@ public class CoordinateList
   }
 
 
-  /** Add an array of coordinates
+  /** 
+   * Adds an array of coordinates to the list.
    * @param coord The coordinates
    * @param allowRepeated if set to false, repeated coordinates are collapsed
    * @return true (as by general collection contract)
@@ -121,7 +142,8 @@ public class CoordinateList
     return true;
   }
 
-  /** Add a coordinate
+  /** 
+   * Adds a coordinate to the list.
    * @param obj The coordinate to add
    * @param allowRepeated if set to false, repeated coordinates are collapsed
    * @return true (as by general collection contract)
@@ -197,7 +219,7 @@ public class CoordinateList
   public void closeRing()
   {
     if (size() > 0)
-      add(get(0), false);
+      add(new Coordinate((Coordinate) get(0)), false);
   }
 
   /** Returns the Coordinates in this collection.

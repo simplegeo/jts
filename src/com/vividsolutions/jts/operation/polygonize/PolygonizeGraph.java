@@ -94,7 +94,7 @@ class PolygonizeGraph
   private GeometryFactory factory;
 
   //private List labelledRings;
-
+ 
   /**
    * Create a new polygonization graph.
    */
@@ -197,7 +197,7 @@ class PolygonizeGraph
   }
 
   /**
-   * Computes the EdgeRings formed by the edges in this graph.
+   * Computes the minimal EdgeRings formed by the edges in this graph.
    * @return a list of the {@link EdgeRing}s found by the polygonization process.
    */
   public List getEdgeRings()
@@ -210,7 +210,7 @@ class PolygonizeGraph
     List maximalRings = findLabeledEdgeRings(dirEdges);
     convertMaximalToMinimalEdgeRings(maximalRings);
 
-    // find all edgerings
+    // find all edgerings (which will now be minimal ones, as required)
     List edgeRingList = new ArrayList();
     for (Iterator i = dirEdges.iterator(); i.hasNext(); ) {
       PolygonizeDirectedEdge de = (PolygonizeDirectedEdge) i.next();
@@ -224,7 +224,10 @@ class PolygonizeGraph
   }
 
   /**
-   *
+   * Finds and labels all edgerings in the graph.
+   * The edge rings are labelling with unique integers.
+   * The labelling allows detecting cut edges.
+   * 
    * @param dirEdges a List of the DirectedEdges in the graph
    * @return a List of DirectedEdges, one for each edge ring found
    */
@@ -357,7 +360,7 @@ class PolygonizeGraph
   }
 
   /**
-   * Traverse a ring of DirectedEdges, accumulating them into a list.
+   * Traverses a ring of DirectedEdges, accumulating them into a list.
    * This assumes that all dangling directed edges have been removed
    * from the graph, so that there is always a next dirEdge.
    *
@@ -438,4 +441,34 @@ class PolygonizeGraph
     }
     return dangleLines;
   }
+  
+  /**
+   * Traverses the polygonized edge rings in the graph
+   * and computes the depth parity (odd or even)
+   * relative to the exterior of the graph.
+   * If the client has requested that the output
+   * be polygonally valid, only odd polygons will be constructed. 
+   *
+   */
+  public void computeDepthParity()
+  {
+    while (true) {
+      PolygonizeDirectedEdge de = null; //findLowestDirEdge();
+      if (de == null)
+        return;
+      computeDepthParity(de);
+    }
+  }
+  
+  /**
+   * Traverses all connected edges, computing the depth parity
+   * of the associated polygons.
+   * 
+   * @param de
+   */
+  private void computeDepthParity(PolygonizeDirectedEdge de)
+  {
+    
+  }
+  
 }

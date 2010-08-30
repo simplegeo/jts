@@ -49,7 +49,7 @@ import com.vividsolutions.jts.geom.*;
  * DEBUG_PROPERTY_NAME (currently "jts.debug") has the value
  * "on" or "true" debugging is enabled.
  * Otherwise, debugging is disabled.
- * The system property can be set by adding an option '-Djts_debug=on'
+ * The system property can be set by adding an option '-Djts.debug=on'
  * to the Java VM commandline.
  *
  * @version 1.7
@@ -137,7 +137,18 @@ public class Debug {
     debug.instancePrint(obj);
     debug.println();
   }
-
+  
+  public static boolean equals(Coordinate c1, Coordinate c2, double tolerance)
+  {
+  	return c1.distance(c2) <= tolerance;
+  }
+  /**
+   * Adds an object to be watched.
+   * A watched object can be printed out at any time.
+   * 
+   * Currently only supports one watched object at a time.
+   * @param obj
+   */
   public static void addWatch(Object obj) {
     debug.instanceAddWatch(obj);
   }
@@ -150,6 +161,66 @@ public class Debug {
     debug.instancePrintIfWatch(obj);
   }
 
+  public static void breakIf(boolean cond)
+  {
+    if (cond) doBreak();
+  }
+  
+  public static void breakIfEqual(Object o1, Object o2)
+  {
+    if (o1.equals(o2)) doBreak();
+  }
+  
+  public static void breakIfEqual(Coordinate p0, Coordinate p1, double tolerance)
+  {
+    if (p0.distance(p1) <= tolerance) doBreak();
+  }
+  
+  private static void doBreak()
+  {
+    // Put breakpoint on following statement to break here
+    return; 
+  }
+  
+  public static boolean hasSegment(Geometry geom, Coordinate p0, Coordinate p1)
+  {
+    SegmentFindingFilter filter = new SegmentFindingFilter(p0, p1);
+    geom.apply(filter);
+    return filter.hasSegment();
+  }
+  
+  private static class SegmentFindingFilter
+  implements CoordinateSequenceFilter
+  {
+    private Coordinate p0, p1;
+    private boolean hasSegment = false;
+    
+    public SegmentFindingFilter(Coordinate p0, Coordinate p1)
+    {
+      this.p0 = p0;
+      this.p1 = p1;
+    }
+
+    public boolean hasSegment() { return hasSegment; }
+
+    public void filter(CoordinateSequence seq, int i)
+    {
+      if (i == 0) return;
+      hasSegment = p0.equals2D(seq.getCoordinate(i-1)) 
+          && p1.equals2D(seq.getCoordinate(i));
+    }
+    
+    public boolean isDone()
+    {
+      return hasSegment; 
+    }
+    
+    public boolean isGeometryChanged()
+    {
+      return false;
+    }
+  }
+  
   private Debug() {
     out = System.out;
     printArgs = new Class[1];

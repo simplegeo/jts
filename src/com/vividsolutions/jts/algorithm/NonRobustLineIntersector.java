@@ -96,7 +96,7 @@ public class NonRobustLineIntersector
 
     // if r != 0 the point does not lie on the line
     if (r != 0) {
-      result = DONT_INTERSECT;
+      result = NO_INTERSECTION;
       return;
     }
 
@@ -104,7 +104,7 @@ public class NonRobustLineIntersector
 
     double dist = rParameter(p1, p2, p);
     if (dist < 0.0 || dist > 1.0) {
-      result = DONT_INTERSECT;
+      result = NO_INTERSECTION;
       return;
     }
 
@@ -112,7 +112,7 @@ public class NonRobustLineIntersector
     if (p.equals(p1) || p.equals(p2)) {
       isProper = false;
     }
-    result = DO_INTERSECT;
+    result = POINT_INTERSECTION;
   }
 
   protected int computeIntersect(
@@ -167,7 +167,7 @@ public class NonRobustLineIntersector
     if (r3 != 0 &&
         r4 != 0 &&
         isSameSignAndNonZero(r3, r4)) {
-      return DONT_INTERSECT;
+      return NO_INTERSECTION;
     }
 
     /*
@@ -191,7 +191,7 @@ public class NonRobustLineIntersector
     if (r1 != 0 &&
         r2 != 0 &&
         isSameSignAndNonZero(r1, r2)) {
-      return DONT_INTERSECT;
+      return NO_INTERSECTION;
     }
 
     /**
@@ -225,7 +225,7 @@ public class NonRobustLineIntersector
     if (precisionModel != null) {
       precisionModel.makePrecise(pa);
     }
-    return DO_INTERSECT;
+    return POINT_INTERSECTION;
   }
 
 
@@ -271,17 +271,17 @@ public class NonRobustLineIntersector
     }
     // check for no intersection
     if (t3 > r2 || t4 < r1) {
-      return DONT_INTERSECT;
+      return NO_INTERSECTION;
     }
 
     // check for single point intersection
     if (q4 == p1) {
       pa.setCoordinate(p1);
-      return DO_INTERSECT;
+      return POINT_INTERSECTION;
     }
     if (q3 == p2) {
       pa.setCoordinate(p2);
-      return DO_INTERSECT;
+      return POINT_INTERSECTION;
     }
 
     // intersection MUST be a segment - compute endpoints
@@ -293,7 +293,7 @@ public class NonRobustLineIntersector
     if (t4 < r2) {
       pb.setCoordinate(q4);
     }
-    return COLLINEAR;
+    return COLLINEAR_INTERSECTION;
   }
 
   /**

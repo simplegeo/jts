@@ -349,12 +349,6 @@ public class GeometryGraph
     return si;
   }
 
-/* NOT USED
-  public SegmentIntersector computeSelfNodes(LineIntersector li)
-  {
-    return computeSelfNodes(li, false);
-  }
-*/
   public SegmentIntersector computeEdgeIntersections(
     GeometryGraph g,
     LineIntersector li,

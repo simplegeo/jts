@@ -164,6 +164,9 @@ public class OffsetCurveSetBuilder {
     // if the polygon would be completely eroded
     if (distance < 0.0 && isErodedCompletely(shell, distance))
         return;
+    // don't attemtp to buffer a polygon with too few distinct vertices
+    if (distance <= 0.0 && shellCoord.length < 3)
+    	return;
 
     addPolygonRing(
             shellCoord,

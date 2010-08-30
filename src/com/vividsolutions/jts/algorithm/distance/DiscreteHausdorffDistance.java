@@ -36,20 +36,40 @@ package com.vividsolutions.jts.algorithm.distance;
 import com.vividsolutions.jts.geom.*;
 
 /**
- * Implements algorithm for computing a distance metric
- * which can be thought of as the "Discrete Hausdorff Distance".
- * This is the Hausdorff distance restricted to discrete points
+ * An algorithm for computing a distance metric
+ * which is an approximation to the Hausdorff Distance
+ * based on a discretization of the input {@link Geometry}.
+ * The algorithm computes the Hausdorff distance restricted to discrete points
  * for one of the geometries.
+ * The points can be either the vertices of the geometries (the default), 
+ * or the geometries with line segments densified by a given fraction.
  * Also determines two points of the Geometries which are separated by the computed distance.
- * <p>
- * <b>NOTE:</b>The current implementation supports only
- * vertices as the discrete locations.  
- * This could be extended to allow an arbitrary density of points to be used.
- * <p>
- * <b>NOTE:</b> This algorithm is NOT equivalent to the standard Hausdorff distance.
- * However, it computes an approximation that is correct for a large subset of useful cases.
- * One important part of this subset is Linestrings that are roughly parallel to each other,
- * and roughly equal in length.  This is a useful metric for line matching.
+* <p>
+ * This algorithm is an approximation to the standard Hausdorff distance.
+ * Specifically, 
+ * <pre>
+ *    for all geometries a, b:    DHD(a, b) <= HD(a, b)
+ * </pre>
+ * The approximation can be made as close as needed by densifying the input geometries.  
+ * In the limit, this value will approach the true Hausdorff distance:
+ * <pre>
+ *    DHD(A, B, densifyFactor) -> HD(A, B) as densifyFactor -> 0.0
+ * </pre>
+ * The default approximation is exact or close enough for a large subset of useful cases.
+ * Examples of these are:
+ * <ul>
+ * <li>computing distance between Linestrings that are roughly parallel to each other,
+ * and roughly equal in length.  This occurs in matching linear networks.
+ * <li>Testing similarity of geometries.
+ * </ul>
+ * An example where the default approximation is not close is:
+ * <pre>
+ *   A = LINESTRING (0 0, 100 0, 10 100, 10 100)
+ *   B = LINESTRING (0 100, 0 10, 80 10)
+ *   
+ *   DHD(A, B) = 22.360679774997898
+ *   HD(A, B) ~= 47.8
+ * </pre>
  */
 public class DiscreteHausdorffDistance
 {
@@ -59,11 +79,19 @@ public class DiscreteHausdorffDistance
     return dist.distance();
   }
 
+  public static double distance(Geometry g0, Geometry g1, double densifyFrac)
+  {
+    DiscreteHausdorffDistance dist = new DiscreteHausdorffDistance(g0, g1);
+    dist.setDensifyFraction(densifyFrac);
+    return dist.distance();
+  }
+
   private Geometry g0;
   private Geometry g1;
   private PointPairDistance ptDist = new PointPairDistance();
+  
   /**
-   * Value of 0.0 indicates not set
+   * Value of 0.0 indicates that no densification should take place
    */
   private double densifyFrac = 0.0;
 
@@ -75,8 +103,8 @@ public class DiscreteHausdorffDistance
 
   /**
    * Sets the fraction by which to densify each segment.
-   * Each segment will be split into a number of equal-length
-   * subsegments, whose fraction of the total length is closest ]
+   * Each segment will be (virtually) split into a number of equal-length
+   * subsegments, whose fraction of the total length is closest
    * to the given fraction.
    * 
    * @param densifyPercent
@@ -129,7 +157,7 @@ public class DiscreteHausdorffDistance
   {
     private PointPairDistance maxPtDist = new PointPairDistance();
     private PointPairDistance minPtDist = new PointPairDistance();
-    private EuclideanDistanceToPoint euclideanDist = new EuclideanDistanceToPoint();
+    private DistanceToPoint euclideanDist = new DistanceToPoint();
     private Geometry geom;
 
     public MaxPointDistanceFilter(Geometry geom)
@@ -140,7 +168,7 @@ public class DiscreteHausdorffDistance
     public void filter(Coordinate pt)
     {
       minPtDist.initialize();
-      EuclideanDistanceToPoint.computeDistance(geom, pt, minPtDist);
+      DistanceToPoint.computeDistance(geom, pt, minPtDist);
       maxPtDist.setMaximum(minPtDist);
     }
 
@@ -179,7 +207,7 @@ public class DiscreteHausdorffDistance
       double y = p0.y + i*dely;
       Coordinate pt = new Coordinate(x, y);
       minPtDist.initialize();
-      EuclideanDistanceToPoint.computeDistance(geom, pt, minPtDist);
+      DistanceToPoint.computeDistance(geom, pt, minPtDist);
       maxPtDist.setMaximum(minPtDist);  
     }
     

@@ -50,19 +50,20 @@ public class LineStringExtracter
    * and adds them to the provided {@link List}.
    * 
    * @param geom the geometry from which to extract
+   * @param lines the list to add the extracted LineStrings to
    * @param list the list to add the extracted elements to
    */
-  public static List getLines(Geometry geom, List list)
+  public static List getLines(Geometry geom, List lines)
   {
   	if (geom instanceof LineString) {
-  		list.add(geom);
+  		lines.add(geom);
   	}
   	else if (geom instanceof GeometryCollection) {
-  		geom.apply(new LineStringExtracter(list));
+  		geom.apply(new LineStringExtracter(lines));
   	}
   	// skip non-LineString elemental geometries
   	
-    return list;
+    return lines;
   }
 
   /**
