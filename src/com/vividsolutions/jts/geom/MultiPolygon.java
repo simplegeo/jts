@@ -124,6 +124,23 @@ public class MultiPolygon
     }
     return super.equalsExact(other, tolerance);
   }
+  
+  /**
+   * Creates a {@link MultiPolygon} with
+   * every component reversed.
+   * The order of the components in the collection are not reversed.
+   *
+   * @return a MultiPolygon in the reverse order
+   */
+  public Geometry reverse()
+  {
+    int n = geometries.length;
+    Polygon[] revGeoms = new Polygon[n];
+    for (int i = 0; i < geometries.length; i++) {
+      revGeoms[i] = (Polygon) geometries[i].reverse();
+    }
+    return getFactory().createMultiPolygon(revGeoms);
+  }
 }
 
 

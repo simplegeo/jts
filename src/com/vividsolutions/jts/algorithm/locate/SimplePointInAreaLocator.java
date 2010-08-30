@@ -39,7 +39,7 @@ import com.vividsolutions.jts.geom.*;
 
 /**
  * Computes the location of points
- * relative to an areal {@link Geometry},
+ * relative to a {@link Polygonal} {@link Geometry},
  * using a simple O(n) algorithm.
  * This algorithm is suitable for use in cases where
  * only one or a few points will be tested against a given area.

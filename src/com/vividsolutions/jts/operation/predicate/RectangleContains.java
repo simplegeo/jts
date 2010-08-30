@@ -65,22 +65,21 @@ public class RectangleContains {
 
   /**
    * Tests if a point is contained in the boundary of the target rectangle.
+   * 
    * @param pt the point to test
    * @return true if the point is contained in the boundary
    */
   private boolean isPointContainedInBoundary(Coordinate pt)
   {
     /**
-     * We already know that the point is contained in the rectangle envelope.
+     * contains = false iff the point is properly contained in the rectangle.
+     * 
+     * This code assumes that the point lies in the rectangle envelope
      */ 
-    if (! (pt.x == rectEnv.getMinX() ||
-           pt.x == rectEnv.getMaxX()) )
-      return false;
-    if (! (pt.y == rectEnv.getMinY() ||
-           pt.y == rectEnv.getMaxY()) )
-      return false;
-
-    return true;
+    return pt.x == rectEnv.getMinX() 
+    		|| pt.x == rectEnv.getMaxX()
+    		|| pt.y == rectEnv.getMinY()
+    		|| pt.y == rectEnv.getMaxY();
   }
 
   /**

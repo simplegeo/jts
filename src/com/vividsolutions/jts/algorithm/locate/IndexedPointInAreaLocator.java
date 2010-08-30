@@ -41,7 +41,7 @@ import com.vividsolutions.jts.index.*;
 import com.vividsolutions.jts.index.intervalrtree.*;
 
 /**
- * Determines the location of {@link Coordinate}s relative to
+ * Determines the {@link Location} of {@link Coordinate}s relative to
  * a {@link Polygonal} geometry, using indexing for efficiency.
  * This algorithm is suitable for use in cases where
  * many points will be tested against a given area.
@@ -52,7 +52,6 @@ import com.vividsolutions.jts.index.intervalrtree.*;
 public class IndexedPointInAreaLocator 
   implements PointOnGeometryLocator
 {
-  private Geometry areaGeom;
   private IntervalIndexedGeometry index;
   
   /**
@@ -61,7 +60,6 @@ public class IndexedPointInAreaLocator
    */
   public IndexedPointInAreaLocator(Geometry g)
   {
-    areaGeom = g;
     if (! (g instanceof Polygonal))
       throw new IllegalArgumentException("Argument must be Polygonal");
     buildIndex(g);
@@ -82,7 +80,6 @@ public class IndexedPointInAreaLocator
   {
     RayCrossingCounter rcc = new RayCrossingCounter(p);
     
-    
     SegmentVisitor visitor = new SegmentVisitor(rcc);
     index.query(p.y, p.y, visitor);
   
@@ -94,19 +91,6 @@ public class IndexedPointInAreaLocator
     
     return rcc.getLocation();
   }
-  
-  /*
-  private void countSegs(RayCrossingCounter rcc, List segs)
-  {
-    for (Iterator i = segs.iterator(); i.hasNext(); ) {
-      LineSegment seg = (LineSegment) i.next();
-      rcc.countSegment(seg.getCoordinate(0), seg.getCoordinate(1));
-      
-      // short-circuit if possible
-      if (rcc.isOnSegment()) return;
-    }
-  }
-  */
   
   private static class SegmentVisitor
     implements ItemVisitor

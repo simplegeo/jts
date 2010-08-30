@@ -37,7 +37,7 @@ import java.util.*;
 import com.vividsolutions.jts.geom.*;
 
 /**
- * Extracts all the {@link LineString} elements from a {@link Geometry}.
+ * Extracts the components of a given type from a {@link Geometry}.
  *
  * @version 1.7
  */
@@ -47,11 +47,12 @@ public class GeometryExtracter
 	
 	protected static boolean isOfClass(Object o, Class clz)
 	{
-		return o.getClass() == clz;
+		return clz.isAssignableFrom(o.getClass());
+//		return o.getClass() == clz;
 	}
 	
   /**
-   * Extracts the {@link LineString} elements from a single {@link Geometry}
+   * Extracts the components of type <tt>clz</tt> from a {@link Geometry}
    * and adds them to the provided {@link List}.
    * 
    * @param geom the geometry from which to extract
@@ -71,7 +72,7 @@ public class GeometryExtracter
   }
 
   /**
-   * Extracts the {@link LineString} elements from a single {@link Geometry}
+   * Extracts the components of type <tt>clz</tt> from a {@link Geometry}
    * and returns them in a {@link List}.
    * 
    * @param geom the geometry from which to extract
@@ -86,6 +87,9 @@ public class GeometryExtracter
   
   /**
    * Constructs a filter with a list in which to store the elements found.
+   * 
+   * @param clz the class of the components to extract (null means all types)
+   * @param comps the list to extract into
    */
   public GeometryExtracter(Class clz, List comps)
   {
@@ -95,7 +99,7 @@ public class GeometryExtracter
 
   public void filter(Geometry geom)
   {
-    if (isOfClass(geom, clz)) comps.add(geom);
+    if (clz == null || isOfClass(geom, clz)) comps.add(geom);
   }
 
 }

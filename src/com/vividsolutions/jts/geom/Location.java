@@ -35,31 +35,30 @@
 package com.vividsolutions.jts.geom;
 
 /**
- *  Constants representing the location of a point relative to a geometry. They
- *  can also be thought of as the row or column index of a DE-9IM matrix. For a
- *  description of the DE-9IM, see the <A
- *  HREF="http://www.opengis.org/techno/specs.htm">OpenGIS Simple Features
- *  Specification for SQL</A> .
+ *  Constants representing the different topological locations
+ *  which can occur in a {@link Geometry}. 
+ *  The constants are also used as the row and column indices 
+ *  of DE-9IM {@link IntersectionMatrix}es. 
  *
  *@version 1.7
  */
 public class Location {
   /**
-   *  DE-9IM row index of the interior of the first geometry and column index of
-   *  the interior of the second geometry. Location value for the interior of a
-   *  geometry.
+   * The location value for the interior of a geometry.
+   * Also, DE-9IM row index of the interior of the first geometry and column index of
+   *  the interior of the second geometry. 
    */
   public final static int INTERIOR = 0;
   /**
-   *  DE-9IM row index of the boundary of the first geometry and column index of
-   *  the boundary of the second geometry. Location value for the boundary of a
-   *  geometry.
+   * The location value for the boundary of a geometry.
+   * Also, DE-9IM row index of the boundary of the first geometry and column index of
+   *  the boundary of the second geometry. 
    */
   public final static int BOUNDARY = 1;
   /**
-   *  DE-9IM row index of the exterior of the first geometry and column index of
-   *  the exterior of the second geometry. Location value for the exterior of a
-   *  geometry.
+   * The location value for the exterior of a geometry.
+   * Also, DE-9IM row index of the exterior of the first geometry and column index of
+   *  the exterior of the second geometry. 
    */
   public final static int EXTERIOR = 2;
 

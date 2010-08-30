@@ -13,7 +13,7 @@ import com.vividsolutions.jts.algorithm.*;
  */
 public class FastSegmentSetIntersectionFinder 
 {
-	private MCIndexSegmentSetMutualIntersector segSetMutInt; 
+	private SegmentSetMutualIntersector segSetMutInt; 
 	// for testing purposes
 //	private SimpleSegmentSetMutualIntersector mci;  
 
@@ -25,6 +25,8 @@ public class FastSegmentSetIntersectionFinder
 	private void init(Collection baseSegStrings)
 	{
     segSetMutInt = new MCIndexSegmentSetMutualIntersector();
+//    segSetMutInt = new MCIndexIntersectionSegmentSetMutualIntersector();
+    
 //		mci = new SimpleSegmentSetMutualIntersector();
 		segSetMutInt.setBaseSegments(baseSegStrings);
 	}

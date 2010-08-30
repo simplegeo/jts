@@ -149,7 +149,11 @@ public abstract class AbstractSTRtree {
     return createHigherLevels(parentBoundables, level + 1);
   }
 
-  protected AbstractNode getRoot() { return root; }
+  public AbstractNode getRoot() 
+  {
+    if (! built) build();
+    return root; 
+  }
 
   /**
    * Returns the maximum number of child nodes that a node may have

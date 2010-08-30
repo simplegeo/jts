@@ -39,7 +39,7 @@ import java.util.NoSuchElementException;
 
 /**
  *  Iterates over all {@link Geometry}s in a {@link GeometryCollection}.
- *  . Implements a pre-order depth-first traversal of the <code>GeometryCollection</code>
+ *  Implements a pre-order depth-first traversal of the <code>GeometryCollection</code>
  *  (which may be nested). The original <code>GeometryCollection</code> is
  *  returned as well (as the first object), as are all sub-collections. It is
  *  simple to ignore the <code>GeometryCollection</code> objects if they are not

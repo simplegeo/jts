@@ -345,10 +345,22 @@ public class Envelope
   }
 
   /**
-   *  Enlarges the boundary of the <code>Envelope</code> so that it contains
-   *  (x,y). Does nothing if (x,y) is already on or within the boundaries.
+   * Gets the area of this envelope.
+   * 
+   * @return the area of the envelope
+   * @return 0.0 if the envelope is null
+   */
+  public double getArea()
+  {
+    return getWidth() * getHeight();
+  }
+  
+  /**
+   *  Enlarges this <code>Envelope</code> so that it contains
+   *  the given {@link Coordinate}. 
+   *  Has no effect if the point is already on or within the envelope.
    *
-   *@param  x  the value to lower the minimum x to or to raise the maximum x to
+   *@param  p  the Coordinate to expand to include
    *@param  y  the value to lower the minimum y to or to raise the maximum y to
    */
   public void expandToInclude(Coordinate p)
@@ -390,8 +402,9 @@ public class Envelope
   }
 
   /**
-   *  Enlarges the boundary of the <code>Envelope</code> so that it contains
-   *  (x,y). Does nothing if (x,y) is already on or within the boundaries.
+   *  Enlarges this <code>Envelope</code> so that it contains
+   *  the given point. 
+   *  Has no effect if the point is already on or within the envelope.
    *
    *@param  x  the value to lower the minimum x to or to raise the maximum x to
    *@param  y  the value to lower the minimum y to or to raise the maximum y to
@@ -420,11 +433,12 @@ public class Envelope
   }
 
   /**
-   *  Enlarges the boundary of the <code>Envelope</code> so that it contains
-   *  <code>other</code>. Does nothing if <code>other</code> is wholly on or
-   *  within the boundaries.
+   *  Enlarges this <code>Envelope</code> so that it contains
+   *  the <code>other</code> Envelope. 
+   *  Has no effect if <code>other</code> is wholly on or
+   *  within the envelope.
    *
-   *@param  other  the <code>Envelope</code> to merge with
+   *@param  other  the <code>Envelope</code> to expand to include
    */
   public void expandToInclude(Envelope other) {
     if (other.isNull()) {

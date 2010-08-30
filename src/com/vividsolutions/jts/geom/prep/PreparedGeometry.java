@@ -127,6 +127,7 @@ public interface PreparedGeometry
 
 	/**
 	 * Tests whether the base {@link Geometry} is disjoint from a given geometry.
+	 * This method supports {@link GeometryCollection}s as input
 	 * 
 	 * @param geom the Geometry to test
 	 * @return true if this Geometry is disjoint from the given Geometry
@@ -137,6 +138,7 @@ public interface PreparedGeometry
 
 	/**
 	 * Tests whether the base {@link Geometry} intersects a given geometry.
+	 * This method supports {@link GeometryCollection}s as input
 	 * 
 	 * @param geom the Geometry to test
 	 * @return true if this Geometry intersects the given Geometry

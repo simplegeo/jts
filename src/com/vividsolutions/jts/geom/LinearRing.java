@@ -41,6 +41,11 @@ package com.vividsolutions.jts.geom;
  * the first and last coordinate in the ring must be equal,
  * and the interior of the ring must not self-intersect.
  * Either orientation of the ring is allowed.
+ * <p>
+ * A ring must have either 0 or 4 or more points.  
+ * The first and last points must be equal (in 2D).
+ * If these conditions are not met, the constructors throw 
+ * an {@link IllegalArgumentException}
  *
  * @version 1.7
  */
@@ -59,6 +64,8 @@ public class LinearRing extends LineString
    *      for this <code>LinearRing</code>
    *@param  SRID            the ID of the Spatial Reference System used by this
    *      <code>LinearRing</code>
+   * @throws IllegalArgumentException if the ring is not closed, or has too few points
+   * 
    * @deprecated Use GeometryFactory instead
    */
   public LinearRing(Coordinate points[], PrecisionModel precisionModel,
@@ -71,6 +78,7 @@ public class LinearRing extends LineString
    * This method is ONLY used to avoid deprecation warnings.
    * @param points
    * @param factory
+   * @throws IllegalArgumentException if the ring is not closed, or has too few points
    */
   private LinearRing(Coordinate points[], GeometryFactory factory) {
     this(factory.getCoordinateSequenceFactory().create(points), factory);
@@ -83,6 +91,8 @@ public class LinearRing extends LineString
    *
    *@param  points  a sequence points forming a closed and simple linestring, or
    *      <code>null</code> to create the empty geometry.
+   *      
+   * @throws IllegalArgumentException if the ring is not closed, or has too few points
    *
    */
   public LinearRing(CoordinateSequence points, GeometryFactory factory) {
@@ -92,10 +102,11 @@ public class LinearRing extends LineString
 
   private void validateConstruction() {
     if (!isEmpty() && ! super.isClosed()) {
-      throw new IllegalArgumentException("points must form a closed linestring");
+      throw new IllegalArgumentException("Points of LinearRing do not form a closed linestring");
     }
     if (getCoordinateSequence().size() >= 1 && getCoordinateSequence().size() <= 3) {
-      throw new IllegalArgumentException("Number of points must be 0 or >3");
+      throw new IllegalArgumentException("Invalid number of points in LinearRing (found " 
+      		+ getCoordinateSequence().size() + " - must be 0 or >= 4)");
     }
   }
 
@@ -123,4 +134,11 @@ public class LinearRing extends LineString
     return "LinearRing";
   }
 
+  public Geometry reverse()
+  {
+    CoordinateSequence seq = (CoordinateSequence) points.clone();
+    CoordinateSequences.reverse(seq);
+    LinearRing rev = getFactory().createLinearRing(seq);
+    return rev;
+  }
 }

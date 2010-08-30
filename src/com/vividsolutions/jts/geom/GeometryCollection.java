@@ -280,5 +280,22 @@ public class GeometryCollection extends Geometry {
     return 0;
 
   }
+  
+  /**
+   * Creates a {@link GeometryCollection} with
+   * every component reversed.
+   * The order of the components in the collection are not reversed.
+   *
+   * @return a {@link GeometryCollection} in the reverse order
+   */
+  public Geometry reverse()
+  {
+    int n = geometries.length;
+    Geometry[] revGeoms = new Geometry[n];
+    for (int i = 0; i < geometries.length; i++) {
+      revGeoms[i] = geometries[i].reverse();
+    }
+    return getFactory().createGeometryCollection(revGeoms);
+  }
 }
 

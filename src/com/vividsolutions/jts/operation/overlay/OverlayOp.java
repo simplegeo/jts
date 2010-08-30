@@ -185,7 +185,7 @@ public class OverlayOp
     findResultAreaEdges(opCode);
     cancelDuplicateResultEdges();
 
-    PolygonBuilder polyBuilder = new PolygonBuilder(geomFact, cga);
+    PolygonBuilder polyBuilder = new PolygonBuilder(geomFact);
     polyBuilder.add(graph);
     resultPolyList = polyBuilder.getPolygons();
 
@@ -196,7 +196,7 @@ public class OverlayOp
     resultPointList = pointBuilder.build(opCode);
 
     // gather the results from all calculations into a single Geometry for the result set
-    resultGeom = computeGeometry(resultPointList, resultLineList, resultPolyList);
+    resultGeom = computeGeometry(resultPointList, resultLineList, resultPolyList, opCode);
   }
 
   private void insertUniqueEdges(List edges)
@@ -419,10 +419,12 @@ public class OverlayOp
    */
   private void labelIncompleteNodes()
   {
+  	int nodeCount = 0;
     for (Iterator ni = graph.getNodes().iterator(); ni.hasNext(); ) {
       Node n = (Node) ni.next();
       Label label = n.getLabel();
       if (n.isIsolated()) {
+      	nodeCount++;
         if (label.isNull(0))
           labelIncompleteNode(n, 0);
         else
@@ -432,6 +434,13 @@ public class OverlayOp
       ((DirectedEdgeStar) n.getEdges()).updateLabelling(label);
 //n.print(System.out);
     }
+    /*
+    int nPoly0 = arg[0].getGeometry().getNumGeometries();
+    int nPoly1 = arg[1].getGeometry().getNumGeometries();
+    System.out.println("# isolated nodes= " + nodeCount 
+    		+ "   # poly[0] = " + nPoly0
+    		+ "   # poly[1] = " + nPoly1);
+    */
   }
 
   /**
@@ -440,6 +449,9 @@ public class OverlayOp
   private void labelIncompleteNode(Node n, int targetIndex)
   {
     int loc = ptLocator.locate(n.getCoordinate(), arg[targetIndex].getGeometry());
+  	
+  	// MD - 2008-10-24 - experimental for now
+//    int loc = arg[targetIndex].locate(n.getCoordinate());
     n.getLabel().setLocation(targetIndex, loc);
   }
 
@@ -523,15 +535,64 @@ public class OverlayOp
 
   private Geometry computeGeometry( List resultPointList,
                                         List resultLineList,
-                                        List resultPolyList)
+                                        List resultPolyList,
+                                        int opcode)
   {
     List geomList = new ArrayList();
     // element geometries of the result are always in the order P,L,A
     geomList.addAll(resultPointList);
     geomList.addAll(resultLineList);
     geomList.addAll(resultPolyList);
+    
+    /*
+    if (geomList.isEmpty())
+    	return createEmptyResult(opcode);
+    */
+    
     // build the most specific geometry possible
     return geomFact.buildGeometry(geomList);
   }
 
+  private Geometry createEmptyResult(int opCode)
+  {
+  	Geometry result = null;
+  	switch (resultDimension(opCode, arg[0].getGeometry(), arg[1].getGeometry())) {
+  	case -1:
+  		result = geomFact.createGeometryCollection(new Geometry[0]);
+  		break;
+  	case 0:
+  		result =  geomFact.createPoint((Coordinate) null);
+  		break;
+  	case 1:
+  		result =  geomFact.createLineString((Coordinate[]) null);
+  		break;
+  	case 2:
+  		result =  geomFact.createPolygon(null, null);
+  		break;
+  	}
+		return result;
+  }
+  
+  private int resultDimension(int opCode, Geometry g0, Geometry g1)
+  {
+  	int dim0 = g0.getDimension();
+  	int dim1 = g1.getDimension();
+  	
+  	int resultDimension = -1;
+  	switch (opCode) {
+  	case INTERSECTION: 
+  		resultDimension = Math.min(dim0, dim1);
+  		break;
+  	case UNION: 
+  		resultDimension = Math.max(dim0, dim1);
+  		break;
+  	case DIFFERENCE: 
+  		resultDimension = dim0;
+  		break;
+  	case SYMDIFFERENCE: 
+  		resultDimension = Math.max(dim0, dim1);
+  		break;
+  	}
+  	return resultDimension;
+  }
 }

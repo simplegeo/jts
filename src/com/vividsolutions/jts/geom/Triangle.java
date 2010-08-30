@@ -199,7 +199,6 @@ public class Triangle
      */
     double len0 = b.distance(a);
     double len2 = b.distance(c);
-    double lenSeg = a.distance(c);
     double frac = len0 / (len0 + len2);
     double dx = c.x - a.x;
     double dy = c.y - a.y;

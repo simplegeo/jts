@@ -83,7 +83,8 @@ public class MCIndexPointSnapper
         if (ss == parentEdge && startIndex == vertexIndex)
           return;
       }
-      isNodeAdded = SimpleSnapRounder.addSnappedNode(hotPixel, ss, startIndex);
+//      isNodeAdded = SimpleSnapRounder.addSnappedNode(hotPixel, ss, startIndex);
+      isNodeAdded = hotPixel.addSnappedNode(ss, startIndex);
     }
 
   }

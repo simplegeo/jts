@@ -145,5 +145,18 @@
 <test><op name="getCentroid" arg1="A" >    POINT (40 40)   </op></test>
 </case>
 
+<case>
+  <desc>A - degenerate box</desc>
+  <a>    POLYGON ((40 160, 160 160, 160 160, 40 160, 40 160))  </a>
+<test><op name="getCentroid" arg1="A" >    POINT (100 160)   </op></test>
+</case>
+
+<case>
+  <desc>A - degenerate triangle</desc>
+  <a>    POLYGON ((10 10, 100 100, 100 100, 10 10))  </a>
+<test><op name="getCentroid" arg1="A" >    POINT (55 55)   </op></test>
+</case>
+
+
 
 </run>

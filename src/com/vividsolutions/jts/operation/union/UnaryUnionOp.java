@@ -50,8 +50,17 @@ import com.vividsolutions.jts.operation.overlay.OverlayOp;
  * <li>Unioning a set of overlapping {@link Polygons}s has the effect of
  * merging the areas (i.e. the same effect as 
  * iteratively unioning all individual polygons together).
- * <li>Unioning a set of {@link LineString}s has the effect of fully noding and dissolving
- * the linework.
+ * 
+ * <li>Unioning a set of {@link LineString}s has the effect of <b>fully noding</b> 
+ * and <b>dissolving</b> the input linework.
+ * In this context "fully noded" means that there will be a node or endpoint in the output 
+ * for every endpoint or line segment crossing in the input.
+ * "Dissolved" means that any duplicate (e.g. coincident) line segments or portions
+ * of line segments will be reduced to a single line segment in the output.  
+ * This is consistent with the semantics of the 
+ * {@link Geometry#union(Geometry)} operation.
+ * If <b>merged</b> linework is required, the {@link LineMerger} class can be used.
+ * 
  * <li>Unioning a set of {@link Points}s has the effect of merging
  * al identical points (producing a set with no duplicates).
  * </ul>
@@ -67,6 +76,12 @@ public class UnaryUnionOp
 		return op.union();
 	}
 	
+	public static Geometry union(Collection geoms, GeometryFactory geomFact)
+	{
+		UnaryUnionOp op = new UnaryUnionOp(geoms, geomFact);
+		return op.union();
+	}
+	
 	public static Geometry union(Geometry geom)
 	{
 		UnaryUnionOp op = new UnaryUnionOp(geom);
@@ -78,6 +93,12 @@ public class UnaryUnionOp
 	private List points = new ArrayList();
 	
 	private GeometryFactory geomFact = null;
+	
+	public UnaryUnionOp(Collection geoms, GeometryFactory geomFact)
+	{
+		this.geomFact = geomFact;
+		extract(geoms);
+	}
 	
 	public UnaryUnionOp(Collection geoms)
 	{
@@ -114,9 +135,10 @@ public class UnaryUnionOp
 
 	/**
 	 * Gets the union of the input geometries.
+	 * If no input geometries were provided, a POINT EMPTY is returned.
 	 * 
 	 * @return a Geometry containing the union
-	 * @null if no geometries were provided in the input
+	 * @return an empty GEOMETRYCOLLECTION if no geometries were provided in the input
 	 */
 	public Geometry union()
 	{
@@ -146,8 +168,17 @@ public class UnaryUnionOp
      * Performing two unions is somewhat inefficient,
      * but is mitigated by unioning lines and points first
      */
-		Geometry unionPL = unionWithNull(unionPoints, unionLines);
-		Geometry union = unionWithNull(unionPL, unionPolygons);
+		Geometry unionLA = unionWithNull(unionLines, unionPolygons);
+		Geometry union = null;
+		if (unionPoints == null)
+			union = unionLA;
+		else if (unionLA == null)
+			union = unionPoints;
+		else 
+			union = PointGeometryUnion.union((Puntal) unionPoints, unionLA);
+		
+		if (union == null)
+			return geomFact.createGeometryCollection(null);
 		
 		return union;
 	}

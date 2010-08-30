@@ -22,6 +22,7 @@ import com.vividsolutions.jts.util.Debug;
  * </ul>
  *
  * @author Martin Davis
+ * @see DouglasPeuckerSimplifier
  *
  */
 public class TopologyPreservingSimplifier
@@ -70,6 +71,7 @@ public class TopologyPreservingSimplifier
   {
     protected CoordinateSequence transformCoordinates(CoordinateSequence coords, Geometry parent)
     {
+    	// for linear components (including rings), simplify the linestring
       if (parent instanceof LineString) {
         TaggedLineString taggedLine = (TaggedLineString) linestringMap.get(parent);
         return createCoordinateSequence(taggedLine.getResultCoordinates());

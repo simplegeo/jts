@@ -96,9 +96,12 @@ public class WKBWriter
 
   /**
    * Creates a writer that writes {@link Geometry}s with
-   * the given output dimension (2 or 3) and BIG_ENDIAN byte order
+   * the given dimension (2 or 3) for output coordinates
+   * and {@link BIG_ENDIAN} byte order.
+   * If the input geometry has a small coordinate dimension,
+   * coordinates will be padded with {@link NULL_ORDINATE}.
    *
-   * @param outputDimension the dimension to output (2 or 3)
+   * @param outputDimension the coordinate dimension to output (2 or 3)
    */
   public WKBWriter(int outputDimension) {
     this(outputDimension, ByteOrderValues.BIG_ENDIAN);
@@ -106,9 +109,12 @@ public class WKBWriter
 
   /**
    * Creates a writer that writes {@link Geometry}s with
-   * the given output dimension (2 or 3) and byte order
+   * the given dimension (2 or 3) for output coordinates
+   * and byte order
+   * If the input geometry has a small coordinate dimension,
+   * coordinates will be padded with {@link NULL_ORDINATE}.
    *
-   * @param outputDimension the dimension to output (2 or 3)
+   * @param outputDimension the coordinate dimension to output (2 or 3)
    * @param byteOrder the byte ordering to use
    */
   public WKBWriter(int outputDimension, int byteOrder) {
@@ -238,24 +244,26 @@ public class WKBWriter
     if (writeSize)
       writeInt(seq.size(), os);
 
-    boolean output3D = false;
-    if (seq.getDimension() >= 3 && outputDimension >= 3)
-      output3D = true;
-
     for (int i = 0; i < seq.size(); i++) {
-      writeCoordinate(seq, i, output3D, os);
+      writeCoordinate(seq, i, os);
     }
   }
 
-  private void writeCoordinate(CoordinateSequence seq, int index, boolean output3D, OutStream os)
+  private void writeCoordinate(CoordinateSequence seq, int index, OutStream os)
   throws IOException
   {
     ByteOrderValues.putDouble(seq.getX(index), buf, byteOrder);
     os.write(buf, 8);
     ByteOrderValues.putDouble(seq.getY(index), buf, byteOrder);
     os.write(buf, 8);
-    if (output3D) {
-      ByteOrderValues.putDouble(seq.getOrdinate(index, 2), buf, byteOrder);
+    
+    // only write 3rd dim if caller has requested it for this writer
+    if (outputDimension >= 3) {
+      // if 3rd dim is requested, only access and write it if the CS provides is
+    	double ordVal = Coordinate.NULL_ORDINATE;
+    	if (seq.getDimension() >= 3)
+    		ordVal = seq.getOrdinate(index, 2);
+      ByteOrderValues.putDouble(ordVal, buf, byteOrder);
       os.write(buf, 8);
     }
   }

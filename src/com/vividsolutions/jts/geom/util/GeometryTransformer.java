@@ -16,18 +16,20 @@ import com.vividsolutions.jts.geom.*;
  * Subclasses will override whichever <code>transformX</code> methods
  * they need to to handle particular Geometry types.
  * <p>
- * A typically usage would be a transformation that may transform Polygons into
- * Polygons, LineStrings
- * or Points.  This class would likely need to override the {@link transformMultiPolygon}
- * method to ensure that if input Polygons change type the result is a GeometryCollection,
- * not a MultiPolygon
+ * A typically usage would be a transformation class that transforms <tt>Polygons</tt> into
+ * <tt>Polygons</tt>, <tt>LineStrings</tt> or <tt>Points</tt>, depending on the geometry of the input
+ * (For instance, a simplification operation).  
+ * This class would likely need to override the {@link transformMultiPolygon}
+ * method to ensure that if input Polygons change type the result is a <tt>GeometryCollection</tt>,
+ * not a <tt>MultiPolygon</tt>.
  * <p>
- * The default behaviour of this class is to simply recursively transform
- * each Geometry component into an identical object by copying.
+ * The default behaviour of this class is simply to recursively transform
+ * each Geometry component into an identical object by deep copying down
+ * to the level of, but not including, coordinates.
  * <p>
  * All <code>transformX</code> methods may return <code>null</code>,
  * to avoid creating empty or invalid geometry objects. This will be handled correctly
- * by the transformer.   <code>transformX</code> methods should always return valid
+ * by the transformer.   <code>transform<i>XXX</i></code> methods should always return valid
  * geometry - if they cannot do this they should return <code>null</code>
  * (for instance, it may not be possible for a transformLineString implementation
  * to return at least two points - in this case, it should return <code>null</code>).
@@ -163,6 +165,19 @@ public class GeometryTransformer
     return factory.buildGeometry(transGeomList);
   }
 
+  /**
+   * Transforms a LinearRing.
+   * The transformation of a LinearRing may result in a coordinate sequence
+   * which does not form a structurally valid ring (i.e. a degnerate ring of 3 or fewer points).
+   * In this case a LineString is returned. 
+   * Subclasses may wish to override this method and check for this situation
+   * (e.g. a subclass may choose to eliminate degenerate linear rings)
+   * 
+   * @param geom the ring to simplify
+   * @param parent the parent geometry
+   * @return a LinearRing if the transformation resulted in a structurally valid ring
+   * @return a LineString if the transformation caused the LinearRing to collapse to 3 or fewer points
+   */
   protected Geometry transformLinearRing(LinearRing geom, Geometry parent) {
     CoordinateSequence seq = transformCoordinates(geom.getCoordinateSequence(), geom);
     int seqSize = seq.size();

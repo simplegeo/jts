@@ -50,8 +50,8 @@ public class MinimalEdgeRing
   extends EdgeRing
 {
 
-  public MinimalEdgeRing(DirectedEdge start, GeometryFactory geometryFactory, CGAlgorithms cga) {
-    super(start, geometryFactory, cga);
+  public MinimalEdgeRing(DirectedEdge start, GeometryFactory geometryFactory) {
+    super(start, geometryFactory);
   }
 
   public DirectedEdge getNext(DirectedEdge de)

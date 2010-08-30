@@ -44,16 +44,22 @@ import com.vividsolutions.jts.geom.*;
  * The algorithm has been extended to handle holes and multi-polygons.
  * See <code>http://www.faqs.org/faqs/graphics/algorithms-faq/</code>
  * for further details of the basic approach.
+ * The code has also be extended to handle degenerate (zero-area) polygons.
+ * In this case, the centroid of the line segments in the polygon 
+ * will be returned.
  *
  * @version 1.7
  */
 public class CentroidArea
 {
-
   private Coordinate basePt = null;// the point all triangles are based at
   private Coordinate triangleCent3 = new Coordinate();// temporary variable to hold centroid of triangle
   private double  areasum2 = 0;        /* Partial area sum */
   private Coordinate cg3 = new Coordinate(); // partial centroid sum
+  
+  // data for linear centroid computation, if needed
+  private Coordinate centSum = new Coordinate();
+  private double totalLength = 0.0;
 
   public CentroidArea()
   {
@@ -96,8 +102,15 @@ public class CentroidArea
   public Coordinate getCentroid()
   {
     Coordinate cent = new Coordinate();
-    cent.x = cg3.x / 3 / areasum2;
-    cent.y = cg3.y / 3 / areasum2;
+    if (Math.abs(areasum2) > 0.0) {
+    	cent.x = cg3.x / 3 / areasum2;
+    	cent.y = cg3.y / 3 / areasum2;
+    }
+    else {
+    	// if polygon was degenerate, compute linear centroid instead
+      cent.x = centSum.x / totalLength;
+      cent.y = centSum.y / totalLength;   	
+    }
     return cent;
   }
 
@@ -106,6 +119,7 @@ public class CentroidArea
     if (this.basePt == null)
       this.basePt = basePt;
   }
+  
   private void add(Polygon poly)
   {
     addShell(poly.getExteriorRing().getCoordinates());
@@ -116,11 +130,11 @@ public class CentroidArea
 
   private void addShell(Coordinate[] pts)
   {
-
     boolean isPositiveArea = ! CGAlgorithms.isCCW(pts);
     for (int i = 0; i < pts.length - 1; i++) {
       addTriangle(basePt, pts[i], pts[i+1], isPositiveArea);
     }
+    addLinearSegments(pts);
   }
   private void addHole(Coordinate[] pts)
   {
@@ -128,6 +142,7 @@ public class CentroidArea
     for (int i = 0; i < pts.length - 1; i++) {
       addTriangle(basePt, pts[i], pts[i+1], isPositiveArea);
     }
+    addLinearSegments(pts);
   }
   private void addTriangle(Coordinate p0, Coordinate p1, Coordinate p2, boolean isPositiveArea)
   {
@@ -159,6 +174,27 @@ public class CentroidArea
     return
     (p2.x - p1.x) * (p3.y - p1.y) -
         (p3.x - p1.x) * (p2.y - p1.y);
+  }
+
+  /**
+   * Adds the linear segments defined by an array of coordinates
+   * to the linear centroid accumulators.
+   * This is done in case the polygon(s) have zero-area, 
+   * in which case the linear centroid is computed instead.
+   * 
+   * @param pts an array of {@link Coordinate}s
+   */
+  private void addLinearSegments(Coordinate[] pts)
+  {
+    for (int i = 0; i < pts.length - 1; i++) {
+      double segmentLen = pts[i].distance(pts[i + 1]);
+      totalLength += segmentLen;
+
+      double midx = (pts[i].x + pts[i + 1].x) / 2;
+      centSum.x += segmentLen * midx;
+      double midy = (pts[i].y + pts[i + 1].y) / 2;
+      centSum.y += segmentLen * midy;
+    }
   }
 
 

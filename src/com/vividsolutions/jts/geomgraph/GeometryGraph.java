@@ -37,6 +37,7 @@ package com.vividsolutions.jts.geomgraph;
 
 import java.util.*;
 import com.vividsolutions.jts.algorithm.*;
+import com.vividsolutions.jts.algorithm.locate.*;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geomgraph.index.*;
 import com.vividsolutions.jts.util.*;
@@ -99,6 +100,10 @@ public class GeometryGraph
   private boolean hasTooFewPoints = false;
   private Coordinate invalidPoint = null;
 
+  private PointOnGeometryLocator areaPtLocator = null;
+  // for use if geometry is not Polygonal
+  private final PointLocator ptLocator = new PointLocator();
+  
   private EdgeSetIntersector createEdgeSetIntersector()
   {
   // various options for computing intersections, from slowest to fastest
@@ -238,7 +243,7 @@ public class GeometryGraph
 
     int left  = cwLeft;
     int right = cwRight;
-    if (cga.isCCW(coord)) {
+    if (CGAlgorithms.isCCW(coord)) {
       left = cwRight;
       right = cwLeft;
     }
@@ -428,4 +433,23 @@ Debug.print(e.getEdgeIntersectionList());
       insertPoint(argIndex, coord, loc);
   }
 
+  // MD - experimental for now
+  /**
+   * Determines the {@link Location} of the given {@link Coordinate}
+   * in this geometry.
+   * 
+   * @param p the point to test
+   * @return the location of the point in the geometry
+   */
+  public int locate(Coordinate pt)
+  {
+  	if (parentGeom instanceof Polygonal && parentGeom.getNumGeometries() > 50) {
+  		// lazily init point locator
+  		if (areaPtLocator == null) {
+  			areaPtLocator = new IndexedPointInAreaLocator(parentGeom);
+  		}
+  		return areaPtLocator.locate(pt);
+  	}
+  	return ptLocator.locate(pt, parentGeom);
+  }
 }

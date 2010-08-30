@@ -154,9 +154,9 @@ class DefaultCoordinateSequence
   public void setOrdinate(int index, int ordinateIndex, double value)
   {
     switch (ordinateIndex) {
-      case CoordinateSequence.X:  coordinates[index].x = value;
-      case CoordinateSequence.Y:  coordinates[index].y = value;
-      case CoordinateSequence.Z:  coordinates[index].z = value;
+      case CoordinateSequence.X:  coordinates[index].x = value; break;
+      case CoordinateSequence.Y:  coordinates[index].y = value; break;
+      case CoordinateSequence.Z:  coordinates[index].z = value; break;
     }
   }
   /**

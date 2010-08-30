@@ -117,9 +117,16 @@ public class NodedSegmentString
   public int getSegmentOctant(int index)
   {
     if (index == pts.length - 1) return -1;
-    return Octant.octant(getCoordinate(index), getCoordinate(index + 1));
+    return safeOctant(getCoordinate(index), getCoordinate(index + 1));
+//    return Octant.octant(getCoordinate(index), getCoordinate(index + 1));
   }
 
+  private int safeOctant(Coordinate p0, Coordinate p1)
+  {
+  	if (p0.equals2D(p1)) return 0;
+  	return Octant.octant(p0, p1);
+  }
+  
   /**
    * Adds EdgeIntersections for one or both
    * intersections found for a segment of an edge to the edge intersection list.

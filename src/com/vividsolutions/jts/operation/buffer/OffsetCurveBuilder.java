@@ -61,13 +61,43 @@ public class OffsetCurveBuilder
    */
   private double maxCurveSegmentError = 0.0;
   
-  private static final double MIN_CURVE_VERTEX_FACTOR = 1.0E-6;
+  /**
+   * Factor which controls how close curve vertices can be to be snapped
+   */
+  private static final double CURVE_VERTEX_SNAP_DISTANCE_FACTOR = 1.0E-6;
+  
+  /**
+   * Factor which controls how close curve vertices on inside turns can be to be snapped 
+   */
+  private static final double INSIDE_TURN_VERTEX_SNAP_DISTANCE_FACTOR = 1.0E-3;
     
+  /**
+   * Factor which determines how short closing segs can be for round buffers
+   */
+  private static final int MAX_CLOSING_SEG_FRACTION = 80;
+  
   private double distance = 0.0;
   private PrecisionModel precisionModel;
   
   private BufferParameters bufParams;
   
+  /**
+   * The Closing Segment Factor controls how long
+   * "closing segments" are.  Closing segments are added
+   * at the middle of inside corners to ensure a smoother
+   * boundary for the buffer offset curve. 
+   * In some cases (particularly for round joins with default-or-better
+   * quantization) the closing segments can be made quite short.
+   * This substantially improves performance (due to fewer intersections being created).
+   * 
+   * A closingSegFactor of 0 results in lines to the corner vertex
+   * A closingSegFactor of 1 results in lines halfway to the corner vertex
+   * A closingSegFactor of 80 results in lines 1/81 of the way to the corner vertex
+   * (this option is reasonable for the very common default situation of round joins
+   * and quadrantSegs >= 8)
+   * 
+   */
+  private int closingSegFactor = 1;
   private OffsetCurveVertexList vertexList;
   private LineIntersector li;
   
@@ -83,6 +113,15 @@ public class OffsetCurveBuilder
     // the points are rounded as they are inserted into the curve line
     li = new RobustLineIntersector();
     filletAngleQuantum = Math.PI / 2.0 / bufParams.getQuadrantSegments();
+    
+    /**
+     * Non-round joins cause issues with short closing segments,
+     * so don't use them.  In any case, non-round joins 
+     * only really make sense for relatively small buffer distances.
+     */
+    if (bufParams.getQuadrantSegments() >= 8 
+        && bufParams.getJoinStyle() == BufferParameters.JOIN_ROUND)
+      closingSegFactor = MAX_CLOSING_SEG_FRACTION;
   }
 
   /**
@@ -161,13 +200,73 @@ public class OffsetCurveBuilder
     /**
      * Choose the min vertex separation as a small fraction of the offset distance.
      */
-    vertexList.setMinimumVertexDistance(distance * MIN_CURVE_VERTEX_FACTOR);
+    vertexList.setMinimumVertexDistance(distance * CURVE_VERTEX_SNAP_DISTANCE_FACTOR);
   }
   
-   private void computeLineBufferCurve(Coordinate[] inputPts)
+  /**
+   * Use a value which results in a potential distance error which is
+   * significantly less than the error due to 
+   * the quadrant segment discretization.
+   * For QS = 8 a value of 400 is reasonable.
+   */
+  private static final double SIMPLIFY_FACTOR = 400.0;
+  
+  /**
+   * Computes the distance tolerance to use during input
+   * line simplification.
+   * 
+   * @param distance the buffer distance
+   * @return the simplification tolerance
+   */
+  private double simplifyTolerance(double bufDistance)
+  {
+    return bufDistance / SIMPLIFY_FACTOR;
+  }
+  
+  private void computeLineBufferCurve(Coordinate[] inputPts)
+  {
+    double distTol = simplifyTolerance(distance);
+    
+    //--------- compute points for left side of line
+    // Simplify the appropriate side of the line before generating
+    Coordinate[] simp1 = BufferInputLineSimplifier.simplify(inputPts, distTol);
+    // MD - used for testing only (to eliminate simplification)
+//    Coordinate[] simp1 = inputPts;
+    
+    int n1 = simp1.length - 1;
+
+
+    initSideSegments(simp1[0], simp1[1], Position.LEFT);
+    for (int i = 2; i <= n1; i++) {
+      addNextSegment(simp1[i], true);
+    }
+    addLastSegment();
+    // add line cap for end of line
+    addLineEndCap(simp1[n1 - 1], simp1[n1]);
+    
+    //---------- compute points for right side of line
+    // Simplify the appropriate side of the line before generating
+    Coordinate[] simp2 = BufferInputLineSimplifier.simplify(inputPts, -distTol);
+    // MD - used for testing only (to eliminate simplification)
+//    Coordinate[] simp2 = inputPts;
+    int n2 = simp2.length - 1;
+   
+    // since we are traversing line in opposite order, offset position is still LEFT
+    initSideSegments(simp2[n2], simp2[n2 - 1], Position.LEFT);
+    for (int i = n2 - 2; i >= 0; i--) {
+      addNextSegment(simp2[i], true);
+    }
+    addLastSegment();
+    // add line cap for start of line
+    addLineEndCap(simp2[1], simp2[0]);
+
+    vertexList.closeRing();
+  }
+
+  private void OLDcomputeLineBufferCurve(Coordinate[] inputPts)
   {
     int n = inputPts.length - 1;
-
+    
     // compute points for left side of line
     initSideSegments(inputPts[0], inputPts[1], Position.LEFT);
     for (int i = 2; i <= n; i++) {
@@ -191,11 +290,19 @@ public class OffsetCurveBuilder
 
   private void computeRingBufferCurve(Coordinate[] inputPts, int side)
   {
-    int n = inputPts.length - 1;
-    initSideSegments(inputPts[n - 1], inputPts[0], side);
+    // simplify input line to improve performance
+    double distTol = simplifyTolerance(distance);
+    // ensure that correct side is simplified
+    if (side == Position.RIGHT)
+      distTol = -distTol;
+    Coordinate[] simp = BufferInputLineSimplifier.simplify(inputPts, distTol);
+//    Coordinate[] simp = inputPts;
+    
+    int n = simp.length - 1;
+    initSideSegments(simp[n - 1], simp[0], side);
     for (int i = 1; i <= n; i++) {
       boolean addStartPoint = i != 1;
-      addNextSegment(inputPts[i], addStartPoint);
+      addNextSegment(simp[i], addStartPoint);
     }
     vertexList.closeRing();
   }
@@ -279,8 +386,24 @@ public class OffsetCurveBuilder
 		}
   }
   
+  /**
+   * Adds the offset points for an outside (convex) turn
+   * 
+   * @param orientation
+   * @param addStartPoint
+   */
   private void addOutsideTurn(int orientation, boolean addStartPoint)
   {
+  	/**
+  	 * If offset endpoints are very close together, just snap them together.
+  	 * This avoids problems with computing mitre corners in degenerate cases.
+  	 */
+    if (offset0.p1.distance(offset1.p0) < distance * CURVE_VERTEX_SNAP_DISTANCE_FACTOR) {
+    	vertexList.addPt(offset0.p1);
+    	return;
+    }
+  	
+  	
 		if (bufParams.getJoinStyle() == BufferParameters.JOIN_MITRE) {
 			addMitreJoin(s1, offset0, offset1, distance);
 		}
@@ -296,42 +419,68 @@ public class OffsetCurveBuilder
 		}
   }
   
-  private void addInsideTurn(int orientation, boolean addStartPoint)
-  {
+  /**
+   * Adds the offset points for an inside (concave) turn
+   * 
+   * @param orientation
+   * @param addStartPoint
+   */
+  private void addInsideTurn(int orientation, boolean addStartPoint) {
     /**
      * add intersection point of offset segments (if any)
      */
-      li.computeIntersection( offset0.p0, offset0.p1,
-                            offset1.p0, offset1.p1  );
-      if (li.hasIntersection()) {
-      	vertexList.addPt(li.getIntersection(0));
+    li.computeIntersection(offset0.p0, offset0.p1, offset1.p0, offset1.p1);
+    if (li.hasIntersection()) {
+      vertexList.addPt(li.getIntersection(0));
+    }
+    else {
+      /**
+       * If no intersection is detected, it means the angle is so small and/or the offset so
+       * large that the offsets segments don't intersect. In this case we must
+       * add a "closing segment" to make sure the buffer line is continuous
+       * and tracks the buffer correctly around the corner. The curve connects
+       * the endpoints of the segment offsets to points
+       * which lie toward the centre point of the corner.
+       * The joining curve will not appear in the final buffer outline, since it
+       * is completely internal to the buffer polygon.
+       * 
+       * The intersection test above is vulnerable to robustness errors; i.e. it
+       * may be that the offsets should intersect very close to their endpoints,
+       * but aren't reported as such due to rounding. To handle this situation
+       * appropriately, we use the following test: If the offset points are very
+       * close, don't add closing segments but simply use one of the offset
+       * points
+       */
+      if (offset0.p1.distance(offset1.p0) < distance
+          * INSIDE_TURN_VERTEX_SNAP_DISTANCE_FACTOR) {
+        vertexList.addPt(offset0.p1);
+      } else {
+        // add endpoint of this segment offset
+        vertexList.addPt(offset0.p1);
+        
+        // add closing segments of required length
+        if (closingSegFactor > 0) {
+          Coordinate mid0 = new Coordinate((closingSegFactor * offset0.p1.x + s1.x)/(closingSegFactor + 1), 
+              (closingSegFactor*offset0.p1.y + s1.y)/(closingSegFactor + 1));
+          vertexList.addPt(mid0);
+          Coordinate mid1 = new Coordinate((closingSegFactor*offset1.p0.x + s1.x)/(closingSegFactor + 1), 
+             (closingSegFactor*offset1.p0.y + s1.y)/(closingSegFactor + 1));
+          vertexList.addPt(mid1);
+        }
+        else {
+          /**
+           * This branch is not expected to be used except for testing purposes.
+           * It is equivalent to the JTS 1.9 logic for closing segments
+           * (which results in very poor performance for large buffer distances)
+           */
+          vertexList.addPt(s1);
+        }
+        
+        //*/  
+        // add start point of next segment offset
+        vertexList.addPt(offset1.p0);
       }
-      else {
-    /**
-     * If no intersection, it means the angle is so small and/or the offset so large
-     * that the offsets segments don't intersect.
-     * In this case we must add a offset joining curve to make sure the buffer line
-     * is continuous and tracks the buffer correctly around the corner.
-     * Note that the joining curve won't appear in the final buffer.
-     *
-     * The intersection test above is vulnerable to robustness errors;
-     * i.e. it may be that the offsets should intersect very close to their
-     * endpoints, but don't due to rounding.  To handle this situation
-     * appropriately, we use the following test:
-     * If the offset points are very close, don't add a joining curve
-     * but simply use one of the offset points
-     */
-          if (offset0.p1.distance(offset1.p0) < distance / 1000.0) {
-          	vertexList.addPt(offset0.p1);
-          }
-          else {
-            // add endpoint of this segment offset
-          	vertexList.addPt(offset0.p1);
-//<FIX> MD - add in centre point of corner, to make sure offset closer lines have correct topology
-            vertexList.addPt(s1);
-            vertexList.addPt(offset1.p0);
-          }
-      }
+    }
   }
   
   /**
@@ -428,6 +577,11 @@ public class OffsetCurveBuilder
   	boolean isMitreWithinLimit = true;
   	Coordinate intPt = null;
   
+  	/*
+  	 * This computation is unstable if the offset segments are nearly collinear, 
+  	 * but this case should be eliminated earlier by the check if 
+  	 * the offset segment endpoints are almost coincident
+  	 */
   	try {
   	 intPt = HCoordinate.intersection(offset0.p0, 
   			offset0.p1, offset1.p0, offset1.p1);

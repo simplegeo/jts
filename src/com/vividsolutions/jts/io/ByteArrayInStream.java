@@ -32,8 +32,6 @@
  */
 package com.vividsolutions.jts.io;
 
-import java.io.*;
-
 /**
  * Allows an array of bytes to be used as an {@link InStream}.
  * To optimize memory usage, instances can be reused
@@ -42,24 +40,45 @@ import java.io.*;
 public class ByteArrayInStream
 	implements InStream
 {
-  private byte[] byteBuffer;
-  private ByteArrayInputStream bis;
+	/*
+	 * Implementation improvement suggested by Andrea Aime - Dec 15 2007
+	 */
+	
+  private byte[] buffer;
+	private int position;
 
-  public ByteArrayInStream(byte[] byteBuffer)
-  {
-    setBuffer(byteBuffer);
-  }
+	/**
+	 * Creates a new stream based on the given buffer.
+	 * 
+	 * @param buffer the bytes to read
+	 */
+	public ByteArrayInStream(final byte[] buffer) {
+		setBytes(buffer);
+	}
 
-  public void setBuffer(byte[] byteBuffer)
-  {
-    this.byteBuffer = byteBuffer;
-    // for now - could be replaced with optimized custom code
-    bis = new ByteArrayInputStream(byteBuffer);
-  }
+	/**
+	 * Sets this stream to read from the given buffer
+	 * 
+	 * @param buffer the bytes to read
+	 */
+	public void setBytes(final byte[] buffer) {
+		this.buffer = buffer;
+		this.position = 0;
+	}
 
-  public void read(byte[] buf)
-  throws IOException
-  {
-    bis.read(buf);
-  }
+	/**
+	 * Reads up to <tt>buf.length</tt> bytes from the stream
+	 * into the given byte buffer.
+	 * 
+	 * @param buf the buffer to place the read bytes into
+	 */
+	public void read(final byte[] buf) {
+		int size = buf.length;
+		// don't try and copy past the end of the input
+		if ((position + size) > buffer.length) {
+			size = buffer.length - position;
+		}
+		System.arraycopy(buffer, position, buf, 0, size);
+		position += size;
+	}
 }

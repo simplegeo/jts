@@ -137,7 +137,7 @@ public class SimpleSnapRounder
       Coordinate snapPt = (Coordinate) it.next();
       HotPixel hotPixel = new HotPixel(snapPt, scaleFactor, li);
       for (int i = 0; i < ss.size() - 1; i++) {
-        addSnappedNode(hotPixel, ss, i);
+      	hotPixel.addSnappedNode(ss, i);
       }
     }
   }
@@ -175,7 +175,7 @@ public class SimpleSnapRounder
           if (i0 == i1) continue;
         }
         //System.out.println("trying " + pts0[i0] + " against " + pts1[i1] + pts1[i1 + 1]);
-        boolean isNodeAdded = addSnappedNode(hotPixel, e1, i1);
+        boolean isNodeAdded = hotPixel.addSnappedNode(e1, i1);
         // if a node is created for a vertex, that vertex must be noded too
         if (isNodeAdded) {
           e0.addIntersection(pts0[i0], i0);
@@ -193,6 +193,7 @@ public class SimpleSnapRounder
    * @param segIndex
    * @return <code>true</code> if a node was added
    */
+  /* refactored to HotPixel
   public static boolean addSnappedNode(
       HotPixel hotPix,
       NodedSegmentString segStr,
@@ -211,5 +212,5 @@ public class SimpleSnapRounder
     }
     return false;
   }
-
+*/
 }

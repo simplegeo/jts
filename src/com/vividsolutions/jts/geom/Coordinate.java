@@ -41,20 +41,29 @@ import com.vividsolutions.jts.util.Assert;
  * A lightweight class used to store coordinates
  * on the 2-dimensional Cartesian plane.
  * It is distinct from {@link Point}, which is a subclass of {@link Geometry}. 
- * Unlike objects of type <code>Point</code> (which contain additional
+ * Unlike objects of type {@link Point} (which contain additional
  * information such as an envelope, a precision model, and spatial reference
  * system information), a <code>Coordinate</code> only contains ordinate values
  * and accessor methods. <P>
  *
  * <code>Coordinate</code>s are two-dimensional points, with an additional Z-ordinate. 
- * JTS does not support any operations on the z-ordinate except the basic accessor functions. 
- * If a value is not specified, constructed coordinates have a Z-ordinate of <code>NaN</code>.  
+ * JTS does not support any operations on the Z-ordinate except the basic accessor functions. 
+ * If an Z-ordinate value is not specified or not defined, 
+ * constructed coordinates have a Z-ordinate of <code>NaN</code>
+ * (which is also the value of <code>NULL_ORDINATE</code>).  
  * The standard comparison functions ignore the Z-ordinate.
  *
  *@version 1.7
  */
 public class Coordinate implements Comparable, Cloneable, Serializable {
   private static final long serialVersionUID = 6683108902428366910L;
+  
+  /**
+   * The value used to indicate a null or missing ordinate value.
+   * In particular, used for the value of ordinates for dimensions 
+   * greater than the defined dimension of a coordinate.
+   */
+  public static final double NULL_ORDINATE = Double.NaN;
   /**
    *  The x-coordinate.
    */
@@ -105,7 +114,7 @@ public class Coordinate implements Comparable, Cloneable, Serializable {
    *@param  y  the y-value
    */
   public Coordinate(double x, double y) {
-    this(x, y, Double.NaN);
+    this(x, y, NULL_ORDINATE);
   }
 
 

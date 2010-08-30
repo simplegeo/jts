@@ -53,6 +53,8 @@ public class OctagonalEnvelope
     return x - y;
   }
 
+  private static double SQRT2 = Math.sqrt(2.0);
+  
   // initialize in the null state
   private double minX = Double.NaN;
   private double maxX;
@@ -219,7 +221,7 @@ public class OctagonalEnvelope
   {
     if (isNull()) return;
 
-    double diagonalDistance = Math.sqrt(2.0) * distance;
+    double diagonalDistance = SQRT2 * distance;
 
     minX -= distance;
     maxX += distance;

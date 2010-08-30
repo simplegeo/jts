@@ -210,7 +210,8 @@ abstract public class EdgeEndStar
       ee.computeLabel(boundaryNodeRule);
     }
   }
-  int getLocation(int geomIndex, Coordinate p, GeometryGraph[] geom)
+  
+  private int getLocation(int geomIndex, Coordinate p, GeometryGraph[] geom)
   {
     // compute location only on demand
     if (ptInAreaLocation[geomIndex] == Location.NONE) {
@@ -287,7 +288,7 @@ abstract public class EdgeEndStar
       if (label.getLocation(geomIndex, Position.ON) == Location.NONE)
           label.setLocation(geomIndex, Position.ON, currLoc);
       // set side labels (if any)
-     // if (label.isArea()) {   //ORIGINAL
+//      if (label.isArea()) {   //ORIGINAL
       if (label.isArea(geomIndex)) {
         int leftLoc   = label.getLocation(geomIndex, Position.LEFT);
         int rightLoc  = label.getLocation(geomIndex, Position.RIGHT);
