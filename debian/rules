@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+# debian/rules file for jts (uses cdbs)
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/ant.mk
+
+export UPSTREAM_VERSION = $(shell head -1 debian/changelog | cut -f2 -d\( | cut -f1 -d\) | cut -f1 -d\-)
+
+JAVA_HOME := /usr/lib/jvm/default-java
+JAVA_CMD := /usr/bin/java
+ANT_HOME := /usr/share/ant
+
+DEB_JARS := $(ANT_HOME)/lib/ant-launcher.jar
+DEB_ANT_BUILDFILE := debian/build.xml
+DEB_ANT_BUILD_TARGET := all
+
+install/libjts-java::
+	install -m 644 target/jts.jar debian/libjts-java/usr/share/java/jts-$(UPSTREAM_VERSION).jar
+	ln -s jts-$(UPSTREAM_VERSION).jar debian/libjts-java/usr/share/java/jts.jar

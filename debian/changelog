@@ -1,0 +1,50 @@
+jts (1.7-2) unstable; urgency=low
+
+  * Added Homepage field to debian/control.
+  * Added Vcs-* fields to debian/control.
+  * Now using default-jdk/jre instead of kaffe.
+    (closes: #547392)
+  * Wolfgang removed among uploaders, because inactive since years.
+  * Fixed lintian warning: debhelper-but-no-misc-depends.
+  * Debhelper compatibility set to 7.
+  * Fixed lintian error: clean-should-be-satisfied-by-build-depends.
+  * Fixed Section for libjts-java.
+  * Copyright fixed: JTS is released under LGPL 2.1 or later.
+
+ -- Francesco Paolo Lovergine <frankie@debian.org>  Tue, 22 Sep 2009 11:16:16 +0200
+
+jts (1.7-1) unstable; urgency=low
+
+  * New upstream release
+    (closes: #362120)
+  * Policy bumped to 3.7.2, without changes
+  * Debhelper compatibility set to 5.
+
+ -- Francesco Paolo Lovergine <frankie@debian.org>  Sat, 16 Jun 2007 00:27:01 +0200
+
+jts (1.6-2) unstable; urgency=low
+
+  * Kaffe compiler transition.
+  * Updated FSF address in debian/copyright
+
+ -- Wolfgang Baer <WBaer@gmx.de>  Sun, 15 Jan 2006 16:01:03 +0100
+
+jts (1.6-1) unstable; urgency=low
+
+  * New upstream release
+  * Upload to unstable
+  * Adjusted copyright to include the second download location
+  * Fixed minor lintian warnings in debian/control
+  * Standards-Version 3.6.2 (no changes needed)
+  * Changed libant1.6-java build-dep to ant (now in main)
+  
+  * Upload sponsored by Petter Reinholdtsen
+
+ -- Wolfgang Baer <WBaer@gmx.de>  Sun,  7 Aug 2005 14:12:35 +0200
+
+jts (1.5-1) experimental; urgency=low
+
+  * Initial Release (closes: #294756)
+
+ -- Wolfgang Baer <WBaer@gmx.de>  Thu, 27 Jan 2005 10:38:29 +0100
+

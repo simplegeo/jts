@@ -1,0 +1,3 @@
+doc/*
+target/docs/api
+target/docs/examples
