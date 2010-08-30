@@ -108,7 +108,7 @@ import java.util.ArrayList;
  * <i>Coordinate:
  *         Number Number Number<sub>opt</sub></i>
  *
- * <i>Number:</i> A Java-style floating-point number
+ * <i>Number:</i> A Java-style floating-point number (including <tt>NaN</tt>, with arbitrary case)
  *
  * </pre></blockquote>
  *
@@ -122,7 +122,8 @@ public class WKTReader
   private static final String COMMA = ",";
   private static final String L_PAREN = "(";
   private static final String R_PAREN = ")";
-
+  private static final String NAN_SYMBOL = "NaN";
+  
   private GeometryFactory geometryFactory;
   private PrecisionModel precisionModel;
   private StreamTokenizer tokenizer;
@@ -249,6 +250,8 @@ public class WKTReader
   /**
    * Parses the next number in the stream.
    * Numbers with exponents are handled.
+   * <tt>NaN</tt> values are handled correctly, and
+   * the case of the "NaN" symbol is not significant. 
    *
    *@param  tokenizer        tokenizer over a stream of text in Well-known Text
    *      format. The next token must be a number.
@@ -262,12 +265,17 @@ public class WKTReader
     switch (type) {
       case StreamTokenizer.TT_WORD:
       {
-        try {
-          return Double.parseDouble(tokenizer.sval);
-        }
-        catch (NumberFormatException ex) {
-          throw new ParseException("Invalid number: " + tokenizer.sval);
-        }
+      	if (tokenizer.sval.equalsIgnoreCase(NAN_SYMBOL)) {
+      		return Double.NaN;
+      	}
+      	else {
+	        try {
+	          return Double.parseDouble(tokenizer.sval);
+	        }
+	        catch (NumberFormatException ex) {
+	          throw new ParseException("Invalid number: " + tokenizer.sval);
+	        }
+      	}
       }
     }
     parseError("number");

@@ -33,8 +33,6 @@
  */
 package com.vividsolutions.jtsexample.precision;
 
-import java.io.*;
-import java.util.*;
 import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.precision.EnhancedPrecisionOp;

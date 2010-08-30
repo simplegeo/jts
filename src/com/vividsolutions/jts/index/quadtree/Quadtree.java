@@ -206,7 +206,7 @@ public class Quadtree
     if (delX < minExtent && delX > 0.0)
       minExtent = delX;
 
-    double delY = itemEnv.getWidth();
+    double delY = itemEnv.getHeight();
     if (delY < minExtent && delY > 0.0)
       minExtent = delY;
   }

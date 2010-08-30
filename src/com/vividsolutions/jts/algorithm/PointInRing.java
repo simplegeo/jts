@@ -40,6 +40,8 @@ import com.vividsolutions.jts.geom.Coordinate;
  * a ring.
  *
  * @version 1.7
+ * 
+ * @see PointOnGeometryLocator for more general functionality
  */
 public interface PointInRing {
 

@@ -3,7 +3,7 @@ package com.vividsolutions.jts.operation.overlay.snap;
 import com.vividsolutions.jts.geom.*;
 
 /**
- * Snaps the vertices and segments of a LineString to a set of target snap vertices.
+ * Snaps the vertices and segments of a {@link LineString} to a set of target snap vertices.
  * A snapping distance tolerance is used to control where snapping is performed.
  *
  * @author Martin Davis
@@ -19,21 +19,21 @@ public class LineStringSnapper
 
   /**
    * Creates a new snapper using the points in the given {@link LineString}
-   * as target snap points.
+   * as source snap points.
    * 
-   * @param line a LineString
+   * @param srcLline a LineString to snap
    * @param snapTolerance the snap tolerance to use
    */
-  public LineStringSnapper(LineString line, double snapTolerance)
+  public LineStringSnapper(LineString srcLline, double snapTolerance)
   {
-    this(line.getCoordinates(), snapTolerance);
+    this(srcLline.getCoordinates(), snapTolerance);
   }
 
   /**
    * Creates a new snapper using the given points
-   * as target snap points.
+   * as source points to be snapped.
    * 
-   * @param srcPts the points to snap to
+   * @param srcPts the points to snap 
    * @param snapTolerance the snap tolerance to use
    */
   public LineStringSnapper(Coordinate[] srcPts, double snapTolerance)
@@ -48,7 +48,7 @@ public class LineStringSnapper
    * to the given set of target snap points.
    * 
    * @param snapPts the vertices to snap to
-   * @return a new snapped LineString
+   * @return a list of the snapped points
    */
   public Coordinate[] snapTo(Coordinate[] snapPts)
   {
@@ -64,8 +64,8 @@ public class LineStringSnapper
   /**
    * Snap source vertices to vertices in the target.
    * 
-   * @param srcCoords
-   * @param snapPts
+   * @param srcCoords the points to snap
+   * @param snapPts the points to snap to
    */
   private void snapVertices(CoordinateList srcCoords, Coordinate[] snapPts)
   {

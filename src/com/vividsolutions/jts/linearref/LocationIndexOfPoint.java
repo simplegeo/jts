@@ -18,6 +18,12 @@ class LocationIndexOfPoint
     return locater.indexOf(inputPt);
   }
 
+  public static LinearLocation indexOfAfter(Geometry linearGeom, Coordinate inputPt, LinearLocation minIndex)
+  {
+    LocationIndexOfPoint locater = new LocationIndexOfPoint(linearGeom);
+    return locater.indexOfAfter(inputPt, minIndex);
+  }
+
   private Geometry linearGeom;
 
   public LocationIndexOfPoint(Geometry linearGeom) {
@@ -83,7 +89,7 @@ class LocationIndexOfPoint
         seg.p0 = it.getSegmentStart();
         seg.p1 = it.getSegmentEnd();
         double segDistance = seg.distance(inputPt);
-        double segFrac = segmentFraction(seg, inputPt);
+        double segFrac = seg.segmentFraction(inputPt);
 
         int candidateComponentIndex = it.getComponentIndex();
         int candidateSegmentIndex = it.getVertexIndex();
@@ -107,7 +113,19 @@ class LocationIndexOfPoint
     return loc;
   }
 
-  public static double segmentFraction(
+  /**
+   * Computes the fraction of distance (in <tt>[0.0, 1.0]</tt>) 
+   * that a point occurs along a line segment.
+   * If the point is beyond either ends of the line segment,
+   * the closest fractional value (<tt>0.0</tt> or <tt>1.0</tt>) is returned.
+   *  
+   * @param seg the line segment to use
+   * @param inputPt the point
+   * @return the fraction along the line segment the point occurs
+   */
+  /*
+   // MD - no longer needed
+  private static double segmentFraction(
       LineSegment seg,
       Coordinate inputPt)
   {
@@ -118,4 +136,5 @@ class LocationIndexOfPoint
       segFrac = 1.0;
     return segFrac;
   }
+  */
 }

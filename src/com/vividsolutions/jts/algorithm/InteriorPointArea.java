@@ -77,8 +77,9 @@ public class InteriorPointArea {
 
   /**
    * Tests the interior vertices (if any)
-   * defined by a linear Geometry for the best inside point.
-   * If a Geometry is not of dimension 1 it is not tested.
+   * defined by an areal Geometry for the best inside point.
+   * If a component Geometry is not of dimension 2 it is not tested.
+   * 
    * @param geom the geometry to add
    */
   private void add(Geometry geom)

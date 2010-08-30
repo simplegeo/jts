@@ -40,30 +40,36 @@ import java.util.ArrayList;
 
 
 /**
- * Supports creating a new {@link Geometry} which is a modification of an existing one.
+ * A class which supports 
+ * creating new {@link Geometry}s 
+ * which are modifications of existing ones.
  * Geometry objects are intended to be treated as immutable.
- * This class allows you to "modify" a Geometry
- * by traversing it and creating a new Geometry with the same overall structure but
- * possibly modified components.
- * The following kinds of modifications can be made:
+ * This class "modifies" Geometrys
+ * by traversing them, applying a user-defined
+ * {@link GeometryEditOperation} or {@link CoordinateOperation}  
+ * and creating new Geometrys with the same structure but
+ * (possibly) modified components.
+ * <p>
+ * Examples of the kinds of modifications which can be made are:
  * <ul>
  * <li>the values of the coordinates may be changed.
- * Changing coordinate values may make the result Geometry invalid;
- * this is not checked by the GeometryEditor
+ *     Changing coordinate values may make the result Geometry invalid;
+ *     this is not checked by the GeometryEditor
  * <li>the coordinate lists may be changed
- * (e.g. by adding or deleting coordinates).
- * The modifed coordinate lists must be consistent with their original parent component
- * (e.g. a LinearRing must always have at least 4 coordinates, and the first and last
- * coordinate must be equal)
+ *     (e.g. by adding or deleting coordinates).
+ *     The modifed coordinate lists must be consistent with their original parent component
+ *     (e.g. a LinearRing must always have at least 4 coordinates, and the first and last
+ *     coordinate must be equal)
  * <li>components of the original geometry may be deleted
- * (e.g. holes may be removed from a Polygon, or LineStrings removed from a MultiLineString).
- * Deletions will be propagated up the component tree appropriately.
+ * (   e.g. holes may be removed from a Polygon, or LineStrings removed from a MultiLineString).
+ *     Deletions will be propagated up the component tree appropriately.
  * </ul>
- * Note that all changes must be consistent with the original Geometry's structure
- * (e.g. a Polygon cannot be collapsed into a LineString).
+ * All changes must be consistent with the original Geometry's structure
+ * (e.g. a <tt>Polygon</tt> cannot be collapsed into a <tt>LineString</tt>).
  * <p>
  * The resulting Geometry is not checked for validity.
- * If validity needs to be enforced, the new Geometry's #isValid should be checked.
+ * If validity needs to be enforced, the new Geometry's 
+ * {@link #isValid} method should be called.
  *
  * @see Geometry#isValid
  *
@@ -97,7 +103,7 @@ public class GeometryEditor
 
   /**
    * Edit the input {@link Geometry} with the given edit operation.
-   * Clients will create subclasses of {@link GeometryEditorOperation} or
+   * Clients can create subclasses of {@link GeometryEditorOperation} or
    * {@link CoordinateOperation} to perform required modifications.
    *
    * @param geometry the Geometry to edit
@@ -253,6 +259,10 @@ public class GeometryEditor
 
     /**
      * Edits the array of {@link Coordinate}s from a {@link Geometry}.
+     * <p>
+     * If it is desired to preserve the immutability of Geometrys,
+     * if the coordinates are changed a new array should be created
+     * and returned.
      *
      * @param coordinates the coordinate array to operate on
      * @param geometry the geometry containing the coordinate list

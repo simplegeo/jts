@@ -40,17 +40,16 @@ import com.vividsolutions.jts.util.Assert;
 /**
  * A lightweight class used to store coordinates
  * on the 2-dimensional Cartesian plane.
- *  It is distinct from <code>Point</code>, which is a subclass of <code>Geometry</code>
- *  . Unlike objects of type <code>Point</code> (which contain additional
- *  information such as an envelope, a precision model, and spatial reference
- *  system information), a <code>Coordinate</code> only contains ordinate values
- *  and accessor methods. <P>
+ * It is distinct from {@link Point}, which is a subclass of {@link Geometry}. 
+ * Unlike objects of type <code>Point</code> (which contain additional
+ * information such as an envelope, a precision model, and spatial reference
+ * system information), a <code>Coordinate</code> only contains ordinate values
+ * and accessor methods. <P>
  *
- *  <code>Coordinate</code>s are two-dimensional points, with an additional
- *  z-ordinate. JTS does not support any operations on the z-ordinate except
- *  the basic accessor functions. Constructed coordinates will have a
- *  z-ordinate of <code>NaN</code>.  The standard comparison functions will ignore
- *  the z-ordinate.
+ * <code>Coordinate</code>s are two-dimensional points, with an additional Z-ordinate. 
+ * JTS does not support any operations on the z-ordinate except the basic accessor functions. 
+ * If a value is not specified, constructed coordinates have a Z-ordinate of <code>NaN</code>.  
+ * The standard comparison functions ignore the Z-ordinate.
  *
  *@version 1.7
  */
@@ -112,8 +111,7 @@ public class Coordinate implements Comparable, Cloneable, Serializable {
 
 
   /**
-   *  Sets this <code>Coordinate</code>s (x,y,z) values to that of <code>other</code>
-   *  .
+   *  Sets this <code>Coordinate</code>s (x,y,z) values to that of <code>other</code>.
    *
    *@param  other  the <code>Coordinate</code> to copy
    */
@@ -224,6 +222,13 @@ public class Coordinate implements Comparable, Cloneable, Serializable {
     }
   }
 
+  /**
+   * Computes the 2-dimensional Euclidean distance to another location.
+   * The Z-ordinate is ignored.
+   * 
+   * @param p a point
+   * @return the 2-dimensional Euclidean distance between the locations
+   */
   public double distance(Coordinate p) {
     double dx = x - p.x;
     double dy = y - p.y;
@@ -231,6 +236,11 @@ public class Coordinate implements Comparable, Cloneable, Serializable {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  /**
+   * Gets a hashcode for this coordinate.
+   * 
+   * @return a hashcode for this coordinate
+   */
   public int hashCode() {
     //Algorithm from Effective Java by Joshua Bloch [Jon Aquino]
     int result = 17;
@@ -240,8 +250,10 @@ public class Coordinate implements Comparable, Cloneable, Serializable {
   }
 
   /**
-   * Returns a hash code for a double value, using the algorithm from
+   * Computes a hash code for a double value, using the algorithm from
    * Joshua Bloch's book <i>Effective Java"</i>
+   * 
+   * @return a hashcode for the double value
    */
   public static int hashCode(double x) {
     long f = Double.doubleToLongBits(x);

@@ -168,8 +168,8 @@ numTests++;
       // only intersection.
       if (! isTrivialIntersection(e0, segIndex0, e1, segIndex1)) {
         hasIntersection = true;
-        e0.addIntersections(li, segIndex0, 0);
-        e1.addIntersections(li, segIndex1, 1);
+        ((NodedSegmentString) e0).addIntersections(li, segIndex0, 0);
+        ((NodedSegmentString) e1).addIntersections(li, segIndex1, 1);
         if (li.isProper()) {
           numProperIntersections++;
 //Debug.println(li.toString());  Debug.println(li.getIntersection(0));

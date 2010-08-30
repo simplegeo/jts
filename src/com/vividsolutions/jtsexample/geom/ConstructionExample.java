@@ -31,7 +31,7 @@ public class ConstructionExample
     System.out.println(p1);
 
     Point p2 = fact.createPoint(new Coordinate(1,1));
-    System.out.println(p1);
+    System.out.println(p2);
 
     MultiPoint mpt = fact.createMultiPoint(new Coordinate[] { new Coordinate(0,0), new Coordinate(1,1) } );
     System.out.println(mpt);

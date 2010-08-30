@@ -34,10 +34,11 @@
 package com.vividsolutions.jts.algorithm;
 
 import java.util.*;
+
+import com.vividsolutions.jts.algorithm.locate.IndexedPointInAreaLocator;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.index.chain.*;
 import com.vividsolutions.jts.index.bintree.*;
-import com.vividsolutions.jts.index.bintree.Interval;
 
 /**
  * Implements {@link PointInRing}
@@ -45,6 +46,8 @@ import com.vividsolutions.jts.index.bintree.Interval;
  * increase performance.
  *
  * @version 1.7
+ * 
+ * @see IndexedPointInAreaLocator for more general functionality
  */
 public class MCPointInRing   implements PointInRing {
 

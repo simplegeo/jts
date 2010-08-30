@@ -36,11 +36,22 @@ import com.vividsolutions.jts.algorithm.CGAlgorithms;
 import com.vividsolutions.jts.operation.BoundaryOp;
 
 /**
- *  Basic implementation of <code>LineString</code>.
+ *  Models an OGC-style <code>LineString</code>.
+ *  A LineString consists of a sequence of two or more vertices,
+ *  along with all points along the linearly-interpolated curves
+ *  (line segments) between each 
+ *  pair of consecutive vertices.
+ *  Consecutive vertices may be equal.
+ *  The line segments in the line may intersect each other (in other words, 
+ *  the linestring may "curl back" in itself and self-intersect.
+ *  Linestrings with exactly two identical points are invalid.  
  *
  *@version 1.7
  */
-public class LineString extends Geometry {
+public class LineString 
+	extends Geometry 
+	implements Lineal
+{
   private static final long serialVersionUID = 3110669828065365560L;
   /**
    *  The points of this <code>LineString</code>.
@@ -52,7 +63,7 @@ public class LineString extends Geometry {
    *
    *@param  points          the points of the linestring, or <code>null</code>
    *      to create the empty geometry. This array must not contain <code>null</code>
-   *      elements. Consecutive points may not be equal.
+   *      elements. Consecutive points may be equal.
    *@param  precisionModel  the specification of the grid of allowable points
    *      for this <code>LineString</code>
    *@param  SRID            the ID of the Spatial Reference System used by this
@@ -157,7 +168,7 @@ public class LineString extends Geometry {
   /**
    *  Returns the length of this <code>LineString</code>
    *
-   *@return the area of the polygon
+   *@return the length of the linestring
    */
   public double getLength()
   {

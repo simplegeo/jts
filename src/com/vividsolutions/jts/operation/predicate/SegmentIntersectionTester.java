@@ -5,8 +5,8 @@ import com.vividsolutions.jts.algorithm.*;
 import com.vividsolutions.jts.geom.*;
 
 /**
- * Tests if any line segments in two sets of CoordinateSequences intersect.
- * Optimized for small geometry size.
+ * Tests if any line segments in two sets of {@link CoordinateSequence}s intersect.
+ * Optimized for use when at least one input is of small size.
  * Short-circuited to return as soon an intersection is found.
  *
  * @version 1.7

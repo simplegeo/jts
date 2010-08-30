@@ -176,16 +176,16 @@ public abstract class PlanarGraph
   }
 
   /**
-   * Removes DirectedEdge from its from-Node and from this PlanarGraph.
-   * This method does not remove the Nodes associated with the DirectedEdge,
-   * even if the removal of the DirectedEdge reduces the degree of a Node to
-   * zero.
+   * Removes a {@link DirectedEdge} from its from-{@link Node} and from this graph.
+   * This method does not remove the {@link Node}s associated with the DirectedEdge,
+   * even if the removal of the DirectedEdge reduces the degree of a Node to zero.
    */
   public void remove(DirectedEdge de)
   {
     DirectedEdge sym = de.getSym();
     if (sym != null) sym.setSym(null);
-    de.getFromNode().getOutEdges().remove(de);
+    
+    de.getFromNode().remove(de);
     de.remove();
     dirEdges.remove(de);
   }

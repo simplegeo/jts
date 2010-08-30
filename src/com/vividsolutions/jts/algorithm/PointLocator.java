@@ -1,6 +1,3 @@
-
-
-
 /*
  * The JTS Topology Suite is a collection of Java classes that
  * implement the fundamental operations required to validate a given
@@ -37,7 +34,6 @@ package com.vividsolutions.jts.algorithm;
 
 import java.util.Iterator;
 import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.geomgraph.GeometryGraph;
 
 /**
  * Computes the topological relationship ({@link Location})
@@ -117,6 +113,9 @@ public class PointLocator
 
   private void computeLocation(Coordinate p, Geometry geom)
   {
+    if (geom instanceof Point) {
+      updateLocationInfo(locate(p, (Point) geom));
+    }
     if (geom instanceof LineString) {
       updateLocationInfo(locate(p, (LineString) geom));
     }
@@ -153,8 +152,21 @@ public class PointLocator
     if (loc == Location.BOUNDARY) numBoundaries++;
   }
 
+  private int locate(Coordinate p, Point pt)
+  {
+  	// no point in doing envelope test, since equality test is just as fast
+  	
+    Coordinate ptCoord = pt.getCoordinate();
+    if (ptCoord.equals2D(p))
+      return Location.INTERIOR;
+    return Location.EXTERIOR;
+  }
+
   private int locate(Coordinate p, LineString l)
   {
+  	// bounding-box check
+  	if (! l.getEnvelopeInternal().intersects(p)) return Location.EXTERIOR;
+  	
     Coordinate[] pt = l.getCoordinates();
     if (! l.isClosed()) {
       if (p.equals(pt[0])
@@ -169,6 +181,12 @@ public class PointLocator
 
   private int locateInPolygonRing(Coordinate p, LinearRing ring)
   {
+  	// bounding-box check
+  	if (! ring.getEnvelopeInternal().intersects(p)) return Location.EXTERIOR;
+
+  	return CGAlgorithms.locatePointInRing(p, ring.getCoordinates());
+  	
+  	/*
     // can this test be folded into isPointInRing ?
     if (CGAlgorithms.isOnLine(p, ring.getCoordinates())) {
       return Location.BOUNDARY;
@@ -176,11 +194,13 @@ public class PointLocator
     if (CGAlgorithms.isPointInRing(p, ring.getCoordinates()))
       return Location.INTERIOR;
     return Location.EXTERIOR;
+    */
   }
 
   private int locate(Coordinate p, Polygon poly)
   {
     if (poly.isEmpty()) return Location.EXTERIOR;
+
     LinearRing shell = (LinearRing) poly.getExteriorRing();
 
     int shellLoc = locateInPolygonRing(p, shell);

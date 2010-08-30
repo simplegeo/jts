@@ -38,18 +38,19 @@ import com.vividsolutions.jts.geom.*;
 
 
 /**
- * MonotoneChains are a way of partitioning the segments of a linestring to
+ * Monotone Chains are a way of partitioning the segments of a linestring to
  * allow for fast searching of intersections.
  * They have the following properties:
  * <ol>
- * <li>the segments within a monotone chain will never intersect each other
+ * <li>the segments within a monotone chain never intersect each other
  * <li>the envelope of any contiguous subset of the segments in a monotone chain
  * is equal to the envelope of the endpoints of the subset.
  * </ol>
  * Property 1 means that there is no need to test pairs of segments from within
  * the same monotone chain for intersection.
+ * <p>
  * Property 2 allows
- * binary search to be used to find the intersection points of two monotone chains.
+ * an efficient binary search to be used to find the intersection points of two monotone chains.
  * For many types of real-world data, these properties eliminate a large number of
  * segment comparisons, producing substantial speed gains.
  * <p>

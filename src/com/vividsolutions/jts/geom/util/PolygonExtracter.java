@@ -37,24 +37,43 @@ import java.util.*;
 import com.vividsolutions.jts.geom.*;
 
 /**
- * Extracts all the 2-dimensional ({@link Polygon}) components from a {@link Geometry}.
+ * Extracts all the {@link Polygon} elements from a {@link Geometry}.
  *
  * @version 1.7
+ * @see GeometryExtracter
  */
 public class PolygonExtracter
   implements GeometryFilter
 {
   /**
-   * Returns the Polygon components from a single geometry.
-   * If more than one geometry is to be processed, it is more
-   * efficient to create a single {@link PolygonExtracterFilter} instance
-   * and pass it to multiple geometries.
+   * Extracts the {@link Polygon} elements from a single {@link Geometry}
+   * and adds them to the provided {@link List}.
+   * 
+   * @param geom the geometry from which to extract
+   * @param list the list to add the extracted elements to
+   */
+  public static List getPolygons(Geometry geom, List list)
+  {
+  	if (geom instanceof Polygon) {
+  		list.add(geom);
+  	}
+  	else if (geom instanceof GeometryCollection) {
+  		geom.apply(new PolygonExtracter(list));
+  	}
+  	// skip non-Polygonal elemental geometries
+  	
+    return list;
+  }
+
+  /**
+   * Extracts the {@link Polygon} elements from a single {@link Geometry}
+   * and returns them in a {@link List}.
+   * 
+   * @param geom the geometry from which to extract
    */
   public static List getPolygons(Geometry geom)
   {
-    List comps = new ArrayList();
-    geom.apply(new PolygonExtracter(comps));
-    return comps;
+    return getPolygons(geom, new ArrayList());
   }
 
   private List comps;

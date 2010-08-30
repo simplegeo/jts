@@ -42,7 +42,7 @@ import java.util.*;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.algorithm.*;
 import com.vividsolutions.jts.geomgraph.*;
-import com.vividsolutions.jts.noding.SegmentString;
+import com.vividsolutions.jts.noding.*;
 
 /**
  * Creates all the raw offset curves for a buffer of a {@link Geometry}.
@@ -52,7 +52,7 @@ import com.vividsolutions.jts.noding.SegmentString;
  */
 public class OffsetCurveSetBuilder {
 
-  private CGAlgorithms cga = new RobustCGAlgorithms();
+  private CGAlgorithms cga = new CGAlgorithms();
 
   private Geometry inputGeom;
   private double distance;
@@ -105,7 +105,7 @@ public class OffsetCurveSetBuilder {
     // don't add null curves!
     if (coord.length < 2) return;
     // add the edge for a coordinate list which is a raw offset curve
-    SegmentString e = new SegmentString(coord,
+    SegmentString e = new NodedSegmentString(coord,
                         new Label(0, Location.BOUNDARY, leftLoc, rightLoc));
     curveList.add(e);
   }

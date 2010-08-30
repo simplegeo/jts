@@ -72,6 +72,10 @@ import java.util.Map;
  *      <LI> jtsPt.y = round( (inputPt.y * scale ) / scale
  *    </UL>
  * </ul>
+ * For example, to specify 3 decimal places of precision, use a scale factor
+ * of 1000. To specify -3 decimal places of precision (i.e. rounding to
+ * the nearest 1000), use a scale factor of 0.001.
+ * <p>
  *  Coordinates are represented internally as Java double-precision values.
  * Since Java uses the IEEE-394 floating point standard, this
  *  provides 53 bits of precision. (Thus the maximum precisely representable
@@ -102,16 +106,8 @@ public class PrecisionModel implements Serializable, Comparable
 
   /**
    * The types of Precision Model which JTS supports.
-   * <p>
-   * This class is only for use to support the "enums" for the types of precision model.
-   * <p>
-   * <i>
-   * Note: Type should be declared as private to this class,
-   * but JBuilder 7 throws a compiler exception
-   * when trying to compile with the "private" keyword.  Package-private is safe enough.
-   * </i>
    */
-  static class Type
+  public static class Type
       implements Serializable
   {
     private static final long serialVersionUID = -5528602631731589822L;
@@ -256,20 +252,23 @@ public class PrecisionModel implements Serializable, Comparable
   }
 
   /**
-   *  Returns the multiplying factor used to obtain a precise coordinate.
-   * This method is private because PrecisionModel is intended to
-   * be an immutable (value) type.
+   * Returns the scale factor used to specify a fixed precision model.
+   * The number of decimal places of precision is 
+   * equal to the base-10 logarithm of the scale factor.
+   * Non-integral and negative scale factors are supported.
+   * Negative scale factors indicate that the places 
+   * of precision is to the left of the decimal point.  
    *
-   *@return    the amount by which to multiply a coordinate after subtracting
-   *      the offset
+   *@return the scale factor for the fixed precision model
    */
   public double getScale() {
     return scale;
   }
 
   /**
-   * Gets the type of this PrecisionModel
-   * @return the type of this PrecisionModel
+   * Gets the type of this precision model
+   * @return the type of this precision model
+   * @see Type
    */
   public Type getType()
   {
@@ -277,9 +276,7 @@ public class PrecisionModel implements Serializable, Comparable
   }
   /**
    *  Sets the multiplying factor used to obtain a precise coordinate.
-   * This method is private because PrecisionModel is intended to
-   * be an immutable (value) type.
-   *
+   * This method is private because PrecisionModel is an immutable (value) type.
    */
   private void setScale(double scale)
   {
@@ -359,8 +356,7 @@ public class PrecisionModel implements Serializable, Comparable
   }
 
   /**
-   *  Sets <code>external</code> to the external representation of <code>internal</code>
-   *  .
+   *  Sets <code>external</code> to the external representation of <code>internal</code>.
    *
    *@param  internal  the original coordinate
    *@param  external  the coordinate whose values will be changed to the

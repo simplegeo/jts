@@ -40,7 +40,7 @@ import com.vividsolutions.jts.algorithm.LineIntersector;
  */
 
 import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.util.Debug;
+//import com.vividsolutions.jts.util.Debug;
 
 /**
  * A non-robust version of {@LineIntersector}.

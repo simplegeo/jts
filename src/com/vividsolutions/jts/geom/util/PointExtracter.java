@@ -34,27 +34,47 @@
 package com.vividsolutions.jts.geom.util;
 
 import java.util.*;
+
 import com.vividsolutions.jts.geom.*;
 
 /**
  * Extracts all the 0-dimensional ({@link Point}) components from a {@link Geometry}.
  *
  * @version 1.7
+ * @see GeometryExtracter
  */
 public class PointExtracter
   implements GeometryFilter
 {
   /**
-   * Returns the Point components from a single geometry.
-   * If more than one geometry is to be processed, it is more
-   * efficient to create a single {@link PointExtracterFilter} instance
-   * and pass it to multiple geometries.
+   * Extracts the {@link Point} elements from a single {@link Geometry}
+   * and adds them to the provided {@link List}.
+   * 
+   * @param geom the geometry from which to extract
+   * @param list the list to add the extracted elements to
+   */
+  public static List getPoints(Geometry geom, List list)
+  {
+  	if (geom instanceof Point) {
+  		list.add(geom);
+  	}
+  	else if (geom instanceof GeometryCollection) {
+  		geom.apply(new PointExtracter(list));
+  	}
+  	// skip non-Polygonal elemental geometries
+  	
+    return list;
+  }
+
+  /**
+   * Extracts the {@link Point} elements from a single {@link Geometry}
+   * and returns them in a {@link List}.
+   * 
+   * @param geom the geometry from which to extract
    */
   public static List getPoints(Geometry geom)
   {
-    List pts = new ArrayList();
-    geom.apply(new PointExtracter(pts));
-    return pts;
+    return getPoints(geom, new ArrayList());
   }
 
   private List pts;

@@ -45,14 +45,14 @@ import com.vividsolutions.jts.util.*;
 public class SegmentNodeList
 {
   private Map nodeMap = new TreeMap();
-  private SegmentString edge;  // the parent edge
+  private NodedSegmentString edge;  // the parent edge
 
-  public SegmentNodeList(SegmentString edge)
+  public SegmentNodeList(NodedSegmentString edge)
   {
     this.edge = edge;
   }
 
-  public SegmentString getEdge() { return edge; }
+  public NodedSegmentString getEdge() { return edge; }
 
   /**
    * Adds an intersection into the list, if it isn't already there.
@@ -248,7 +248,7 @@ public class SegmentNodeList
     }
     if (useIntPt1) pts[ipt] = ei1.coord;
 
-    return new SegmentString(pts, edge.getData());
+    return new NodedSegmentString(pts, edge.getData());
   }
 
   public void print(PrintStream out)
@@ -266,7 +266,7 @@ class NodeVertexIterator
     implements Iterator
 {
   private SegmentNodeList nodeList;
-  private SegmentString edge;
+  private NodedSegmentString edge;
   private Iterator nodeIt;
   private SegmentNode currNode = null;
   private SegmentNode nextNode = null;

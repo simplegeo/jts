@@ -34,6 +34,7 @@ package com.vividsolutions.jts.algorithm;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.Location;
 
 /**
  * Specifies and implements various fundamental Computational Geometric algorithms.
@@ -88,64 +89,47 @@ public class CGAlgorithms
   }
 
   /**
-   * Test whether a point lies inside a ring.
+   * Tests whether a point lies inside or on a ring.
    * The ring may be oriented in either direction.
-   * If the point lies on the ring boundary the result of this method is unspecified.
+   * A point lying exactly on the ring boundary is considered to be inside the ring.
    * <p>
-   * This algorithm does not attempt to first check the point against the envelope
+   * This method does <i>not</i> first check the point against the envelope
    * of the ring.
    *
    * @param p point to check for ring inclusion
-   * @param ring assumed to have first point identical to last point
-   * @return <code>true</code> if p is inside ring
+   * @param ring an array of coordinates representing the ring (which must have first point identical to last point)
+   * @return true if p is inside ring
+   * 
+   * @see locatePointInRing
    */
   public static boolean isPointInRing(Coordinate p, Coordinate[] ring) {
-    /*
-     *  For each segment l = (i-1, i), see if it crosses ray from test point in positive x direction.
-     */
-    int crossings = 0;  // number of segment/ray crossings
-    for (int i = 1; i < ring.length; i++) {
-      int i1 = i - 1;
-      Coordinate p1 = ring[i];
-      Coordinate p2 = ring[i1];
-
-      if (((p1.y > p.y) && (p2.y <= p.y)) ||
-          ((p2.y > p.y) && (p1.y <= p.y))) {
-        double x1 = p1.x - p.x;
-        double y1 = p1.y - p.y;
-        double x2 = p2.x - p.x;
-        double y2 = p2.y - p.y;
-        /*
-        *  segment straddles x axis, so compute intersection with x-axis.
-         */
-        double xInt = RobustDeterminant.signOfDet2x2(x1, y1, x2, y2) / (y2 - y1);
-        //xsave = xInt;
-        /*
-        *  crosses ray if strictly positive intersection.
-         */
-        if (xInt > 0.0) {
-          crossings++;
-        }
-      }
-    }
-    /*
-     *  p is inside if number of crossings is odd.
-     */
-    if ((crossings % 2) == 1) {
-      return true;
-    }
-    else {
-      return false;
-    }
+  	return locatePointInRing(p, ring) != Location.EXTERIOR;
   }
+  
 
   /**
-   * Test whether a point lies on the line segments defined by a
+   * Determines whether a point lies in the interior, on the boundary, or in the exterior
+   * of a ring.
+   * The ring may be oriented in either direction.
+   * <p>
+   * This method does <i>not</i> first check the point against the envelope
+   * of the ring.
+   *
+   * @param p point to check for ring inclusion
+   * @param ring an array of coordinates representing the ring (which must have first point identical to last point)
+   * @return the {@link Location} of p relative to the ring
+   */
+  public static int locatePointInRing(Coordinate p, Coordinate[] ring) 
+  {
+    return RayCrossingCounter.locatePointInRing(p, ring);
+  }
+  
+  /**
+   * Tests whether a point lies on the line segments defined by a
    * list of coordinates.
    *
-   * @return true true if
-   * the point is a vertex of the line or lies in the interior of a line
-   * segment in the linestring
+   * @return true if the point is a vertex of the line 
+   * or lies in the interior of a line segment in the linestring
    */
   public static boolean isOnLine(Coordinate p, Coordinate[] pt) {
     LineIntersector lineIntersector = new RobustLineIntersector();
@@ -161,7 +145,7 @@ public class CGAlgorithms
   }
 
   /**
-   * Computes whether a ring defined by an array of {@link Coordinate} is
+   * Computes whether a ring defined by an array of {@link Coordinate}s is
    * oriented counter-clockwise.
    * <ul>
    * <li>The list of points is assumed to have the first and last points equal.
@@ -169,10 +153,10 @@ public class CGAlgorithms
    * </ul>
    * This algorithm is <b>only</b> guaranteed to work with valid rings.
    * If the ring is invalid (e.g. self-crosses or touches),
-   * the computed result <b>may</b> not be correct.
+   * the computed result may not be correct.
    *
-   * @param ring an array of coordinates forming a ring
-   * @return <code>true</code> if the ring is oriented counter-clockwise.
+   * @param ring an array of Coordinates forming a ring
+   * @return true if the ring is oriented counter-clockwise.
    */
   public static boolean isCCW(Coordinate[] ring) {
     // # of points without closing endpoint

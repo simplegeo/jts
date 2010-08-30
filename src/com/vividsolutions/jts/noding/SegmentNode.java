@@ -43,13 +43,13 @@ import com.vividsolutions.jts.geom.Coordinate;
 public class SegmentNode
     implements Comparable
 {
-  private final SegmentString segString;
+  private final NodedSegmentString segString;
   public final Coordinate coord;   // the point of intersection
   public final int segmentIndex;   // the index of the containing line segment in the parent edge
   private final int segmentOctant;
   private final boolean isInterior;
 
-  public SegmentNode(SegmentString segString, Coordinate coord, int segmentIndex, int segmentOctant) {
+  public SegmentNode(NodedSegmentString segString, Coordinate coord, int segmentIndex, int segmentOctant) {
     this.segString = segString;
     this.coord = new Coordinate(coord);
     this.segmentIndex = segmentIndex;

@@ -41,10 +41,14 @@ import java.util.List;
 /**
  * An <code>BinTree</code> (or "Binary Interval Tree")
  * is a 1-dimensional version of a quadtree.
- * It indexes 1-dimensional intervals (which of course may
+ * It indexes 1-dimensional intervals (which may
  * be the projection of 2-D objects on an axis).
  * It supports range searching
  * (where the range may be a single point).
+ * This structure is dynamic - 
+ * new items can be added at any time,   
+ * and it will support deletion of items 
+ * (although this is not currently implemented).
  * <p>
  * This implementation does not require specifying the extent of the inserted
  * items beforehand.  It will automatically expand to accomodate any extent

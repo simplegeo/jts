@@ -34,8 +34,6 @@
 package com.vividsolutions.jts.geomgraph;
 
 import java.util.*;
-import com.vividsolutions.jts.algorithm.*;
-import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.noding.*;
 
 /**
@@ -45,20 +43,34 @@ import com.vividsolutions.jts.noding.*;
  * @version 1.7
  */
 public class EdgeNodingValidator 
-{
-
-  private static Collection toSegmentStrings(Collection edges)
+{  
+	/**
+   * Checks whether the supplied {@link Edge}s
+   * are correctly noded.  
+   * Throws a  {@link TopologyException} if they are not.
+   * 
+   * @param edges a collection of Edges.
+   * @throws TopologyException if the SegmentStrings are not correctly noded
+   *
+   */
+	public static void checkValid(Collection edges)
+	{
+		EdgeNodingValidator validator = new EdgeNodingValidator(edges);
+		validator.checkValid();
+	}
+	
+  public static Collection toSegmentStrings(Collection edges)
   {
     // convert Edges to SegmentStrings
     Collection segStrings = new ArrayList();
     for (Iterator i = edges.iterator(); i.hasNext(); ) {
       Edge e = (Edge) i.next();
-      segStrings.add(new SegmentString(e.getCoordinates(), e));
+      segStrings.add(new BasicSegmentString(e.getCoordinates(), e));
     }
     return segStrings;
   }
 
-  private NodingValidator nv;
+  private FastNodingValidator nv;
 
   /**
    * Creates a new validator for the given collection of {@link Edge}s.
@@ -67,14 +79,15 @@ public class EdgeNodingValidator
    */
   public EdgeNodingValidator(Collection edges)
   {
-    nv = new NodingValidator(toSegmentStrings(edges));
+    nv = new FastNodingValidator(toSegmentStrings(edges));
   }
 
   /**
    * Checks whether the supplied edges
    * are correctly noded.  Throws an exception if they are not.
    * 
-   * @throws RuntimeException if the SegmentStrings are not correctly noded
+   * @throws TopologyException if the SegmentStrings are not correctly noded
+   *
    */
   public void checkValid()
   {

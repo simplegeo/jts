@@ -116,6 +116,15 @@ public class Node
   }
 
   /**
+   * Removes a {@link DirectedEdge} incident on this node.
+   * Does not change the state of the directed edge.
+   */
+  public void remove(DirectedEdge de)
+  {
+    deStar.remove(de);
+  }
+
+  /**
    * Removes this node from its containing graph.
    */
   void remove() {

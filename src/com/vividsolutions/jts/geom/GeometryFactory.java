@@ -212,31 +212,45 @@ public class GeometryFactory
   }
 
   /**
-   *  If the <code>Envelope</code> is a null <code>Envelope</code>, returns an
-   *  empty <code>Point</code>. If the <code>Envelope</code> is a point, returns
-   *  a non-empty <code>Point</code>. If the <code>Envelope</code> is a
-   *  rectangle, returns a <code>Polygon</code> whose points are (minx, miny),
+   * Creates a {@link Geometry} with the same extent as the given envelope.
+   * The Geometry returned is guaranteed to be valid.  
+   * To provide this behaviour, the following cases occur:
+   * <p>
+   * If the <code>Envelope</code> is:
+   * <ul>
+   * <li>null : returns an empty {@link Point}
+   * <li>a point : returns a non-empty {@link Point}
+   * <li>a line : returns a two-point {@link LineString}
+   * <li>a rectangle : returns a {@link Polygon}> whose points are (minx, miny),
    *  (maxx, miny), (maxx, maxy), (minx, maxy), (minx, miny).
-   *
-   *@param  envelope        the <code>Envelope</code> to convert to a <code>Geometry</code>
-   *@param  precisionModel  the specification of the grid of allowable points
-   *      for the new <code>Geometry</code>
-   *@param  SRID            the ID of the Spatial Reference System used by the
-   *      <code>Envelope</code>
-   *@return                 an empty <code>Point</code> (for null <code>Envelope</code>
-   *      s), a <code>Point</code> (when min x = max x and min y = max y) or a
+   * </ul>
+   * 
+   *@param  envelope the <code>Envelope</code> to convert
+   *@return an empty <code>Point</code> (for null <code>Envelope</code>s), 
+   *	a <code>Point</code> (when min x = max x and min y = max y) or a
    *      <code>Polygon</code> (in all other cases)
-   *@throws  <code>         TopologyException</code> if <code>coordinates</code>
-   *      is not a closed linestring, that is, if the first and last coordinates
-   *      are not equal
    */
-  public Geometry toGeometry(Envelope envelope) {
+  public Geometry toGeometry(Envelope envelope) 
+  {
+  	// null envelope - return empty point geometry
     if (envelope.isNull()) {
       return createPoint((CoordinateSequence)null);
     }
+    
+    // point?
     if (envelope.getMinX() == envelope.getMaxX() && envelope.getMinY() == envelope.getMaxY()) {
       return createPoint(new Coordinate(envelope.getMinX(), envelope.getMinY()));
     }
+    
+    // vertical or horizontal line?
+    if (envelope.getMinX() == envelope.getMaxX()
+    		|| envelope.getMinY() == envelope.getMaxY()) {
+    	return createLineString(new Coordinate[]{
+          new Coordinate(envelope.getMinX(), envelope.getMinY()),
+          new Coordinate(envelope.getMaxX(), envelope.getMaxY())
+          });
+    }
+
     return createPolygon(createLinearRing(new Coordinate[]{
         new Coordinate(envelope.getMinX(), envelope.getMinY()),
         new Coordinate(envelope.getMaxX(), envelope.getMinY()),

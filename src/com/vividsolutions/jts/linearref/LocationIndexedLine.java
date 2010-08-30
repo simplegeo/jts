@@ -33,6 +33,8 @@ public class LocationIndexedLine
    * on the line at the given index.
    * If the index is out of range the first or last point on the
    * line will be returned.
+   * The Z-ordinate of the computed point will be interpolated from
+   * the Z-ordinates of the line segment containing it, if they exist.
    *
    * @param length the index of the desired point
    * @return the Coordinate at the given index
@@ -72,6 +74,34 @@ public class LocationIndexedLine
   {
     return LocationIndexOfPoint.indexOf(linearGeom, pt);
   }
+  
+  /**
+   * Finds the index for a point on the line
+   * which is greater than the given index.
+   * If no such index exists, returns <tt>minIndex</tt>.
+   * This method can be used to determine all indexes for
+   * a point which occurs more than once on a non-simple line.
+   * It can also be used to disambiguate cases where the given point lies
+   * slightly off the line and is equidistant from two different
+   * points on the line.
+   *
+   * The supplied point does not <i>necessarily</i> have to lie precisely
+   * on the line, but if it is far from the line the accuracy and
+   * performance of this function is not guaranteed.
+   * Use {@link #project} to compute a guaranteed result for points
+   * which may be far from the line.
+   *
+   * @param pt a point on the line
+   * @param minIndex the value the returned index must be greater than
+   * @return the index of the point greater than the given minimum index
+   *
+   * @see project
+   */
+  public LinearLocation indexOfAfter(Coordinate pt, LinearLocation minIndex)
+  {
+    return LocationIndexOfPoint.indexOfAfter(linearGeom, pt, minIndex);
+  }
+
 
   /**
    * Computes the indices for a subline of the line.

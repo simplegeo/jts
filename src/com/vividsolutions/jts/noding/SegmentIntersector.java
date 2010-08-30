@@ -38,16 +38,18 @@ import com.vividsolutions.jts.algorithm.LineIntersector;
 import com.vividsolutions.jts.util.Debug;
 
 /**
- * Computes the intersections between two line segments in {@link SegmentString}s
- * and adds them to each string.
+ * Processes possible intersections detected by a {@link Noder}.
  * The {@link SegmentIntersector} is passed to a {@link Noder}.
  * The {@link addIntersections} method is called whenever the {@link Noder}
  * detects that two SegmentStrings <i>might</i> intersect.
+ * This class may be used either to find all intersections, or
+ * to detect the presence of an intersection.  In the latter case,
+ * Noders may choose to short-circuit their computation by calling the
+ * {@link isDone} method.
  * This class is an example of the <i>Strategy</i> pattern.
  *
  * @version 1.7
  */
-
 public interface SegmentIntersector
 {
   /**
@@ -59,4 +61,12 @@ public interface SegmentIntersector
     SegmentString e0,  int segIndex0,
     SegmentString e1,  int segIndex1
      );
+  
+  /**
+   * Reports whether the client of this class
+   * needs to continue testing all intersections in an arrangement.
+   * 
+   * @return true if there is no need to continue testing segments
+   */
+  boolean isDone();
 }

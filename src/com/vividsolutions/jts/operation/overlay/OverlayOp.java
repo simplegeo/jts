@@ -157,9 +157,17 @@ public class OverlayOp
 
 //Debug.println(edgeList);
 
-    // debugging only
-    EdgeNodingValidator nv = new EdgeNodingValidator(edgeList.getEdges());
-    nv.checkValid();
+    /**
+     * Check that the noding completed correctly.
+     * 
+     * This test is slow, but necessary in order to catch robustness failure 
+     * situations.
+     * If an exception is thrown because of a noding failure, 
+     * then snapping will be performed, which will hopefully avoid the problem.
+     * In the future hopefully a faster check can be developed.  
+     * 
+     */
+    EdgeNodingValidator.checkValid(edgeList.getEdges());
 
     graph.addEdges(edgeList.getEdges());
     computeLabelling();

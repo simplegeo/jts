@@ -31,6 +31,8 @@ public class LengthIndexedLine
    * on the line at the given index.
    * If the index is out of range the first or last point on the
    * line will be returned.
+   * The Z-ordinate of the computed point will be interpolated from
+   * the Z-ordinates of the line segment containing it, if they exist.
    *
    * @param index the index of the desired point
    * @return the Coordinate at the given index

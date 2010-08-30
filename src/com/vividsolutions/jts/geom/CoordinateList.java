@@ -60,12 +60,15 @@ public class CoordinateList
   }
 
   /**
-   * The basic constructor for a CoordinateArray allows repeated points
-   * (i.e produces a CoordinateList with exactly the same set of points)
+   * Constructs a new list from an array of Coordinates, allowing repeated points.
+   * (I.e. this constructor produces a {@link CoordinateList} with exactly the same set of points
+   * as the input array.)
+   * 
    * @param coord the initial coordinates
    */
   public CoordinateList(Coordinate[] coord)
   {
+  	ensureCapacity(coord.length);
     add(coord, true);
   }
 
@@ -78,6 +81,7 @@ public class CoordinateList
    */
   public CoordinateList(Coordinate[] coord, boolean allowRepeated)
   {
+  	ensureCapacity(coord.length);
     add(coord, allowRepeated);
   }
 
@@ -128,7 +132,9 @@ public class CoordinateList
     return true;
   }
 
-  /** Add a coordinate
+  /**
+   * Adds a coordinate to the end of the list.
+   * 
    * @param coord The coordinates
    * @param allowRepeated if set to false, repeated coordinates are collapsed
    */
@@ -142,6 +148,32 @@ public class CoordinateList
       }
     }
     super.add(coord);
+  }
+
+  /**
+   * Inserts the specified coordinate at the specified position in this list.
+   * 
+   * @param i the position at which to insert
+   * @param coord the coordinate to insert
+   * @param allowRepeated if set to false, repeated coordinates are collapsed
+   */
+  public void add(int i, Coordinate coord, boolean allowRepeated)
+  {
+    // don't add duplicate coordinates
+    if (! allowRepeated) {
+      int size = size();
+      if (size > 0) {
+        if (i > 0) {
+          Coordinate prev = (Coordinate) get(i - 1);
+          if (prev.equals2D(coord)) return;
+        }
+        if (i < size) {
+          Coordinate next = (Coordinate) get(i);
+          if (next.equals2D(coord)) return;
+        }
+      }
+    }
+    super.add(i, coord);
   }
 
   /** Add an array of coordinates

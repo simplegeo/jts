@@ -51,7 +51,10 @@ import com.vividsolutions.jts.algorithm.*;
  *
  *@version 1.7
  */
-public class Polygon extends Geometry {
+public class Polygon 
+	extends Geometry
+	implements Polygonal
+{
   private static final long serialVersionUID = -3494792200821764533L;
 
   /**

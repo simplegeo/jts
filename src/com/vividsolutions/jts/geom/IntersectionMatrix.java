@@ -300,7 +300,7 @@ public class IntersectionMatrix implements Cloneable {
    *      this <code>IntersectionMatrix</code> intersect
    */
   public boolean isIntersects() {
-    return !isDisjoint();
+    return ! isDisjoint();
   }
 
   /**
@@ -332,7 +332,7 @@ public class IntersectionMatrix implements Cloneable {
   }
 
   /**
-   * Returns <code>true</code> if this geometry crosses the
+   * Tests whether this geometry crosses the
    * specified geometry.
    * <p>
    * The <code>crosses</code> predicate has the following equivalent definitions:
@@ -376,7 +376,7 @@ public class IntersectionMatrix implements Cloneable {
   }
 
   /**
-   *  Returns <code>true</code> if this <code>IntersectionMatrix</code> is
+   *  Tests whether this <code>IntersectionMatrix</code> is
    *  T*F**F***.
    *
    *@return    <code>true</code> if the first <code>Geometry</code> is within
@@ -389,7 +389,7 @@ public class IntersectionMatrix implements Cloneable {
   }
 
   /**
-   *  Returns <code>true</code> if this <code>IntersectionMatrix</code> is
+   *  Tests whether this <code>IntersectionMatrix</code> is
    *  T*****FF*.
    *
    *@return    <code>true</code> if the first <code>Geometry</code> contains the
@@ -472,13 +472,12 @@ public class IntersectionMatrix implements Cloneable {
    *  <UL>
    *    <LI> T*T***T** (for two points or two surfaces)
    *    <LI> 1*T***T** (for two curves)
-   *  </UL>
-   *  .
+   *  </UL>.
    *
    *@param  dimensionOfGeometryA  the dimension of the first <code>Geometry</code>
    *@param  dimensionOfGeometryB  the dimension of the second <code>Geometry</code>
-   *@return                       <code>true</code> if the two <code>Geometry</code>
-   *      s related by this <code>IntersectionMatrix</code> overlap. For this
+   *@return                       <code>true</code> if the two <code>Geometry</code>s
+   *      related by this <code>IntersectionMatrix</code> overlap. For this
    *      function to return <code>true</code>, the <code>Geometry</code>s must
    *      be two points, two curves or two surfaces.
    */

@@ -41,6 +41,7 @@ package com.vividsolutions.jts.geom;
  */
 public class MultiPoint
   extends GeometryCollection
+  implements Puntal
 {
 
   private static final long serialVersionUID = -8048474874175355449L;

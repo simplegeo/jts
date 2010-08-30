@@ -1,5 +1,3 @@
-
-
 /*
  * The JTS Topology Suite is a collection of Java classes that
  * implement the fundamental operations required to validate a given
@@ -34,7 +32,6 @@
  */
 package com.vividsolutions.jts.geom;
 
-import com.vividsolutions.jts.geomgraph.GeometryGraph;
 import com.vividsolutions.jts.operation.BoundaryOp;
 
 /**
@@ -42,7 +39,10 @@ import com.vividsolutions.jts.operation.BoundaryOp;
  *
  *@version 1.7
  */
-public class MultiLineString extends GeometryCollection {
+public class MultiLineString 
+	extends GeometryCollection
+	implements Lineal
+	{
   private static final long serialVersionUID = 8166665132445433741L;
   /**
    *  Constructs a <code>MultiLineString</code>.
