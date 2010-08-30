@@ -1,0 +1,139 @@
+BODY
+{
+    BACKGROUND-COLOR: lightblue;
+    FONT-FAMILY: Verdana, Arial;
+    FONT-SIZE: 10pt;
+    FONT-WEIGHT: normal
+}
+H2
+{
+    BACKGROUND-COLOR: darkblue;
+    COLOR: white;
+    FONT-FAMILY: Verdana, Arial;
+    FONT-SIZE: 12pt;
+    FONT-WEIGHT: bolder;
+    MARGIN-BOTTOM: 2pt;
+    PADDING-LEFT: 5px
+}
+H3
+{
+    BACKGROUND-COLOR: lightskyblue;
+    FONT-WEIGHT: normal;
+    MARGIN-BOTTOM: 2pt
+}
+H4
+{
+    BACKGROUND-COLOR: limegreen;
+    FONT-WEIGHT: normal
+}
+H5
+{
+    BACKGROUND-COLOR: burlywood;
+    FONT-WEIGHT: normal
+}
+H6
+{
+    FONT-SIZE: 12pt
+}
+TH
+{
+    BACKGROUND-COLOR: burlywood
+}
+.initialLetter
+{
+    COLOR: lightblue
+}
+.foo
+{
+    COLOR: goldenrod
+}
+.wktA
+{
+    COLOR: blue;
+    FONT-SIZE: 8pt
+}
+.wktB
+{
+    COLOR: red;
+    FONT-SIZE: 8pt
+}
+.methodTitle
+{
+    BACKGROUND-COLOR: steelblue;
+    COLOR: yellow
+}
+.wktR
+{
+    FONT-SIZE: 8pt
+}
+.precisionModel
+{
+    FONT-SIZE: 8pt
+}
+.resultTrue
+{
+    COLOR: green
+}
+.resultFalse
+{
+    COLOR: red
+}
+.MenuBody
+{
+    BACKGROUND-COLOR: midnightblue
+}
+.MenuItem
+{
+    COLOR: white
+}
+.MenuTitle
+{
+    COLOR: #3366ff;
+    FONT-SIZE: 14pt;
+    TEXT-ALIGN: center
+}
+TD
+{
+    FONT-SIZE: 10pt
+}
+.orgName
+{
+    FONT-SIZE: 8pt;
+    FONT-STYLE: italic;
+    FONT-WEIGHT: lighter
+}
+.creditName
+{
+    FONT-WEIGHT: bolder;
+    PADDING-LEFT: 10px
+}
+.creditTitle
+{
+    BACKGROUND-COLOR: steelblue;
+    COLOR: yellow;
+    FONT-WEIGHT: bolder;
+    PADDING-LEFT: 10px;
+    PADDING-RIGHT: 10px
+}
+H1
+{
+    BORDER-BOTTOM: darkblue thin solid;
+    BORDER-TOP: medium none;
+    FONT-STYLE: italic;
+    MARGIN-BOTTOM: 2px;
+    PADDING-BOTTOM: 4px
+}
+.testTitle
+{
+    FONT-SIZE: 16pt;
+    FONT-WEIGHT: bolder
+}
+.caption
+{
+    FONT-SIZE: 8pt;
+    FONT-STYLE: italic
+}
+.bigCaption
+{
+    FONT-WEIGHT: bolder
+}
