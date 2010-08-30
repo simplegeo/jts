@@ -34,9 +34,6 @@
  */
 package com.vividsolutions.jts.operation;
 
-import java.io.PrintStream;
-import java.util.*;
-import com.vividsolutions.jts.util.*;
 import com.vividsolutions.jts.algorithm.*;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geomgraph.GeometryGraph;
@@ -48,7 +45,6 @@ import com.vividsolutions.jts.geomgraph.GeometryGraph;
  */
 public class GeometryGraphOperation
 {
-  protected final CGAlgorithms cga = new CGAlgorithms();
   protected final LineIntersector li = new RobustLineIntersector();
   protected PrecisionModel resultPrecisionModel;
 

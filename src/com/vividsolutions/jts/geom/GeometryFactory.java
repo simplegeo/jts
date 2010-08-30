@@ -222,7 +222,7 @@ public class GeometryFactory
    * <li>a point : returns a non-empty {@link Point}
    * <li>a line : returns a two-point {@link LineString}
    * <li>a rectangle : returns a {@link Polygon}> whose points are (minx, miny),
-   *  (maxx, miny), (maxx, maxy), (minx, maxy), (minx, miny).
+   *  (minx, maxy), (maxx, maxy), (maxx, miny), (minx, miny).
    * </ul>
    * 
    *@param  envelope the <code>Envelope</code> to convert
@@ -251,11 +251,12 @@ public class GeometryFactory
           });
     }
 
+    // create a CW ring for the polygon 
     return createPolygon(createLinearRing(new Coordinate[]{
         new Coordinate(envelope.getMinX(), envelope.getMinY()),
-        new Coordinate(envelope.getMaxX(), envelope.getMinY()),
-        new Coordinate(envelope.getMaxX(), envelope.getMaxY()),
         new Coordinate(envelope.getMinX(), envelope.getMaxY()),
+        new Coordinate(envelope.getMaxX(), envelope.getMaxY()),
+        new Coordinate(envelope.getMaxX(), envelope.getMinY()),
         new Coordinate(envelope.getMinX(), envelope.getMinY())
         }), null);
   }
@@ -425,6 +426,10 @@ public class GeometryFactory
    *      .
    */
   public Geometry buildGeometry(Collection geomList) {
+  	
+  	/**
+  	 * Determine some facts about the geometries in the list
+  	 */
     Class geomClass = null;
     boolean isHeterogeneous = false;
     boolean hasGeometryCollection = false;
@@ -440,6 +445,10 @@ public class GeometryFactory
       if (geom instanceof GeometryCollection)
         hasGeometryCollection = true;
     }
+    
+    /**
+     * Now construct an appropriate geometry to return
+     */
     // for the empty geometry, return an empty GeometryCollection
     if (geomClass == null) {
       return createGeometryCollection(null);

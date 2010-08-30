@@ -53,8 +53,7 @@ import java.util.ArrayList;
  * Examples of the kinds of modifications which can be made are:
  * <ul>
  * <li>the values of the coordinates may be changed.
- *     Changing coordinate values may make the result Geometry invalid;
- *     this is not checked by the GeometryEditor
+ *     The editor does not check whether changing coordinate values makes the result Geometry invalid
  * <li>the coordinate lists may be changed
  *     (e.g. by adding or deleting coordinates).
  *     The modifed coordinate lists must be consistent with their original parent component
@@ -66,11 +65,19 @@ import java.util.ArrayList;
  * </ul>
  * All changes must be consistent with the original Geometry's structure
  * (e.g. a <tt>Polygon</tt> cannot be collapsed into a <tt>LineString</tt>).
+ * If changing the structure is required, use a {@link GeometryTransformer}.
+ * <p>
+ * This class supports the case where an edited Geometry needs to
+ * be created under a new GeometryFactory, via the {@link GeometryEditor(GeometryFactory)}
+ * constructor.  
+ * Examples of situations where this is required is if the geometry is 
+ * transformed to a new SRID and/or a new PrecisionModel.
  * <p>
  * The resulting Geometry is not checked for validity.
  * If validity needs to be enforced, the new Geometry's 
  * {@link #isValid} method should be called.
  *
+ * @see GeometryTransformer
  * @see Geometry#isValid
  *
  * @version 1.7
@@ -78,13 +85,14 @@ import java.util.ArrayList;
 public class GeometryEditor
 {
   /**
-   * The factory used to create the modified Geometry
+   * The factory used to create the modified Geometry.
+   * If <tt>null</tt> the GeometryFactory of the input is used.
    */
   private GeometryFactory factory = null;
 
   /**
    * Creates a new GeometryEditor object which will create
-   * an edited {@link Geometry} with the same {@link GeometryFactory} as the input Geometry.
+   * edited {@link Geometry}s with the same {@link GeometryFactory} as the input Geometry.
    */
   public GeometryEditor()
   {
@@ -92,9 +100,9 @@ public class GeometryEditor
 
   /**
    * Creates a new GeometryEditor object which will create
-   * the edited Geometry with the given {@link GeometryFactory}
+   * edited {@link Geometry}s with the given {@link GeometryFactory}.
    *
-   * @param factory the GeometryFactory to create the edited Geometry with
+   * @param factory the GeometryFactory to create  edited Geometrys with
    */
   public GeometryEditor(GeometryFactory factory)
   {

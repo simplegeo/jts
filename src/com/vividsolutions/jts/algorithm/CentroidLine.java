@@ -53,8 +53,9 @@ public class CentroidLine
   }
 
   /**
-   * Adds the linestring(s) defined by a Geometry to the centroid total.
-   * If the geometry is not linear it does not contribute to the centroid
+   * Adds the linear components of by a Geometry to the centroid total.
+   * If the geometry has no linear components it does not contribute to the centroid,
+   * 
    * @param geom the geometry to add
    */
   public void add(Geometry geom)
@@ -62,6 +63,14 @@ public class CentroidLine
     if (geom instanceof LineString) {
       add(geom.getCoordinates());
     }
+    else if (geom instanceof Polygon) {
+    	Polygon poly = (Polygon) geom;
+    	// add linear components of a polygon
+      add(poly.getExteriorRing().getCoordinates());
+      for (int i = 0; i < poly.getNumInteriorRing(); i++) {
+        add(poly.getInteriorRingN(i).getCoordinates());
+      }
+		}
     else if (geom instanceof GeometryCollection) {
       GeometryCollection gc = (GeometryCollection) geom;
       for (int i = 0; i < gc.getNumGeometries(); i++) {

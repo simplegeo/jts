@@ -38,19 +38,31 @@ import com.vividsolutions.jts.geom.*;
 /**
  * Dissolves a noded collection of {@link SegmentString}s to produce
  * a set of merged linework with unique segments.
- * A custom merging strategy can be applied when two identical (up to orientation)
+ * A custom {@link SegmentStringMerger} merging strategy
+ * can be supplied.  
+ * This strategy will be called when two identical (up to orientation)
  * strings are dissolved together.
- * The default merging strategy is simply to discard the merged string.
+ * The default merging strategy is simply to discard one of the merged strings.
  * <p>
  * A common use for this class is to merge noded edges
  * while preserving topological labelling.
+ * This requires a custom merging strategy to be supplied 
+ * to merge the topology labels appropriately.
  *
  * @version 1.7
  * @see SegmentStringMerger
  */
 public class SegmentStringDissolver
 {
-  public interface SegmentStringMerger {
+	/**
+	 * A merging strategy which can be used to update the context data of {@link SegmentString}s 
+	 * which are merged during the dissolve process.
+	 * 
+	 * @author mbdavis
+	 *
+	 */
+  public interface SegmentStringMerger 
+  {
     /**
      * Updates the context data of a SegmentString
      * when an identical (up to orientation) one is found during dissolving.
@@ -137,9 +149,6 @@ public class SegmentStringDissolver
   }
 
 /*
-  public static CoordinateArrays.BidirectionalComparator ptsComp
-      = new CoordinateArrays.BidirectionalComparator();
-
 
   private boolean checkAdded(OrientedCoordinateArray oca)
   {

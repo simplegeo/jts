@@ -49,7 +49,6 @@ import com.vividsolutions.jts.util.*;
  */
 public class IsValidOp
 {
-
   /**
    * Checks whether a coordinate is valid for processing.
    * Coordinates are valid iff their x and y ordinates are in the
@@ -441,26 +440,6 @@ public class IsValidOp
     }
   }
 
-  /*
-  private void OLDcheckHolesInShell(Polygon p)
-  {
-    LinearRing shell =  (LinearRing) p.getExteriorRing();
-    Coordinate[] shellPts = shell.getCoordinates();
-    for (int i = 0; i < p.getNumInteriorRing(); i++) {
-      Coordinate holePt = findPtNotNode(p.getInteriorRingN(i).getCoordinates(), shell, arg[0]);
-      Assert.isTrue(holePt != null, "Unable to find a hole point not a vertex of the shell");
-      boolean onBdy = cga.isOnLine(holePt, shellPts);
-      boolean inside = cga.isPointInRing(holePt, shellPts);
-      boolean outside = ! (onBdy || inside);
-      if ( outside ) {
-        validErr = new TopologyValidationError(
-                          TopologyValidationError.HOLE_OUTSIDE_SHELL,
-                          holePt);
-        return;
-      }
-    }
-  }
-  */
   /**
    * Tests that no hole is nested inside another hole.
    * This routine assumes that the holes are disjoint.
@@ -475,7 +454,7 @@ public class IsValidOp
    */
   private void checkHolesNotNested(Polygon p, GeometryGraph graph)
   {
-    QuadtreeNestedRingTester nestedTester = new QuadtreeNestedRingTester(graph);
+    IndexedNestedRingTester nestedTester = new IndexedNestedRingTester(graph);
     //SimpleNestedRingTester nestedTester = new SimpleNestedRingTester(arg[0]);
     //SweeplineNestedRingTester nestedTester = new SweeplineNestedRingTester(arg[0]);
 
@@ -491,36 +470,6 @@ public class IsValidOp
     }
   }
 
-  /*
-  private void SLOWcheckHolesNotNested(Polygon p)
-  {
-    for (int i = 0; i < p.getNumInteriorRing(); i++) {
-      LinearRing innerHole = (LinearRing) p.getInteriorRingN(i);
-      Coordinate[] innerHolePts = innerHole.getCoordinates();
-      for (int j = 0; j < p.getNumInteriorRing(); j++) {
-        // don't test hole against itself!
-        if (i == j) continue;
-
-        LinearRing searchHole = (LinearRing) p.getInteriorRingN(j);
-
-        // if envelopes don't overlap, holes are not nested
-        if (! innerHole.getEnvelopeInternal().overlaps(searchHole.getEnvelopeInternal()))
-          continue;
-
-        Coordinate[] searchHolePts = searchHole.getCoordinates();
-        Coordinate innerholePt = findPtNotNode(innerHolePts, searchHole, arg[0]);
-        Assert.isTrue(innerholePt != null, "Unable to find a hole point not a node of the search hole");
-        boolean inside = cga.isPointInRing(innerholePt, searchHolePts);
-        if ( inside ) {
-          validErr = new TopologyValidationError(
-                            TopologyValidationError.NESTED_HOLES,
-                            innerholePt);
-          return;
-        }
-      }
-    }
-  }
-  */
   /**
    * Tests that no element polygon is wholly in the interior of another element polygon.
    * <p>

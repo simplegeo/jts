@@ -83,7 +83,7 @@ public class CoordinateSequenceComparator
     if (dim2 < minDim)
       minDim = dim2;
     boolean dimLimited = false;
-    if (dimensionLimit < minDim) {
+    if (dimensionLimit <= minDim) {
       minDim = dimensionLimit;
       dimLimited = true;
     }

@@ -1,5 +1,5 @@
 <run>
-  <desc>Test cases for PreparedGeometry predicates</desc>
+  <desc>Test cases for PreparedGeometry predicates using polygons as input</desc>
   <precisionModel type="FLOATING"/>
   <geometryOperation>com.vividsolutions.jtstest.geomop.PreparedGeometryOperation</geometryOperation>
 
@@ -142,6 +142,34 @@
   </b>
 <test>  <op name="contains"   		arg1="A" arg2="B">   true  </op> </test>
 <test>  <op name="covers"     		arg1="A" arg2="B">   true  </op> </test>
+<test>  <op name="intersects" 		arg1="A" arg2="B">   true   </op> </test>
+</case>
+
+<case>
+  <desc>A/L - line with repeated points
+  </desc>
+  <a>
+      POLYGON((20 20, 20 100, 120 100, 140 20, 20 20)) 
+  </a>
+  <b>
+    LINESTRING (10 60, 50 60, 60 30, 60 30, 90 80, 90 80, 160 70) 
+  </b>
+<test>  <op name="contains"   		arg1="A" arg2="B">   false  </op> </test>
+<test>  <op name="covers"     		arg1="A" arg2="B">   false  </op> </test>
+<test>  <op name="intersects" 		arg1="A" arg2="B">   true   </op> </test>
+</case>
+
+<case>
+  <desc>A/L - polygon and line with repeated points
+  </desc>
+  <a>
+      POLYGON((20 20, 20 100, 120 100, 120 100, 120 100, 140 20, 140 20, 140 20, 20 20)) 
+  </a>
+  <b>
+    LINESTRING (10 60, 50 60, 60 30, 60 30, 90 80, 90 80, 160 70) 
+  </b>
+<test>  <op name="contains"   		arg1="A" arg2="B">   false  </op> </test>
+<test>  <op name="covers"     		arg1="A" arg2="B">   false  </op> </test>
 <test>  <op name="intersects" 		arg1="A" arg2="B">   true   </op> </test>
 </case>
 

@@ -65,8 +65,6 @@ public class DirectedEdge
     return edges;
   }
 
-  protected static final CGAlgorithms cga = new CGAlgorithms();
-
   protected Edge parentEdge;
   protected Node from;
   protected Node to;

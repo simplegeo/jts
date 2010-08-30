@@ -62,11 +62,9 @@ public abstract class EdgeRing {
   private ArrayList holes = new ArrayList(); // a list of EdgeRings which are holes in this EdgeRing
 
   protected GeometryFactory geometryFactory;
-  protected CGAlgorithms cga;
 
-  public EdgeRing(DirectedEdge start, GeometryFactory geometryFactory, CGAlgorithms cga) {
+  public EdgeRing(DirectedEdge start, GeometryFactory geometryFactory) {
     this.geometryFactory = geometryFactory;
-    this.cga = cga;
     computePoints(start);
     computeRing();
   }
@@ -115,7 +113,7 @@ public abstract class EdgeRing {
       coord[i] = (Coordinate) pts.get(i);
     }
     ring = geometryFactory.createLinearRing(coord);
-    isHole = cga.isCCW(ring.getCoordinates());
+    isHole = CGAlgorithms.isCCW(ring.getCoordinates());
 //Debug.println( (isHole ? "hole - " : "shell - ") + WKTWriter.toLineString(new CoordinateArraySequence(ring.getCoordinates())));
   }
   abstract public DirectedEdge getNext(DirectedEdge de);
@@ -235,7 +233,7 @@ public abstract class EdgeRing {
     LinearRing shell = getLinearRing();
     Envelope env = shell.getEnvelopeInternal();
     if (! env.contains(p)) return false;
-    if (! cga.isPointInRing(p, shell.getCoordinates()) ) return false;
+    if (! CGAlgorithms.isPointInRing(p, shell.getCoordinates()) ) return false;
 
     for (Iterator i = holes.iterator(); i.hasNext(); ) {
       EdgeRing hole = (EdgeRing) i.next();

@@ -150,7 +150,7 @@ public class SubgraphDepthLocater
         continue;
 
       // skip if stabbing ray is right of the segment
-      if (cga.computeOrientation(seg.p0, seg.p1, stabbingRayLeftPt)
+      if (CGAlgorithms.computeOrientation(seg.p0, seg.p1, stabbingRayLeftPt)
           == CGAlgorithms.RIGHT)
         continue;
 

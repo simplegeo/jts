@@ -172,6 +172,10 @@ public class BasicPreparedGeometry
     return baseGeom.crosses(g);
   }
   
+  /**
+   * Standard implementation for all geometries.
+   * Supports {@link GeometryCollection}s as input.
+   */
   public boolean disjoint(Geometry g)
   {
     return ! intersects(g);

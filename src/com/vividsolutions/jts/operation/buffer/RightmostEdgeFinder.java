@@ -52,8 +52,6 @@ import com.vividsolutions.jts.util.*;
  */
 public class RightmostEdgeFinder {
 
-  private CGAlgorithms cga;
-
   //private Coordinate extremeCoord;
   private int minIndex = -1;
   private Coordinate minCoord = null;
@@ -63,10 +61,10 @@ public class RightmostEdgeFinder {
    * A RightmostEdgeFinder finds the DirectedEdge with the rightmost coordinate.
    * The DirectedEdge returned is guaranteed to have the R of the world on its RHS.
    */
-  public RightmostEdgeFinder(CGAlgorithms cga)
+  public RightmostEdgeFinder()
   {
-    this.cga = cga;
   }
+  
   public DirectedEdge getEdge()  {    return orientedDe;  }
   public Coordinate getCoordinate()  {    return minCoord;  }
 
@@ -127,7 +125,7 @@ public class RightmostEdgeFinder {
       Assert.isTrue(minIndex > 0 && minIndex < pts.length, "rightmost point expected to be interior vertex of edge");
       Coordinate pPrev = pts[minIndex - 1];
       Coordinate pNext = pts[minIndex + 1];
-      int orientation = cga.computeOrientation(minCoord, pNext, pPrev);
+      int orientation = CGAlgorithms.computeOrientation(minCoord, pNext, pPrev);
       boolean usePrev = false;
         // both segments are below min point
       if (pPrev.y < minCoord.y && pNext.y < minCoord.y

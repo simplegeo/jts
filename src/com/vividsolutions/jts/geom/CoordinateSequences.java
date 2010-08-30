@@ -69,5 +69,37 @@ public class CoordinateSequences {
       seq.setOrdinate(j, dim, tmp);
     }
   }
+  
+  /**
+   * Copies a section of a {@link CoordinateSequence} to another {@link CoordinateSequence}.
+   * The sequences must have the same dimension.
+   *
+   * @param src
+   * @param srcPos
+   * @param dest
+   * @param destPos
+   * @param length
+   */
+  public static void copy(CoordinateSequence src, int srcPos, CoordinateSequence dest, int destPos, int length)
+  {
+  	for (int i = 0; i < length; i++) {
+  		copyCoord(src, srcPos + i, dest, destPos + i);
+  	}
+  }
 
+  /**
+   * Copies a coordinate of a {@link CoordinateSequence} to another {@link CoordinateSequence}.
+   * The sequences must have the same dimension.
+   * 
+   * @param src
+   * @param srcPos
+   * @param dest
+   * @param destPos
+   */
+  public static void copyCoord(CoordinateSequence src, int srcPos, CoordinateSequence dest, int destPos)
+  {
+		for (int dim = 0; dim < src.getDimension(); dim++) {
+			dest.setOrdinate(destPos, dim, src.getOrdinate(srcPos, dim));
+		}
+  }
 }

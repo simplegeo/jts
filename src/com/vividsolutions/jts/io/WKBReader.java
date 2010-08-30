@@ -78,7 +78,7 @@ public class WKBReader
   {
     int nib = Character.digit(hex, 16);
     if (nib < 0)
-      throw new IllegalArgumentException("Invalid hex digit");
+      throw new IllegalArgumentException("Invalid hex digit: '" + hex + "'");
     return nib;
   }
 

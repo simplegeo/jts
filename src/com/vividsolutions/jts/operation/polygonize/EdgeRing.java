@@ -83,7 +83,7 @@ public class EdgeRing {
 //      testPt = ptNotInList(testRing.getCoordinates(), tryRing.getCoordinates());
       testPt = CoordinateArrays.ptNotInList(testRing.getCoordinates(), tryRing.getCoordinates());
       if (tryEnv.contains(testEnv)
-          && cga.isPointInRing(testPt, tryRing.getCoordinates()) )
+          && CGAlgorithms.isPointInRing(testPt, tryRing.getCoordinates()) )
         isContained = true;
       // check if this new containing ring is smaller than the current minimum ring
       if (isContained) {
@@ -130,7 +130,6 @@ public class EdgeRing {
     return false;
   }
   private GeometryFactory factory;
-  private static CGAlgorithms cga = new CGAlgorithms();
 
 
   private List deList = new ArrayList();
@@ -164,7 +163,7 @@ public class EdgeRing {
   public boolean isHole()
   {
     LinearRing ring = getRing();
-    return cga.isCCW(ring.getCoordinates());
+    return CGAlgorithms.isCCW(ring.getCoordinates());
   }
 
   /**

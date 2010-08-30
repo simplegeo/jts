@@ -95,7 +95,7 @@ public class ClosestPointExample
       double distance = distOp.distance();
       System.out.println("Distance = " + distance);
 
-      Coordinate[] closestPt = distOp.closestPoints();
+      Coordinate[] closestPt = distOp.nearestPoints();
       LineString closestPtLine = fact.createLineString(closestPt);
       System.out.println("Closest points: " + closestPtLine
                          + " (distance = " + closestPtLine.getLength() + ")");

@@ -39,6 +39,23 @@
 </case>
 
 <case>
+  <desc>GC - shows handling linear rings and linestrings</desc>
+  <a>    GEOMETRYCOLLECTION (LINEARRING (0 0, 0 70, 80 70, 80 0, 0 0), 
+  LINESTRING (30 110, 30 30, 100 30))
+  </a>
+  <test>
+    <op name="union" arg1="A">
+    MULTILINESTRING ((0 0, 0 70, 30 70), 
+  (30 70, 80 70, 80 30), 
+  (80 30, 80 0, 0 0), 
+  (30 110, 30 70), 
+  (30 70, 30 30, 80 30), 
+  (80 30, 100 30))
+    </op>
+  </test>
+</case>
+
+<case>
   <desc>mL - multiLineString (showing noding and dissolving)</desc>
   <a>    MULTILINESTRING((0 0, 10 10), (5 5, 15 15))
   </a>

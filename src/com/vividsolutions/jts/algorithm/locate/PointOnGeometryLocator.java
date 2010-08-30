@@ -36,14 +36,14 @@ import com.vividsolutions.jts.geom.*;
 
 /**
  * An interface for classes which determine the {@link Location} of
- * points in areal geometries.
+ * points in a {@link Geometry}.
  * 
  * @author Martin Davis
  */
 public interface PointOnGeometryLocator 
 {
   /**
-   * Determines the {@link Location} of a point in an areal {@link Geometry}.
+   * Determines the {@link Location} of a point in the {@link Geometry}.
    * 
    * @param p the point to test
    * @return the location of the point in the geometry  

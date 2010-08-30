@@ -33,8 +33,7 @@
 package com.vividsolutions.jts.geom;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
 import com.vividsolutions.jts.algorithm.*;
 import com.vividsolutions.jts.io.WKTWriter;
@@ -49,6 +48,7 @@ import com.vividsolutions.jts.operation.predicate.RectangleContains;
 import com.vividsolutions.jts.operation.relate.RelateOp;
 import com.vividsolutions.jts.operation.valid.IsValidOp;
 import com.vividsolutions.jts.util.Assert;
+
 /**
  * The base class for all geometric objects.
  * <P>
@@ -131,19 +131,10 @@ import com.vividsolutions.jts.util.Assert;
 public abstract class Geometry
     implements Cloneable, Comparable, Serializable
 {
-    private static final long serialVersionUID = 8763622679187376702L;
-
-  private final static Class[] sortedClasses = new Class[] {
-      Point.class,
-      MultiPoint.class,
-      LineString.class,
-      LinearRing.class,
-      MultiLineString.class,
-      Polygon.class,
-      MultiPolygon.class,
-      GeometryCollection.class
-      };
-
+  private static final long serialVersionUID = 8763622679187376702L;
+    
+  private static Class[] sortedClasses;  
+  
   private final static GeometryComponentFilter geometryChangedFilter = new GeometryComponentFilter() {
     public void filter(Geometry geom) {
       geom.geometryChangedAction();
@@ -164,6 +155,12 @@ public abstract class Geometry
    *  The ID of the Spatial Reference System used by this <code>Geometry</code>
    */
   protected int SRID;
+
+  /**
+   * An object reference which can be used to carry ancillary data defined
+   * by the client.
+   */
+  private Object userData = null;
 
   /**
    * Creates a new <tt>Geometry</tt> via the specified GeometryFactory.
@@ -217,8 +214,6 @@ public abstract class Geometry
     return false;
   }
 
-
-
   /**
    *  Returns the ID of the Spatial Reference System used by the <code>Geometry</code>.
    *  <P>
@@ -238,12 +233,18 @@ public abstract class Geometry
   }
     /**
    *  Sets the ID of the Spatial Reference System used by the <code>Geometry</code>.
+   *  <p>
+   *  <b>NOTE:</b> This method should only be used for exceptional circumstances or 
+   *  for backwards compatibility.  Normally the SRID should be set on the 
+   *  {@link GeometryFactory} used to create the geometry.
+   *  SRIDs set using this method will <i>not</i> be propagated to 
+   *  geometries returned by constructive methods.
+   *  
+   *  @see GeometryFactory
    */
   public void setSRID(int SRID) {
     this.SRID = SRID;
   }
-
-  private Object userData = null;
 
   /**
    * Gets the factory which contains the context in which this geometry was created.
@@ -311,19 +312,34 @@ public abstract class Geometry
   }
 
   /**
-   *  Returns a vertex of this <code>Geometry</code>.
+   *  Returns a vertex of this <code>Geometry</code>
+   *  (usually, but not necessarily, the first one).
+   *  The returned coordinate should not be assumed
+   *  to be an actual Coordinate object used in
+   *  the internal representation.
    *
    *@return    a {@link Coordinate} which is a vertex of this <code>Geometry</code>.
-   *          Returns <code>null</code> if this Geometry is empty
+   *@return null if this Geometry is empty
    */
   public abstract Coordinate getCoordinate();
+  
   /**
-   *  Returns this <code>Geometry</code> s vertices. If you modify the coordinates
-   *  in this array, be sure to call #geometryChanged afterwards.
-   *  The <code>Geometry</code>s contained by composite <code>Geometry</code>s
-   *  must be Geometry's; that is, they must implement <code>getCoordinates</code>.
+   *  Returns an array containing the values of all the vertices for 
+   *  this geometry.
+   *  If the geometry is a composite, the array will contain all the vertices
+   *  for the components, in the order in which the components occur in the geometry.
+   *  <p>
+   *  In general, the array cannot be assumed to be the actual internal 
+   *  storage for the vertices.  Thus modifying the array
+   *  may not modify the geometry itself. 
+   *  Use the {@link CoordinateSequence#setOrdinate} method
+   *  (possibly on the components) to modify the underlying data.
+   *  If the coordinates are modified, 
+   *  {@link #geometryChanged} must be called afterwards.
    *
    *@return    the vertices of this <code>Geometry</code>
+   *@see geometryChanged
+   *@see CoordinateSequence#setOrdinate
    */
   public abstract Coordinate[] getCoordinates();
 
@@ -516,10 +532,18 @@ public abstract class Geometry
   }
 
   /**
-   *  Returns the dimension of this <code>Geometry</code>.
+   * Returns the dimension of this geometry.
+   * The dimension of a geometry is is the topological 
+   * dimension of its embedding in the 2-D Euclidean plane.
+   * In the JTS spatial model, dimension values are in the set {0,1,2}.
+   * <p>
+   * Note that this is a different concept to the dimension of 
+   * the vertex {@link Coordinate}s.  
+   * The geometry dimension can never be greater than the coordinate dimension.
+   * For example, a 0-dimensional geometry (e.g. a Point) 
+   * may have a coordinate dimension of 3 (X,Y,Z). 
    *
-   *@return    the dimension of the class implementing this interface, whether
-   *      or not this object is the empty geometry
+   *@return the topological dimension of this geometry.
    */
   public abstract int getDimension();
 
@@ -575,9 +599,10 @@ public abstract class Geometry
   }
 
   /**
-   * Notifies this Geometry that its Coordinates have been changed by an external
-   * party (using a CoordinateFilter, for example). The Geometry will flush
-   * and/or update any information it has cached (such as its {@link Envelope} ).
+   * Notifies this geometry that its coordinates have been changed by an external
+   * party (for example, via a {@link CoordinateFilter}). 
+   * When this method is called the geometry will flush
+   * and/or update any derived information it has cached (such as its {@link Envelope} ).
    */
   public void geometryChanged() {
     apply(geometryChangedFilter);
@@ -649,7 +674,7 @@ public abstract class Geometry
    * or <code>[*T*******]</code>
    * or <code>[***T*****]</code>
    * or <code>[****T****]</code>
-   * <li>! <code>g.disjoint(this)</code>
+   * <li><code>! g.disjoint(this)</code>
    * (<code>intersects</code> is the inverse of <code>disjoint</code>)
    * </ul>
    *
@@ -701,7 +726,7 @@ public abstract class Geometry
    * <li>The DE-9IM Intersection Matrix for the two geometries matches
    *   <ul>
    *    <li><code>[T*T******]</code> (for P/L, P/A, and L/A situations)
-   *    <li><code>[T*****T**]</code> (for L/P, L/A, and A/L situations)
+   *    <li><code>[T*****T**]</code> (for L/P, A/P, and A/L situations)
    *    <li><code>[0********]</code> (for L/L situations)
    *   </ul>
    * </ul>
@@ -735,9 +760,9 @@ public abstract class Geometry
    * (<code>within</code> is the converse of <code>contains</code>)
    * </ul>
    * An implication of the definition is that
-   * "The boundary of a Polygon is not within the Polygon".
-   * In other words, if a geometry G is a subset of
-   * the points in the boundary of a polygon P, <code>G.within(P) = false</code>
+   * "The boundary of a Geometry is not within the Geometry".
+   * In other words, if a geometry A is a subset of
+   * the points in the boundary of a geomtry B, <code>A.within(B) = false</code>
    *
    *@param  g  the <code>Geometry</code> with which to compare this <code>Geometry</code>
    *@return        <code>true</code> if this <code>Geometry</code> is within
@@ -762,9 +787,9 @@ public abstract class Geometry
    * <li><code>g.within(this)</code>
    * (<code>contains</code> is the converse of <code>within</code>)
    * </ul>
-   * An implication of the definition is that "Polygons do not
-   * contain their boundary".  In other words, if a geometry G is a subset of
-   * the points in the boundary of a polygon P, <code>P.contains(G) = false</code>
+   * An implication of the definition is that "Geometries do not
+   * contain their boundary".  In other words, if a geometry A is a subset of
+   * the points in the boundary of a geometry B, <code>B.contains(A) = false</code>
    *
    *@param  g  the <code>Geometry</code> with which to compare this <code>Geometry</code>
    *@return        <code>true</code> if this <code>Geometry</code> contains <code>g</code>
@@ -933,7 +958,7 @@ public abstract class Geometry
    * <li>The DE-9IM Intersection Matrix for the two geometries is T*F**FFF*
    * </ul>
    * <b>Note</b> that this method computes topologically equality, not structural or
-   * point-wise equality.
+   * vertex-wise equality.
    *
    *@param  other  the <code>Geometry</code> with which to compare this <code>Geometry</code>
    *@return        <code>true</code> if the two <code>Geometry</code>s are equal
@@ -1093,6 +1118,14 @@ public abstract class Geometry
     return (new ConvexHull(this)).getConvexHull();
   }
 
+  /**
+   * Computes a new geometry which has all component coordinate sequences
+   * in reverse order (opposite orientation) to this one.
+   * 
+   * @return a reversed geometry
+   */
+  public abstract Geometry reverse();
+  
   /**
    *  Computes a <code>Geometry</code> representing the points shared by this
    *  <code>Geometry</code> and <code>other</code>.
@@ -1255,12 +1288,11 @@ public abstract class Geometry
    *  Performs an operation with or on this <code>Geometry</code>'s
    *  coordinates. 
    *  If this method modifies any coordinate values,
-   *  #geometryChanged() must be called to update the geometry state. 
-   *  Note that you cannot use this
-   *  method to
+   *  {@link #geometryChanged} must be called to update the geometry state. 
+   *  Note that you cannot use this method to
    *  modify this Geometry if its underlying CoordinateSequence's #get method
    *  returns a copy of the Coordinate, rather than the actual Coordinate stored
-   *  (if it even stores Coordinates at all).
+   *  (if it even stores Coordinate objects at all).
    *
    *@param  filter  the filter to apply to this <code>Geometry</code>'s
    *      coordinates
@@ -1270,8 +1302,8 @@ public abstract class Geometry
   /**
    *  Performs an operation on the coordinates in this <code>Geometry</code>'s
    *  {@link CoordinateSequence}s. 
-   *  If this method modifies any coordinate values,
-   *  #geometryChanged() must be called to update the geometry state. 
+   *  If the filter reports that a coordinate value has been changed, 
+   *  {@link #geometryChanged} will be called automatically.
    *
    *@param  filter  the filter to apply
    */
@@ -1530,15 +1562,30 @@ public abstract class Geometry
   }
 
   private int getClassSortIndex() {
-    for (int i = 0; i < sortedClasses.length; i++) {
-      if (sortedClasses[i].isInstance(this)) {
-        return i;
-      }
-    }
-    Assert.shouldNeverReachHere("Class not supported: " + this.getClass());
-    return -1;
-  }
+		if (sortedClasses == null)
+			initSortedClasses();
 
+		for (int i = 0; i < sortedClasses.length; i++) {
+			if (sortedClasses[i].isInstance(this))
+				return i;
+		}
+		Assert.shouldNeverReachHere("Class not supported: " + this.getClass());
+		return -1;
+	}
+
+  private static void initSortedClasses()
+  {
+		sortedClasses = new Class[] { 
+					Point.class, 
+					MultiPoint.class,
+					LineString.class, 
+					LinearRing.class, 
+					MultiLineString.class,
+					Polygon.class, 
+					MultiPolygon.class, 
+					GeometryCollection.class };
+  }
+  
   private Point createPointFromInternalCoord(Coordinate coord, Geometry exemplar)
   {
     exemplar.getPrecisionModel().makePrecise(coord);

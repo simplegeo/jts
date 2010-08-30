@@ -35,9 +35,11 @@
 package com.vividsolutions.jts.geom;
 
 /**
- *  A Dimensionally Extended Nine-Intersection Model (DE-9IM) matrix. This class
- *  can used to represent both computed DE-9IM's (like 212FF1FF2) as well as
- *  patterns for matching them (like T*T******). <P>
+ * Models a Dimensionally Extended Nine-Intersection Model (DE-9IM) matrix. 
+ * This class is used to represent intersection matrices (such as "212FF1FF2")
+ * capturing the topological relationship between two {@link Geometry}s. 
+ * It can also be represent patterns (such as "T*T******")for matching 
+ * existing matrices.
  *
  *  Methods are provided to:
  *  <UL>
@@ -50,7 +52,13 @@ package com.vividsolutions.jts.geom;
  *
  *  For a description of the DE-9IM, see the <A
  *  HREF="http://www.opengis.org/techno/specs.htm">OpenGIS Simple Features
- *  Specification for SQL</A> .
+ *  Specification for SQL</A>.
+ *  
+ * The entries of the matrix are defined by the constants in the {@link Dimension} class.
+ * The indices of the matrix represent the topological locations 
+ * that occur in a geometry (Interior, Boundary, Exterior).  
+ * These are provided as constants in the {@link Location} class.
+ *  
  *
  *@version 1.7
  */
@@ -265,8 +273,12 @@ public class IntersectionMatrix implements Cloneable {
   }
 
   /**
-   *  Returns the value of one of this <code>IntersectionMatrix</code>s
-   *  elements.
+   *  Returns the value of one of this matrix
+   *  entries.
+   *  The value of the provided index is one of the 
+   *  values from the {@link Location} class.  
+   *  The value returned is a constant 
+   *  from the {@link Dimension} class.
    *
    *@param  row     the row of this <code>IntersectionMatrix</code>, indicating
    *      the interior, boundary or exterior of the first <code>Geometry</code>

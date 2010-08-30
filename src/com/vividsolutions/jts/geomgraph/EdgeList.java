@@ -37,9 +37,12 @@ package com.vividsolutions.jts.geomgraph;
 
 import java.io.PrintStream;
 import java.util.*;
+
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.index.SpatialIndex;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
+import com.vividsolutions.jts.noding.OrientedCoordinateArray;
+import com.vividsolutions.jts.noding.SegmentString;
 
 /**
  * A EdgeList is a list of Edges.  It supports locating edges
@@ -52,13 +55,8 @@ public class EdgeList
   /**
    * An index of the edges, for fast lookup.
    *
-   * a Quadtree is used, because this index needs to be dynamic
-   * (e.g. allow insertions after queries).
-   * An alternative would be to use an ordered set based on the values
-   * of the edge coordinates
-   *
    */
-  private SpatialIndex index = new Quadtree();
+  private Map ocaMap = new TreeMap();
 
   public EdgeList() {
   }
@@ -69,7 +67,8 @@ public class EdgeList
   public void add(Edge e)
   {
     edges.add(e);
-    index.insert(e.getEnvelope(), e);
+    OrientedCoordinateArray oca = new OrientedCoordinateArray(e.getCoordinates());
+    ocaMap.put(oca, e);
   }
 
   public void addAll(Collection edgeColl)
@@ -81,7 +80,6 @@ public class EdgeList
 
   public List getEdges() { return edges; }
 
-// <FIX> fast lookup for edges
   /**
    * If there is an edge equal to e already in the list, return it.
    * Otherwise return null.
@@ -90,15 +88,12 @@ public class EdgeList
    */
   public Edge findEqualEdge(Edge e)
   {
-    Collection testEdges = index.query(e.getEnvelope());
-
-    for (Iterator i = testEdges.iterator(); i.hasNext(); ) {
-      Edge testEdge = (Edge) i.next();
-      if (testEdge.equals(e) ) return testEdge;
-    }
-    return null;
+    OrientedCoordinateArray oca = new OrientedCoordinateArray(e.getCoordinates());
+    // will return null if no edge matches
+    Edge matchEdge = (Edge) ocaMap.get(oca);
+    return matchEdge; 
   }
-
+  
   public Iterator iterator() { return edges.iterator(); }
 
   public Edge get(int i) { return (Edge) edges.get(i); }

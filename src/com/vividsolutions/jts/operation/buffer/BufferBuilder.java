@@ -78,8 +78,6 @@ public class BufferBuilder
     return 0;
   }
 
-  private final CGAlgorithms cga = new CGAlgorithms();
-
   private BufferParameters bufParams;
 
   private PrecisionModel workingPrecisionModel;
@@ -154,7 +152,7 @@ public class BufferBuilder
     graph.addEdges(edgeList.getEdges());
 
     List subgraphList = createSubgraphs(graph);
-    PolygonBuilder polyBuilder = new PolygonBuilder(geomFact, cga);
+    PolygonBuilder polyBuilder = new PolygonBuilder(geomFact);
     buildSubgraphs(subgraphList, polyBuilder);
     List resultPolyList = polyBuilder.getPolygons();
 
@@ -196,7 +194,7 @@ public class BufferBuilder
       SegmentString segStr = (SegmentString) i.next();
       Label oldLabel = (Label) segStr.getData();
       Edge edge = new Edge(segStr.getCoordinates(), new Label(oldLabel));
-      insertEdge(edge);
+      insertUniqueEdge(edge);
     }
     //saveEdges(edgeList.getEdges(), "run" + runCount + "_collapsedEdges");
   }
@@ -207,7 +205,7 @@ public class BufferBuilder
    * If so, the edge is not inserted, but its label is merged
    * with the existing edge.
    */
-  protected void insertEdge(Edge e)
+  protected void insertUniqueEdge(Edge e)
   {
 //<FIX> MD 8 Oct 03  speed up identical edge lookup
     // fast lookup
@@ -246,7 +244,7 @@ public class BufferBuilder
     for (Iterator i = graph.getNodes().iterator(); i.hasNext(); ) {
       Node node = (Node) i.next();
       if (! node.isVisited()) {
-        BufferSubgraph subgraph = new BufferSubgraph(cga);
+        BufferSubgraph subgraph = new BufferSubgraph();
         subgraph.create(node);
         subgraphList.add(subgraph);
       }

@@ -54,11 +54,8 @@ import com.vividsolutions.jts.geomgraph.*;
  *
  * @version 1.7
  */
-public abstract class EdgeSetIntersector {
-
-  List edges0 = null;
-  List edges1 = null;
-
+public abstract class EdgeSetIntersector 
+{
   public EdgeSetIntersector() {
   }
 

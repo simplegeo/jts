@@ -41,6 +41,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryComponentFilter;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.planargraph.GraphComponent;
 import com.vividsolutions.jts.planargraph.Node;
 import com.vividsolutions.jts.util.Assert;
 
@@ -55,24 +56,17 @@ import com.vividsolutions.jts.util.Assert;
  * form the edges. The edges must be correctly noded; that is, they must only meet
  * at their endpoints.  The LineMerger will still run on incorrectly noded input
  * but will not form polygons from incorrected noded edges.
+ * <p>
+ * <b>NOTE:</b>once merging has been performed, no more 
  *
  * @version 1.7
  */
-public class LineMerger {
-  /**
-   * Adds a collection of Geometries to be processed. May be called multiple times.
-   * Any dimension of Geometry may be added; the constituent linework will be
-   * extracted.
-   */
-  public void add(Collection geometries) {
-    for (Iterator i = geometries.iterator(); i.hasNext(); ) {
-      Geometry geometry = (Geometry) i.next();
-      add(geometry);
-    }
-  }
+public class LineMerger 
+{
   private LineMergeGraph graph = new LineMergeGraph();
   private Collection mergedLineStrings = null;
   private GeometryFactory factory = null;
+  
   /**
    * Adds a Geometry to be processed. May be called multiple times.
    * Any dimension of Geometry may be added; the constituent linework will be
@@ -87,15 +81,36 @@ public class LineMerger {
       }      
     });
   }
+  /**
+   * Adds a collection of Geometries to be processed. May be called multiple times.
+   * Any dimension of Geometry may be added; the constituent linework will be
+   * extracted.
+   */
+  public void add(Collection geometries) 
+  {
+  	mergedLineStrings = null;
+    for (Iterator i = geometries.iterator(); i.hasNext(); ) {
+      Geometry geometry = (Geometry) i.next();
+      add(geometry);
+    }
+  }
   private void add(LineString lineString) {
     if (factory == null) {
       this.factory = lineString.getFactory();
     }
     graph.addEdge(lineString);
   }
+  
   private Collection edgeStrings = null;
-  private void merge() {
+  
+  private void merge() 
+  {
     if (mergedLineStrings != null) { return; }
+    
+    // reset marks (this allows incremental processing)
+    GraphComponent.setMarked(graph.nodeIterator(), false);
+    GraphComponent.setMarked(graph.edgeIterator(), false);
+    
     edgeStrings = new ArrayList();
     buildEdgeStringsForObviousStartNodes();
     buildEdgeStringsForIsolatedLoops();
@@ -105,12 +120,15 @@ public class LineMerger {
       mergedLineStrings.add(edgeString.toLineString());
     }    
   }
+  
   private void buildEdgeStringsForObviousStartNodes() {
     buildEdgeStringsForNonDegree2Nodes();
   }
+  
   private void buildEdgeStringsForIsolatedLoops() {
     buildEdgeStringsForUnprocessedNodes();
   }  
+  
   private void buildEdgeStringsForUnprocessedNodes() {
     for (Iterator i = graph.getNodes().iterator(); i.hasNext(); ) {
       Node node = (Node) i.next();
@@ -137,6 +155,7 @@ public class LineMerger {
       edgeStrings.add(buildEdgeStringStartingWith(directedEdge));
     }
   }
+  
   private EdgeString buildEdgeStringStartingWith(LineMergeDirectedEdge start) {    
     EdgeString edgeString = new EdgeString(factory);
     LineMergeDirectedEdge current = start;
@@ -147,6 +166,7 @@ public class LineMerger {
     } while (current != null && current != start);
     return edgeString;
   }
+  
   /**
    * Returns the LineStrings built by the merging process.
    */

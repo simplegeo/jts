@@ -48,15 +48,13 @@ import com.vividsolutions.jts.util.*;
 public class PolygonBuilder {
 
   private GeometryFactory geometryFactory;
-  private CGAlgorithms cga;
   //private List dirEdgeList;
   //private NodeMap nodes;
   private List shellList        = new ArrayList();
 
-  public PolygonBuilder(GeometryFactory geometryFactory, CGAlgorithms cga)
+  public PolygonBuilder(GeometryFactory geometryFactory)
   {
     this.geometryFactory = geometryFactory;
-    this.cga = cga;
   }
 
   /**
@@ -103,7 +101,7 @@ public class PolygonBuilder {
       if (de.isInResult() && de.getLabel().isArea() ) {
         // if this edge has not yet been processed
         if (de.getEdgeRing() == null) {
-          MaximalEdgeRing er = new MaximalEdgeRing(de, geometryFactory, cga);
+          MaximalEdgeRing er = new MaximalEdgeRing(de, geometryFactory);
           maxEdgeRings.add(er);
           er.setInResult();
 //System.out.println("max node degree = " + er.getMaxDegree());

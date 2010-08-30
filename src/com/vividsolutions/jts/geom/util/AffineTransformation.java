@@ -1,7 +1,7 @@
 package com.vividsolutions.jts.geom.util;
 
 import com.vividsolutions.jts.geom.*;
-
+import com.vividsolutions.jts.util.*;
 /**
  * Represents a affine transformation on the 2D Cartesian plane. 
  * It can be used to transform a {@link Coordinate} or {@link Geometry}.
@@ -975,6 +975,8 @@ public class AffineTransformation
   {
     if (obj instanceof AffineTransformation)
       return false;
+    if (obj == null) return false;
+    
     AffineTransformation trans = (AffineTransformation) obj;
     return m00 == trans.m00
     && m01 == trans.m01
@@ -1008,6 +1010,11 @@ public class AffineTransformation
    */
   public Object clone()
   {
-    return new AffineTransformation(this);
+  	try {
+  		return super.clone();
+  	} catch(Exception ex) {
+  		Assert.shouldNeverReachHere();
+  	}
+  	return null;
   }
 }

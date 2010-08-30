@@ -66,9 +66,9 @@ public class BufferSubgraph
   private Coordinate rightMostCoord = null;
   private Envelope env = null;
 
-  public BufferSubgraph(CGAlgorithms cga)
+  public BufferSubgraph()
   {
-    finder = new RightmostEdgeFinder(cga);
+    finder = new RightmostEdgeFinder();
   }
 
   public List getDirectedEdges() { return dirEdgeList; }
@@ -229,7 +229,10 @@ public class BufferSubgraph
     }
     // MD - testing  Result: breaks algorithm
     //if (startEdge == null) return;
-    Assert.isTrue(startEdge != null, "unable to find edge to compute depths at " + n.getCoordinate());
+    
+    // only compute string append if assertion would fail
+    if (startEdge == null)
+    	Assert.isTrue(startEdge != null, "unable to find edge to compute depths at " + n.getCoordinate());
 
     ((DirectedEdgeStar) n.getEdges()).computeDepths(startEdge);
 

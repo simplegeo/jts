@@ -52,6 +52,20 @@ import com.vividsolutions.jts.geom.util.*;
  */
 public class SimpleGeometryPrecisionReducer
 {
+	/**
+	 * Convenience method for doing precision reduction on a single geometry,
+	 * with collapses removed and keeping the geometry precision model the same.
+	 * 
+	 * @param g
+	 * @param precModel
+	 * @return the reduced geometry
+	 */
+	public static Geometry reduce(Geometry g, PrecisionModel precModel)
+	{
+		SimpleGeometryPrecisionReducer reducer = new SimpleGeometryPrecisionReducer(precModel);
+		return reducer.reduce(g);
+	}
+	
   private PrecisionModel newPrecisionModel;
   private boolean removeCollapsed = true;
   private boolean changePrecisionModel = false;

@@ -203,7 +203,15 @@ public class Point
     return p;// return the clone
   }
 
-  public void normalize() { }
+  public Geometry reverse()
+  {
+    return (Geometry) clone();
+  }
+  
+  public void normalize() 
+  { 
+    // a Point is always in normalized form 
+  }
 
   protected int compareToSameClass(Object other) {
     Point point = (Point) other;

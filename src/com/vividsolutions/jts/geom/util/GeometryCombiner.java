@@ -11,7 +11,7 @@ import com.vividsolutions.jts.geom.*;
  * will have their elements extracted first.
  * No validation of the result geometry is performed.
  * (The only case where invalidity is possible is where {@link Polygonal} geometries
- * are combined and result in a self-intersection)
+ * are combined and result in a self-intersection).
  * 
  * @author mbdavis
  * @see GeometryFactory#buildGeometry
@@ -57,21 +57,6 @@ public class GeometryCombiner
 		return combiner.combine();
 	}
 	
-	private GeometryFactory geomFactory;
-	private boolean skipEmpty = false;
-	private Collection inputGeoms;
-		
-	/**
-	 * Creates a new combiner for a collection of geometries
-	 * 
-	 * @param geoms the geometries to combine
-	 */
-	public GeometryCombiner(Collection geoms)
-	{
-		geomFactory = extractFactory(geoms);
-		this.inputGeoms = geoms;
-	}
-	
 	/**
 	 * Creates a list from two items
 	 * 
@@ -103,7 +88,21 @@ public class GeometryCombiner
 		return list;
   }
   
-
+	private GeometryFactory geomFactory;
+	private boolean skipEmpty = false;
+	private Collection inputGeoms;
+		
+	/**
+	 * Creates a new combiner for a collection of geometries
+	 * 
+	 * @param geoms the geometries to combine
+	 */
+	public GeometryCombiner(Collection geoms)
+	{
+		geomFactory = extractFactory(geoms);
+		this.inputGeoms = geoms;
+	}
+	
 	/**
 	 * Extracts the GeometryFactory used by the geometries in a collection
 	 * 
@@ -118,8 +117,9 @@ public class GeometryCombiner
 	
 	/**
 	 * Computes the combination of the input geometries
+	 * to produce the most appropriate {@link Geometry} or {@link GeometryCollection}
 	 * 
-	 * @return a Geometry which is the combination
+	 * @return a Geometry which is the combination of the inputs
 	 */
   public Geometry combine()
   {

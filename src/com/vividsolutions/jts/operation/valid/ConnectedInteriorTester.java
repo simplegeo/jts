@@ -67,7 +67,6 @@ public class ConnectedInteriorTester {
   }
 
   private GeometryFactory geometryFactory = new GeometryFactory();
-  private CGAlgorithms cga = new CGAlgorithms();
 
   private GeometryGraph geomGraph;
   // save a coordinate for any disconnected interior found
@@ -133,7 +132,7 @@ public class ConnectedInteriorTester {
       // if this edge has not yet been processed
       if (de.isInResult()
          && de.getEdgeRing() == null) {
-        MaximalEdgeRing er = new MaximalEdgeRing(de, geometryFactory, cga);
+        MaximalEdgeRing er = new MaximalEdgeRing(de, geometryFactory);
 
         er.linkDirectedEdgesForMinimalEdgeRings();
         List minEdgeRings = er.buildMinimalRings();

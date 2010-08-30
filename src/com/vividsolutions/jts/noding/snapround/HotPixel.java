@@ -224,4 +224,31 @@ public class HotPixel
 
     return false;
   }
+  
+  /**
+   * Adds a new node (equal to the snap pt) to the specified segment
+   * if the segment passes through the hot pixel
+   *
+   * @param segStr
+   * @param segIndex
+   * @return true if a node was added to the segment
+   */
+  public boolean addSnappedNode(
+      NodedSegmentString segStr,
+      int segIndex
+      )
+  {
+    Coordinate p0 = segStr.getCoordinate(segIndex);
+    Coordinate p1 = segStr.getCoordinate(segIndex + 1);
+
+    if (intersects(p0, p1)) {
+      //System.out.println("snapped: " + snapPt);
+      //System.out.println("POINT (" + snapPt.x + " " + snapPt.y + ")");
+      segStr.addIntersection(getCoordinate(), segIndex);
+
+      return true;
+    }
+    return false;
+  }
+
 }

@@ -65,29 +65,33 @@ public interface BoundaryNodeRule
   boolean isInBoundary(int boundaryCount);
 
   /**
-   * The Mod-2 Boundary Node Rule (as used in the OGC SFS).
+   * The Mod-2 Boundary Node Rule (which is the rule specified in the OGC SFS).
+   * @see Mod2BoundaryNodeRule
    */
   public static final BoundaryNodeRule MOD2_BOUNDARY_RULE = new Mod2BoundaryNodeRule();
 
-
   /**
    * The Endpoint Boundary Node Rule.
+   * @see EndPointBoundaryNodeRule
    */
   public static final BoundaryNodeRule ENDPOINT_BOUNDARY_RULE = new EndPointBoundaryNodeRule();
 
   /**
    * The MultiValent Endpoint Boundary Node Rule.
+   * @see MultiValentEndPointBoundaryNodeRule
    */
   public static final BoundaryNodeRule MULTIVALENT_ENDPOINT_BOUNDARY_RULE = new MultiValentEndPointBoundaryNodeRule();
 
   /**
    * The Monovalent Endpoint Boundary Node Rule.
+   * @see MonoValentEndPointBoundaryNodeRule
    */
   public static final BoundaryNodeRule MONOVALENT_ENDPOINT_BOUNDARY_RULE = new MonoValentEndPointBoundaryNodeRule();
 
   /**
    * The Boundary Node Rule specified by the OGC Simple Features Specification,
-   * equal to the Mod-2 rule.
+   * which is the same as the Mod-2 rule.
+   * @see Mod2BoundaryNodeRule
    */
   public static final BoundaryNodeRule OGC_SFS_BOUNDARY_RULE = MOD2_BOUNDARY_RULE;
 

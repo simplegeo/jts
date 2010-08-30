@@ -257,7 +257,7 @@ public abstract class PackedCoordinateSequence
     public Coordinate getCoordinateInternal(int i) {
       double x = coords[i * dimension];
       double y = coords[i * dimension + 1];
-      double z = dimension == 2 ? 0.0 : coords[i * dimension + 2];
+      double z = dimension == 2 ? Coordinate.NULL_ORDINATE : coords[i * dimension + 2];
       return new Coordinate(x, y, z);
     }
 
@@ -383,7 +383,7 @@ public abstract class PackedCoordinateSequence
     public Coordinate getCoordinateInternal(int i) {
       double x = coords[i * dimension];
       double y = coords[i * dimension + 1];
-      double z = dimension == 2 ? 0.0 : coords[i * dimension + 2];
+      double z = dimension == 2 ? Coordinate.NULL_ORDINATE : coords[i * dimension + 2];
       return new Coordinate(x, y, z);
     }
 

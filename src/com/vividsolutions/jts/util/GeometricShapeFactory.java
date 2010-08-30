@@ -203,13 +203,16 @@ public class GeometricShapeFactory
   }
 
    /**
-    * Creates a elliptical arc, as a LineString.
+    * Creates an elliptical arc, as a {@link LineString}.
+    * The arc is always created in a counter-clockwise direction.
     *
+    * @param startAng start angle in radians
+    * @param angExtent size of angle in radians
     * @return an elliptical arc
     */
   public LineString createArc(
      double startAng,
-     double endAng)
+     double angExtent)
   {
     Envelope env = dim.getEnvelope();
     double xRadius = env.getWidth() / 2.0;
@@ -218,10 +221,10 @@ public class GeometricShapeFactory
     double centreX = env.getMinX() + xRadius;
     double centreY = env.getMinY() + yRadius;
 
-     double angSize = (endAng - startAng);
+     double angSize = angExtent;
      if (angSize <= 0.0 || angSize > 2 * Math.PI)
        angSize = 2 * Math.PI;
-     double angInc = angSize / nPts;
+     double angInc = angSize / (nPts - 1);
 
      Coordinate[] pts = new Coordinate[nPts];
      int iPt = 0;
@@ -234,6 +237,47 @@ public class GeometricShapeFactory
      LineString line = geomFact.createLineString(pts);
      return line;
    }
+
+  /**
+   * Creates an elliptical arc polygon.
+   * The polygon is formed from the specified arc of an ellipse
+   * and the two radii connecting the endpoints to the centre of the ellipse.
+   *
+   * @param startAng start angle in radians
+   * @param angExtent size of angle in radians
+   * @return an elliptical arc polygon
+   */
+  public Polygon createArcPolygon(double startAng, double angExtent) {
+    Envelope env = dim.getEnvelope();
+    double xRadius = env.getWidth() / 2.0;
+    double yRadius = env.getHeight() / 2.0;
+
+    double centreX = env.getMinX() + xRadius;
+    double centreY = env.getMinY() + yRadius;
+
+    double angSize = angExtent;
+    if (angSize <= 0.0 || angSize > 2 * Math.PI)
+      angSize = 2 * Math.PI;
+    double angInc = angSize / (nPts - 1);
+    // double check = angInc * nPts;
+    // double checkEndAng = startAng + check;
+
+    Coordinate[] pts = new Coordinate[nPts + 2];
+
+    int iPt = 0;
+    pts[iPt++] = createCoord(centreX, centreY);
+    for (int i = 0; i < nPts; i++) {
+      double ang = startAng + angInc * i;
+
+      double x = xRadius * Math.cos(ang) + centreX;
+      double y = yRadius * Math.sin(ang) + centreY;
+      pts[iPt++] = createCoord(x, y);
+    }
+    pts[iPt++] = createCoord(centreX, centreY);
+    LinearRing ring = geomFact.createLinearRing(pts);
+    Polygon geom = geomFact.createPolygon(ring, null);
+    return geom;
+  }
 
   protected Coordinate createCoord(double x, double y)
   {

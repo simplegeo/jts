@@ -76,7 +76,8 @@ public interface CoordinateSequenceFilter
   /**
    * Reports whether the execution of this filter
    * has modified the coordinates of the geometry.
-   * If so, {@link Geometry#geometryChanged} will be executed.
+   * If so, {@link Geometry#geometryChanged} will be executed
+   * after this filter has finished being executed.
    * <p>
    * Most filters can simply return a constant value reflecting
    * whether they are able to change the coordinates.

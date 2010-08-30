@@ -35,9 +35,10 @@
 package com.vividsolutions.jts.geom;
 
 /**
- * Constants representing the dimensions of a point, a curve and a surface.
- * Also, constants representing the dimensions of the empty geometry and
- * non-empty geometries, and a wildcard dimension meaning "any dimension".
+ * Provides constants representing the dimensions of a point, a curve and a surface.
+ * Also provides constants representing the dimensions of the empty geometry and
+ * non-empty geometries, and the wildcard constant {@link #DONTCARE} meaning "any dimension".
+ * These constants are used as the entries in {@link IntersectionMatrix}s.
  * 
  * @version 1.7
  */
@@ -108,7 +109,7 @@ public class Dimension {
    *@param  dimensionSymbol  a character for use in the string representation of
    *      an <code>IntersectionMatrix</code>. Possible values are <code>{T, F, * , 0, 1, 2}</code>
    *      .
-   *@return                  a number that can be stored in the <code>IntersectionMatrix</code>
+   *@return a number that can be stored in the <code>IntersectionMatrix</code>
    *      . Possible values are <code>{TRUE, FALSE, DONTCARE, 0, 1, 2}</code>.
    */
   public static int toDimensionValue(char dimensionSymbol) {

@@ -40,8 +40,13 @@ package com.vividsolutions.jts.geom;
  *  a <code>GeometryComponentFilter</code>
  *  filter to the <code>Geometry</code>.
  *  The filter is applied to every component of the <code>Geometry</code>
- *  which is itself a <code>Geometry</code>.
- * (For instance, all the LinearRings in Polygons are visited.)
+ *  which is itself a <code>Geometry</code>
+ *  and which does not itself contain any components.
+ * (For instance, all the LinearRings in Polygons are visited,
+ * but in a MultiPolygon the Polygons themselves are not visited.)
+ * Thus the only classes of Geometry which must be 
+ * handled as arguments to {@link #filter}
+ * are {@link LineString}s, {@link LinearRing}s and {@link Point}s.
  *  <p>
  *  A <code>GeometryComponentFilter</code> filter can either
  *  record information about the <code>Geometry</code>

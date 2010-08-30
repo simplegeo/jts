@@ -146,9 +146,9 @@ public class Quadtree
   /**
    * Removes a single item from the tree.
    *
-   * @param itemEnv the Envelope of the item to remove
+   * @param itemEnv the Envelope of the item to be removed
    * @param item the item to remove
-   * @return <code>true</code> if the item was found
+   * @return <code>true</code> if the item was found (and thus removed)
    */
   public boolean remove(Envelope itemEnv, Object item)
   {
@@ -170,6 +170,19 @@ public class Quadtree
   }
 */
 
+  /**
+   * Queries the tree and returns items which may lie in the given search envelope.
+   * Precisely, the items that are returned are all items in the tree 
+   * whose envelope <b>may</b> intersect the search Envelope.
+   * Note that some items with non-intersecting envelopes may be returned as well;
+   * the client is responsible for filtering these out.
+   * In most situations there will be many items in the tree which do not
+   * intersect the search envelope and which are not returned - thus
+   * providing improved performance over a simple linear scan.    
+   * 
+   * @param searchEnv the envelope of the desired query area.
+   * @return a List of items which may intersect the search envelope
+   */
   public List query(Envelope searchEnv)
   {
     /**
@@ -181,6 +194,19 @@ public class Quadtree
     return visitor.getItems();
   }
 
+  /**
+   * Queries the tree and visits items which may lie in the given search envelope.
+   * Precisely, the items that are visited are all items in the tree 
+   * whose envelope <b>may</b> intersect the search Envelope.
+   * Note that some items with non-intersecting envelopes may be visited as well;
+   * the client is responsible for filtering these out.
+   * In most situations there will be many items in the tree which do not
+   * intersect the search envelope and which are not visited - thus
+   * providing improved performance over a simple linear scan.    
+   * 
+   * @param searchEnv the envelope of the desired query area.
+   * @param visitor a visitor object which is passed the visited items
+   */
   public void query(Envelope searchEnv, ItemVisitor visitor)
   {
     /**

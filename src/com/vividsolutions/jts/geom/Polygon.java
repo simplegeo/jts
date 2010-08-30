@@ -424,5 +424,15 @@ public class Polygon
     }
   }
 
+  public Geometry reverse()
+  {
+    Polygon poly = (Polygon) super.clone();
+    poly.shell = (LinearRing) ((LinearRing) shell.clone()).reverse();
+    poly.holes = new LinearRing[holes.length];
+    for (int i = 0; i < holes.length; i++) {
+      poly.holes[i] = (LinearRing) ((LinearRing) holes[i].clone()).reverse();
+    }
+    return poly;// return the clone
+  }
 }
 

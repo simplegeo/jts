@@ -64,7 +64,7 @@ import java.util.Map;
  * <li>FLOATING_SINGLE - represents single precision floating point.
  * <li>FIXED - represents a model with a fixed number of decimal places.
  *  A Fixed Precision Model is specified by a scale factor.
- *  The scale factor specifies the grid which numbers are rounded to.
+ *  The scale factor specifies the size of the grid which numbers are rounded to.
  *  Input coordinates are mapped to fixed coordinates according to the following
  *  equations:
  *    <UL>

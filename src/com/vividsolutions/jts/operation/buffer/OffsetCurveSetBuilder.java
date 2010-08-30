@@ -52,7 +52,6 @@ import com.vividsolutions.jts.noding.*;
  */
 public class OffsetCurveSetBuilder {
 
-  private CGAlgorithms cga = new CGAlgorithms();
 
   private Geometry inputGeom;
   private double distance;
@@ -212,7 +211,7 @@ public class OffsetCurveSetBuilder {
     //Coordinate[] coord = CoordinateArrays.removeRepeatedPoints(lr.getCoordinates());
     int leftLoc  = cwLeftLoc;
     int rightLoc = cwRightLoc;
-    if (cga.isCCW(coord)) {
+    if (CGAlgorithms.isCCW(coord)) {
       leftLoc = cwRightLoc;
       rightLoc = cwLeftLoc;
       side = Position.opposite(side);
@@ -294,7 +293,7 @@ public class OffsetCurveSetBuilder {
   {
     Triangle tri = new Triangle(triangleCoord[0], triangleCoord[1], triangleCoord[2]);
     Coordinate inCentre = tri.inCentre();
-    double distToCentre = cga.distancePointLine(inCentre, tri.p0, tri.p1);
+    double distToCentre = CGAlgorithms.distancePointLine(inCentre, tri.p0, tri.p1);
     return distToCentre < Math.abs(bufferDistance);
   }
 

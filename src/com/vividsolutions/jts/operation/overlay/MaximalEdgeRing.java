@@ -61,8 +61,8 @@ public class MaximalEdgeRing
   extends EdgeRing
 {
 
-  public MaximalEdgeRing(DirectedEdge start, GeometryFactory geometryFactory, CGAlgorithms cga) {
-    super(start, geometryFactory, cga);
+  public MaximalEdgeRing(DirectedEdge start, GeometryFactory geometryFactory) {
+    super(start, geometryFactory);
   }
 
   public DirectedEdge getNext(DirectedEdge de)
@@ -94,7 +94,7 @@ public class MaximalEdgeRing
     DirectedEdge de = startDe;
     do {
       if (de.getMinEdgeRing() == null) {
-        EdgeRing minEr = new MinimalEdgeRing(de, geometryFactory, cga);
+        EdgeRing minEr = new MinimalEdgeRing(de, geometryFactory);
         minEdgeRings.add(minEr);
       }
       de = de.getNext();

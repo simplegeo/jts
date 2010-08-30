@@ -44,7 +44,11 @@ import com.vividsolutions.jts.operation.BoundaryOp;
  *  Consecutive vertices may be equal.
  *  The line segments in the line may intersect each other (in other words, 
  *  the linestring may "curl back" in itself and self-intersect.
- *  Linestrings with exactly two identical points are invalid.  
+ *  Linestrings with exactly two identical points are invalid. 
+ *  <p> 
+ * A linestring must have either 0 or 2 or more points.  
+ * If these conditions are not met, the constructors throw 
+ * an {@link IllegalArgumentException}
  *
  *@version 1.7
  */
@@ -56,7 +60,7 @@ public class LineString
   /**
    *  The points of this <code>LineString</code>.
    */
-  private CoordinateSequence points;
+  protected CoordinateSequence points;
 
   /**
    *  Constructs a <code>LineString</code> with the given points.
@@ -68,6 +72,7 @@ public class LineString
    *      for this <code>LineString</code>
    *@param  SRID            the ID of the Spatial Reference System used by this
    *      <code>LineString</code>
+   * @throws IllegalArgumentException if too few points are provided
    */
   /** @deprecated Use GeometryFactory instead */
   public LineString(Coordinate points[], PrecisionModel precisionModel, int SRID)
@@ -77,8 +82,11 @@ public class LineString
   }
 
   /**
+   * Constructs a <code>LineString</code> with the given points.
+   *  
    *@param  points          the points of the linestring, or <code>null</code>
    *      to create the empty geometry. Consecutive points may not be equal.
+   * @throws IllegalArgumentException if too few points are provided
    */
   public LineString(CoordinateSequence points, GeometryFactory factory) {
     super(factory);
@@ -91,7 +99,8 @@ public class LineString
       points = getFactory().getCoordinateSequenceFactory().create(new Coordinate[]{});
     }
     if (points.size() == 1) {
-      throw new IllegalArgumentException("point array must contain 0 or >1 elements");
+      throw new IllegalArgumentException("Invalid number of points in LineString (found " 
+      		+ points.size() + " - must be 0 or >= 2)");
     }
     this.points = points;
   }
@@ -192,7 +201,7 @@ public class LineString
    *
    * @return a {@link LineString} with coordinates in the reverse order
    */
-  public LineString reverse()
+  public Geometry reverse()
   {
     CoordinateSequence seq = (CoordinateSequence) points.clone();
     CoordinateSequences.reverse(seq);

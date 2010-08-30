@@ -62,9 +62,6 @@ import com.vividsolutions.jts.geom.*;
  */
 public class PlanarGraph
 {
-
-  public static final CGAlgorithms cga = new CGAlgorithms();
-
   /**
    * For nodes in the Collection, link the DirectedEdges at the node that are in the result.
    * This allows clients to link only a subset of nodes in the graph, for
