@@ -135,6 +135,14 @@ public class Point extends Geometry {
     return "Point";
   }
 
+  /**
+   * Gets the boundary of this geometry.
+   * Zero-dimensional geometries have no boundary by definition,
+   * so an empty GeometryCollection is returned.
+   *
+   * @return an empty GeometryCollection
+   * @see Geometry#getBoundary
+   */
   public Geometry getBoundary() {
     return getFactory().createGeometryCollection(null);
   }
@@ -159,9 +167,18 @@ public class Point extends Geometry {
   }
 
   public void apply(CoordinateFilter filter) {
-    if (isEmpty()) { return; }
-    filter.filter(getCoordinate());
-  }
+	    if (isEmpty()) { return; }
+	    filter.filter(getCoordinate());
+	  }
+
+  public void apply(CoordinateSequenceFilter filter) 
+  {
+	    if (isEmpty())
+        return;
+	    filter.filter(coordinates, 0);
+      if (filter.isGeometryChanged())
+        geometryChanged();
+	  }
 
   public void apply(GeometryFilter filter) {
     filter.filter(this);
@@ -171,6 +188,12 @@ public class Point extends Geometry {
     filter.filter(this);
   }
 
+  /**
+   * Creates and returns a full copy of this {@link Point} object.
+   * (including all coordinates contained by it).
+   *
+   * @return a clone of this instance
+   */
   public Object clone() {
     Point p = (Point) super.clone();
     p.coordinates = (CoordinateSequence) coordinates.clone();

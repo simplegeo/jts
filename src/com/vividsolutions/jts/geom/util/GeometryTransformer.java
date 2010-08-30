@@ -25,11 +25,14 @@ import com.vividsolutions.jts.geom.*;
  * The default behaviour of this class is to simply recursively transform
  * each Geometry component into an identical object by copying.
  * <p>
- * Note that all <code>transformX</code> methods may return <code>null</code>,
- * to avoid creating empty geometry objects. This will be handled correctly
- * by the transformer.
- * The @link transform} method itself will always
- * return a geometry object.
+ * All <code>transformX</code> methods may return <code>null</code>,
+ * to avoid creating empty or invalid geometry objects. This will be handled correctly
+ * by the transformer.   <code>transformX</code> methods should always return valid
+ * geometry - if they cannot do this they should return <code>null</code>
+ * (for instance, it may not be possible for a transformLineString implementation
+ * to return at least two points - in this case, it should return <code>null</code>).
+ * The {@link transform} method itself will always
+ * return a non-null Geometry object (but this may be empty).
  *
  * @version 1.7
  *
@@ -73,6 +76,11 @@ public class GeometryTransformer
   public GeometryTransformer() {
   }
 
+  /**
+   * Utility function to make input geometry available
+   *
+   * @return the input geometry
+   */
   public Geometry getInputGeometry() { return inputGeom; }
 
   public final Geometry transform(Geometry inputGeom)
@@ -122,6 +130,18 @@ public class GeometryTransformer
     return (CoordinateSequence) seq.clone();
   }
 
+  /**
+   * Transforms a {@link CoordinateSequence}.
+   * This method should always return a valid coordinate list for
+   * the desired result type.  (E.g. a coordinate list for a LineString
+   * must have 0 or at least 2 points).
+   * If this is not possible, return an empty sequence -
+   * this will be pruned out.
+   *
+   * @param coords the coordinates to transform
+   * @param parent the parent geometry
+   * @return the transformed coordinates
+   */
   protected CoordinateSequence transformCoordinates(CoordinateSequence coords, Geometry parent)
   {
     return copy(coords);
@@ -153,6 +173,13 @@ public class GeometryTransformer
 
   }
 
+  /**
+   * Transforms a {@link LineString} geometry.
+   *
+   * @param geom
+   * @param parent
+   * @return
+   */
   protected Geometry transformLineString(LineString geom, Geometry parent) {
     // should check for 1-point sequences and downgrade them to points
     return factory.createLineString(

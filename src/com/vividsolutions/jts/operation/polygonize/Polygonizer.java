@@ -135,7 +135,7 @@ public class Polygonizer
 
   /**
    * Gets the list of polygons formed by the polygonization.
-   * @return a collection of {@link Polygons}
+   * @return a collection of {@link Polygon}s
    */
   public Collection getPolygons()
   {
@@ -145,7 +145,7 @@ public class Polygonizer
 
   /**
    * Get the list of dangling lines found during polygonization.
-   * @return a collection of the input {@LineStrings} which are dangles
+   * @return a collection of the input {@link LineString}s which are dangles
    */
   public Collection getDangles()
   {
@@ -155,7 +155,7 @@ public class Polygonizer
 
   /**
    * Get the list of cut edges found during polygonization.
-   * @return a collection of the input {@LineStrings} which are cut edges
+   * @return a collection of the input {@link LineString}s which are cut edges
    */
   public Collection getCutEdges()
   {
@@ -165,7 +165,7 @@ public class Polygonizer
 
   /**
    * Get the list of lines forming invalid rings found during polygonization.
-   * @return a collection of the input {@LineStrings} which form invalid rings
+   * @return a collection of the input {@link LineString}s which form invalid rings
    */
   public Collection getInvalidRingLines()
   {

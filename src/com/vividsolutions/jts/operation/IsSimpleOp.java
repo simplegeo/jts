@@ -44,33 +44,118 @@ import com.vividsolutions.jts.geomgraph.index.SegmentIntersector;
  * Tests whether a <code>Geometry</code> is simple.
  * In general, the SFS specification of simplicity
  * follows the rule:
- *  <UL>
- *    <LI> A Geometry is simple iff the only self-intersections are at
+ * <ul>
+ *    <li> A Geometry is simple if and only if the only self-intersections are at
  *    boundary points.
- *  </UL>
+ * </ul>
+ * This definition relies on the definition of boundary points.
+ * The SFS uses the Mod-2 rule to determine which points are on the boundary of
+ * lineal geometries, but this class supports
+ * using other {@link BoundaryNodeRule}s as well.
+ * <p>
  * Simplicity is defined for each {@link Geometry} subclass as follows:
  * <ul>
  * <li>Valid polygonal geometries are simple by definition, so
  * <code>isSimple</code> trivially returns true.
+ * (Hint: in order to check if a polygonal geometry has self-intersections,
+ * use {@link Geometry#isValid}).
  * <li>Linear geometries are simple iff they do not self-intersect at points
- * other than boundary points.
+ * other than boundary points. 
+ * (Using the Mod-2 rule, this means that closed linestrings
+ * cannot be touched at their endpoints, since these are
+ * interior points, not boundary points).
  * <li>Zero-dimensional geometries (points) are simple iff they have no
  * repeated points.
  * <li>Empty <code>Geometry</code>s are always simple
- * <ul>
+ * </ul>
+ *
+ * @see BoundaryNodeRule
  *
  * @version 1.7
  */
-public class IsSimpleOp {
+public class IsSimpleOp
+{
+  private Geometry geom;
+  private boolean isClosedEndpointsInInterior = true;
+  private Coordinate nonSimpleLocation = null;
 
+  /**
+   * Creates a simplicity checker using the default SFS Mod-2 Boundary Node Rule
+   *
+   * @deprecated use IsSimpleOp(Geometry)
+   */
   public IsSimpleOp() {
   }
 
+  /**
+   * Creates a simplicity checker using the default SFS Mod-2 Boundary Node Rule
+   *
+   * @param geom the geometry to test
+   */
+  public IsSimpleOp(Geometry geom) {
+    this.geom = geom;
+  }
+
+  /**
+   * Creates a simplicity checker using a given {@link BoundaryNodeRule}
+   *
+   * @param geom the geometry to test
+   * @param boundaryNodeRule the rule to use.
+   */
+  public IsSimpleOp(Geometry geom, BoundaryNodeRule boundaryNodeRule)
+  {
+    this.geom = geom;
+    isClosedEndpointsInInterior = ! boundaryNodeRule.isInBoundary(2);
+  }
+
+  /**
+   * Tests whether the geometry is simple.
+   *
+   * @return true if the geometry is simple
+   */
+  public boolean isSimple()
+  {
+    nonSimpleLocation = null;
+    if (geom instanceof LineString) return isSimpleLinearGeometry(geom);
+    if (geom instanceof MultiLineString) return isSimpleLinearGeometry(geom);
+    if (geom instanceof MultiPoint) return isSimpleMultiPoint((MultiPoint) geom);
+    // all other geometry types are simple by definition
+    return true;
+  }
+
+  /**
+   * Gets a coordinate for the location where the geometry
+   * fails to be simple. 
+   * (i.e. where it has a non-boundary self-intersection).
+   * {@link #isSimple} must be called before this method is called.
+   *
+   * @return a coordinate for the location of the non-boundary self-intersection
+   * @return null if the geometry is simple
+   */
+  public Coordinate getNonSimpleLocation()
+  {
+    return nonSimpleLocation;
+  }
+
+  /**
+   * Reports whether a {@link LineString} is simple.
+   *
+   * @param geom the lineal geometry to test
+   * @return true if the geometry is simple
+   * @deprecated use isSimple()
+   */
   public boolean isSimple(LineString geom)
   {
     return isSimpleLinearGeometry(geom);
   }
 
+  /**
+   * Reports whether a {@link MultiLineString} geometry is simple.
+   *
+   * @param geom the lineal geometry to test
+   * @return true if the geometry is simple
+   * @deprecated use isSimple()
+   */
   public boolean isSimple(MultiLineString geom)
   {
     return isSimpleLinearGeometry(geom);
@@ -78,16 +163,24 @@ public class IsSimpleOp {
 
   /**
    * A MultiPoint is simple iff it has no repeated points
+   * @deprecated use isSimple()
    */
   public boolean isSimple(MultiPoint mp)
+  {
+    return isSimpleMultiPoint(mp);
+  }
+
+  private boolean isSimpleMultiPoint(MultiPoint mp)
   {
     if (mp.isEmpty()) return true;
     Set points = new TreeSet();
     for (int i = 0; i < mp.getNumGeometries(); i++) {
       Point pt = (Point) mp.getGeometryN(i);
       Coordinate p = pt.getCoordinate();
-      if (points.contains(p))
+      if (points.contains(p)) {
+        nonSimpleLocation = p;
         return false;
+      }
       points.add(p);
     }
     return true;
@@ -101,9 +194,14 @@ public class IsSimpleOp {
     SegmentIntersector si = graph.computeSelfNodes(li, true);
     // if no self-intersection, must be simple
     if (! si.hasIntersection()) return true;
-    if (si.hasProperIntersection()) return false;
+    if (si.hasProperIntersection()) {
+      nonSimpleLocation = si.getProperIntersectionPoint();
+      return false;
+    }
     if (hasNonEndpointIntersection(graph)) return false;
-    if (hasClosedEndpointIntersection(graph)) return false;
+    if (isClosedEndpointsInInterior) {
+      if (hasClosedEndpointIntersection(graph)) return false;
+    }
     return true;
   }
 
@@ -118,26 +216,30 @@ public class IsSimpleOp {
       int maxSegmentIndex = e.getMaximumSegmentIndex();
       for (Iterator eiIt = e.getEdgeIntersectionList().iterator(); eiIt.hasNext(); ) {
         EdgeIntersection ei = (EdgeIntersection) eiIt.next();
-        if (! ei.isEndPoint(maxSegmentIndex))
+        if (! ei.isEndPoint(maxSegmentIndex)) {
+          nonSimpleLocation = ei.getCoordinate();
           return true;
+        }
       }
     }
     return false;
   }
 
-  class EndpointInfo {
+  private static class EndpointInfo {
     Coordinate pt;
     boolean isClosed;
     int degree;
 
-    EndpointInfo(Coordinate pt)
+    public EndpointInfo(Coordinate pt)
     {
       this.pt = pt;
       isClosed = false;
       degree = 0;
     }
 
-    void addEndpoint(boolean isClosed)
+    public Coordinate getCoordinate() { return pt; }
+
+    public void addEndpoint(boolean isClosed)
     {
       degree++;
       this.isClosed |= isClosed;
@@ -145,9 +247,11 @@ public class IsSimpleOp {
   }
 
   /**
-   * Test that no edge intersection is the
-   * endpoint of a closed line.  To check this we compute the
-   * degree of each endpoint. The degree of endpoints of closed lines
+   * Tests that no edge intersection is the endpoint of a closed line.
+   * This ensures that closed lines are not touched at their endpoint,
+   * which is an interior point according to the Mod-2 rule
+   * To check this we compute the degree of each endpoint.
+   * The degree of endpoints of closed lines
    * must be exactly 2.
    */
   private boolean hasClosedEndpointIntersection(GeometryGraph graph)
@@ -165,8 +269,10 @@ public class IsSimpleOp {
 
     for (Iterator i = endPoints.values().iterator(); i.hasNext(); ) {
       EndpointInfo eiInfo = (EndpointInfo) i.next();
-      if (eiInfo.isClosed && eiInfo.degree != 2)
+      if (eiInfo.isClosed && eiInfo.degree != 2) {
+        nonSimpleLocation = eiInfo.getCoordinate();
         return true;
+      }
     }
     return false;
   }

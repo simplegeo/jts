@@ -6,7 +6,8 @@ import com.vividsolutions.jts.geom.*;
 /**
  * @version 1.7
  */
-public class TaggedLineString {
+public class TaggedLineString
+{
 
   private LineString parentLine;
   private TaggedLineSegment[] segs;

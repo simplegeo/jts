@@ -127,7 +127,7 @@ public class EdgeEnd
     return CGAlgorithms.computeOrientation(e.p0, e.p1, p1);
   }
 
-  public void computeLabel()
+  public void computeLabel(BoundaryNodeRule boundaryNodeRule)
   {
     // subclasses should override this if they are using labels
   }

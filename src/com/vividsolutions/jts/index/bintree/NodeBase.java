@@ -92,6 +92,7 @@ public abstract class NodeBase {
     if (! isSearchMatch(interval))
       return items;
 
+    // some of these may not actually overlap - this is allowed by the bintree contract
     resultItems.addAll(items);
 
     for (int i = 0; i < 2; i++) {

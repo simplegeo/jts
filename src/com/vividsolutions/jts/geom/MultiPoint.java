@@ -34,8 +34,6 @@
  */
 package com.vividsolutions.jts.geom;
 
-import com.vividsolutions.jts.operation.IsSimpleOp;
-
 /**
  *  Models a collection of <code>Point</code>s.
  *
@@ -84,12 +82,16 @@ public class MultiPoint
     return "MultiPoint";
   }
 
+  /**
+   * Gets the boundary of this geometry.
+   * Zero-dimensional geometries have no boundary by definition,
+   * so an empty GeometryCollection is returned.
+   *
+   * @return an empty GeometryCollection
+   * @see Geometry#getBoundary
+   */
   public Geometry getBoundary() {
     return getFactory().createGeometryCollection(null);
-  }
-
-  public boolean isSimple() {
-    return (new IsSimpleOp()).isSimple(this);
   }
 
   public boolean isValid() {

@@ -406,7 +406,16 @@ public class WKTReader
    *@throws  IOException     if an I/O error occurs
    */
   private Geometry readGeometryTaggedText() throws IOException, ParseException {
-    String type = getNextWord();
+    String type = null;
+    
+    try{
+    	type = getNextWord();
+    }catch(IOException e){
+    	return null;
+    }catch(ParseException e){
+    	return null;
+    }
+    
     if (type.equals("POINT")) {
       return readPointText();
     }

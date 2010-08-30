@@ -46,12 +46,15 @@ import com.vividsolutions.jts.util.Assert;
  * An ordered list of {@link EdgeEndBundle}s around a {@link RelateNode}.
  * They are maintained in CCW order (starting with the positive x-axis) around the node
  * for efficient lookup and topology building.
+ *
  * @version 1.7
  */
 public class EdgeEndBundleStar
   extends EdgeEndStar
 {
-
+  /**
+   * Creates a new empty EdgeEndBundleStar
+   */
   public EdgeEndBundleStar() {
   }
 

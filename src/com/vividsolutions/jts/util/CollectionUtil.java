@@ -18,7 +18,7 @@ public class CollectionUtil {
    * Executes a function on each item in a {@link Collection}
    * and returns the results in a new {@link List}
    *
-   * @param coll
+   * @param coll the collection to process
    * @param func the Function to execute
    */
   public static List transform(Collection coll, Function func)
@@ -34,7 +34,7 @@ public class CollectionUtil {
    * Executes a function on each item in a Collection but does
    * not accumulate the result
    *
-   * @param coll
+   * @param coll the collection to process
    * @param func the Function to execute
    */
   public static void apply(Collection coll, Function func)
@@ -49,7 +49,7 @@ public class CollectionUtil {
    * and collects all the entries for which the result
    * of the function is equal to {@link Boolean}.TRUE.
    *
-   * @param coll
+   * @param collection the collection to process
    * @param func the Function to execute
    */
   public static List select(Collection collection, Function func) {

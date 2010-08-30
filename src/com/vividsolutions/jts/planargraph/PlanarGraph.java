@@ -117,7 +117,7 @@ public abstract class PlanarGraph
   /**
    * Tests whether this graph contains the given {@link Edge}
    *
-   * @param de the edge to query
+   * @param e the edge to query
    * @return <code>true</code> if the graph contains the edge
    */
   public boolean contains(Edge e)

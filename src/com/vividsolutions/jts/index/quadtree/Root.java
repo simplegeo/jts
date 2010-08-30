@@ -102,7 +102,7 @@ public class Root
     * the smallest existing quad containing the query
     */
     boolean isZeroX = IntervalSize.isZeroWidth(itemEnv.getMinX(), itemEnv.getMaxX());
-    boolean isZeroY = IntervalSize.isZeroWidth(itemEnv.getMinX(), itemEnv.getMaxX());
+    boolean isZeroY = IntervalSize.isZeroWidth(itemEnv.getMinY(), itemEnv.getMaxY());
     NodeBase node;
     if (isZeroX || isZeroY)
       node = tree.find(itemEnv);

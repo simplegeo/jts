@@ -50,10 +50,8 @@ public final class CoordinateArraySequenceFactory
   private CoordinateArraySequenceFactory() {
   }
 
-  /**
-   * @see http://www.javaworld.com/javaworld/javatips/jw-javatip122.html
-   */
   private Object readResolve() {
+  	// http://www.javaworld.com/javaworld/javatips/jw-javatip122.html
     return CoordinateArraySequenceFactory.instance();
   }
 

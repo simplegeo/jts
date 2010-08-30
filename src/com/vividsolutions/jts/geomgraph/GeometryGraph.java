@@ -36,7 +36,7 @@
 package com.vividsolutions.jts.geomgraph;
 
 import java.util.*;
-import com.vividsolutions.jts.algorithm.LineIntersector;
+import com.vividsolutions.jts.algorithm.*;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geomgraph.index.*;
 import com.vividsolutions.jts.util.*;
@@ -60,6 +60,7 @@ public class GeometryGraph
  * the "At Most One Rule":
  *    isInBoundary = (componentCount == 1)
  */
+/*
   public static boolean isInBoundary(int boundaryCount)
   {
     // the "Mod-2 Rule"
@@ -69,11 +70,16 @@ public class GeometryGraph
   {
     return isInBoundary(boundaryCount) ? Location.BOUNDARY : Location.INTERIOR;
   }
+*/
+
+  public static int determineBoundary(BoundaryNodeRule boundaryNodeRule, int boundaryCount)
+  {
+    return boundaryNodeRule.isInBoundary(boundaryCount)
+        ? Location.BOUNDARY : Location.INTERIOR;
+  }
 
   private Geometry parentGeom;
-  // the precision model of the Geometry represented by this graph
-  //private PrecisionModel precisionModel = null;
-  //private int SRID;
+
   /**
    * The lineEdgeMap is a map of the linestring components of the
    * parentGeometry to the edges which are derived from them.
@@ -81,12 +87,13 @@ public class GeometryGraph
    */
   private Map lineEdgeMap = new HashMap();
 
-  //private PrecisionModel newPM = null;
+  private BoundaryNodeRule boundaryNodeRule = null;
+
   /**
    * If this flag is true, the Boundary Determination Rule will used when deciding
    * whether nodes are in the boundary or not
    */
-  private boolean useBoundaryDeterminationRule = false;
+  private boolean useBoundaryDeterminationRule = true;
   private int argIndex;  // the index of this geometry as an argument to a spatial function (used for labelling)
   private Collection boundaryNodes;
   private boolean hasTooFewPoints = false;
@@ -106,9 +113,17 @@ public class GeometryGraph
     return new SimpleMCSweepLineIntersector();
   }
 
-  public GeometryGraph(int argIndex, Geometry parentGeom) {
+  public GeometryGraph(int argIndex, Geometry parentGeom)
+  {
+    this(argIndex, parentGeom,
+         BoundaryNodeRule.OGC_SFS_BOUNDARY_RULE
+         );
+  }
+
+  public GeometryGraph(int argIndex, Geometry parentGeom, BoundaryNodeRule boundaryNodeRule) {
     this.argIndex = argIndex;
     this.parentGeom = parentGeom;
+    this.boundaryNodeRule = boundaryNodeRule;
     if (parentGeom != null) {
 //      precisionModel = parentGeom.getPrecisionModel();
 //      SRID = parentGeom.getSRID();
@@ -133,9 +148,12 @@ public class GeometryGraph
 //  public int getSRID() { return SRID; }
 
   public boolean hasTooFewPoints() { return hasTooFewPoints; }
+
   public Coordinate getInvalidPoint() { return invalidPoint; }
 
   public Geometry getGeometry() { return parentGeom; }
+
+  public BoundaryNodeRule getBoundaryNodeRule() { return boundaryNodeRule; }
 
   public Collection getBoundaryNodes()
   {
@@ -174,9 +192,8 @@ public class GeometryGraph
 
     // check if this Geometry should obey the Boundary Determination Rule
     // all collections except MultiPolygons obey the rule
-    if (g instanceof GeometryCollection
-        && ! (g instanceof MultiPolygon))
-            useBoundaryDeterminationRule = true;
+    if (g instanceof MultiPolygon)
+      useBoundaryDeterminationRule = false;
 
     if (g instanceof Polygon)                 addPolygon((Polygon) g);
                         // LineString also handles LinearRings
@@ -364,10 +381,9 @@ Debug.print(e.getEdgeIntersectionList());
   }
 
   /**
-   * Adds points using the mod-2 rule of SFS.  This is used to add the boundary
-   * points of dim-1 geometries (Curves/MultiCurves).  According to the SFS,
-   * an endpoint of a Curve is on the boundary
-   * iff if it is in the boundaries of an odd number of Geometries
+   * Adds candidate boundary points using the current {@link BoundaryNodeRule}.
+   * This is used to add the boundary
+   * points of dim-1 geometries (Curves/MultiCurves).
    */
   private void insertBoundaryPoint(int argIndex, Coordinate coord)
   {
@@ -381,7 +397,7 @@ Debug.print(e.getEdgeIntersectionList());
     if (loc == Location.BOUNDARY) boundaryCount++;
 
     // determine the boundary status of the point according to the Boundary Determination Rule
-    int newLoc = determineBoundary(boundaryCount);
+    int newLoc = determineBoundary(boundaryNodeRule, boundaryCount);
     lbl.setLocation(argIndex, newLoc);
   }
 

@@ -61,9 +61,9 @@ import com.vividsolutions.jts.noding.snapround.*;
  * The <b>end cap style</b> of a linear buffer may be specified. The
  * following end cap styles are supported:
  * <ul
- * <li>{@link CAP_ROUND} - the usual round end caps
- * <li>{@link CAP_BUTT} - end caps are truncated flat at the line ends
- * <li>{@link CAP_SQUARE} - end caps are squared off at the buffer distance beyond the line ends
+ * <li>{@link #CAP_ROUND} - the usual round end caps
+ * <li>{@link #CAP_BUTT} - end caps are truncated flat at the line ends
+ * <li>{@link #CAP_SQUARE} - end caps are squared off at the buffer distance beyond the line ends
  * </ul>
  * <p>
  *
@@ -193,7 +193,7 @@ public class BufferOp
 
   /**
    * Specifies the end cap style of the generated buffer.
-   * The styles supported are {@link CAP_ROUND}, {@link CAP_BUTT}, and {@link CAP_SQUARE}.
+   * The styles supported are {@link #CAP_ROUND}, {@link #CAP_BUTT}, and {@link #CAP_SQUARE}.
    * The default is CAP_ROUND.
    *
    * @param endCapStyle the end cap style to specify
@@ -204,11 +204,9 @@ public class BufferOp
   }
 
   /**
-   * Specifies the end cap style of the generated buffer.
-   * The styles supported are {@link CAP_ROUND}, {@link CAP_BUTT}, and {@link CAP_SQUARE}.
-   * The default is CAP_ROUND.
+   * Sets the number of segments used to approximate a angle fillet
    *
-   * @param endCapStyle the end cap style to specify
+   * @param quadrantSegments the number of segments in a fillet for a quadrant
    */
   public void setQuadrantSegments(int quadrantSegments)
   {
@@ -218,32 +216,12 @@ public class BufferOp
   /**
    * Returns the buffer computed for a geometry for a given buffer distance.
    *
-   * @param g the geometry to buffer
    * @param distance the buffer distance
    * @return the buffer of the input geometry
    */
   public Geometry getResultGeometry(double distance)
   {
     this.distance = distance;
-    computeGeometry();
-    return resultGeometry;
-  }
-
-  /**
-   * Comutes the buffer for a geometry for a given buffer distance
-   * and accuracy of approximation.
-   *
-   * @param g the geometry to buffer
-   * @param distance the buffer distance
-   * @param quadrantSegments the number of segments used to approximate a quarter circle
-   * @return the buffer of the input geometry
-   *
-   * @deprecated use setQuadrantSegments instead
-   */
-  public Geometry getResultGeometry(double distance, int quadrantSegments)
-  {
-    this.distance = distance;
-    setQuadrantSegments(quadrantSegments);
     computeGeometry();
     return resultGeometry;
   }

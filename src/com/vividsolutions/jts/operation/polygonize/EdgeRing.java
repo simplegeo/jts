@@ -80,7 +80,8 @@ public class EdgeRing {
       if (tryEnv.equals(testEnv))
         continue;
 
-      testPt = ptNotInList(testRing.getCoordinates(), tryRing.getCoordinates());
+//      testPt = ptNotInList(testRing.getCoordinates(), tryRing.getCoordinates());
+      testPt = CoordinateArrays.ptNotInList(testRing.getCoordinates(), tryRing.getCoordinates());
       if (tryEnv.contains(testEnv)
           && cga.isPointInRing(testPt, tryRing.getCoordinates()) )
         isContained = true;
@@ -99,14 +100,14 @@ public class EdgeRing {
    * Finds a point in a list of points which is not contained in another list of points
    * @param testPts the {@link Coordinate}s to test
    * @param pts an array of {@link Coordinate}s to test the input points against
-   * @return a {@link Coordinate} from <code>testPts</code> which is not in <code>pts</code>, '
-   * or <code>null</code>
+   * @return a {@link Coordinate} from <code>testPts</code> which is not in <code>pts</code>,
+   * @return null if there is no coordinate not in the list
    */
   public static Coordinate ptNotInList(Coordinate[] testPts, Coordinate[] pts)
   {
     for (int i = 0; i < testPts.length; i++) {
       Coordinate testPt = testPts[i];
-      if (isInList(testPt, pts))
+      if (! isInList(testPt, pts))
           return testPt;
     }
     return null;
@@ -124,9 +125,9 @@ public class EdgeRing {
   {
     for (int i = 0; i < pts.length; i++) {
         if (pt.equals(pts[i]))
-            return false;
+            return true;
     }
-    return true;
+    return false;
   }
   private GeometryFactory factory;
   private static CGAlgorithms cga = new CGAlgorithms();
@@ -177,7 +178,7 @@ public class EdgeRing {
   }
 
   /**
-   * Computes the {@link Polygon formed by this ring and any contained holes.
+   * Computes the {@link Polygon} formed by this ring and any contained holes.
    *
    * @return the {@link Polygon} formed by this ring and its holes.
    */

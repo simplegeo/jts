@@ -87,11 +87,11 @@ public class ConnectedInteriorTester {
     List splitEdges = new ArrayList();
     geomGraph.computeSplitEdges(splitEdges);
 
-    // polygonize the edges
+    // form the edges into rings
     PlanarGraph graph = new PlanarGraph(new OverlayNodeFactory());
     graph.addEdges(splitEdges);
-    setAllEdgesInResult(graph);
-    graph.linkAllDirectedEdges();
+    setInteriorEdgesInResult(graph);
+    graph.linkResultDirectedEdges();
     List edgeRings = buildEdgeRings(graph.getEdgeEnds());
 
     /**
@@ -110,16 +110,20 @@ public class ConnectedInteriorTester {
     return ! hasUnvisitedShellEdge(edgeRings);
   }
 
-  private void setAllEdgesInResult(PlanarGraph graph)
+  private void setInteriorEdgesInResult(PlanarGraph graph)
   {
     for (Iterator it = graph.getEdgeEnds().iterator(); it.hasNext(); ) {
       DirectedEdge de = (DirectedEdge) it.next();
-      de.setInResult(true);
+      if (de.getLabel().getLocation(0, Position.RIGHT) == Location.INTERIOR) {
+        de.setInResult(true);
+      }
     }
   }
 
   /**
-   * for all DirectedEdges in result, form them into EdgeRings
+   * Form DirectedEdges in graph into Minimal EdgeRings.
+   * (Minimal Edgerings must be used, because only they are guaranteed to provide
+   * a correct isHole computation)
    */
   private List buildEdgeRings(Collection dirEdges)
   {
@@ -127,9 +131,13 @@ public class ConnectedInteriorTester {
     for (Iterator it = dirEdges.iterator(); it.hasNext(); ) {
       DirectedEdge de = (DirectedEdge) it.next();
       // if this edge has not yet been processed
-      if (de.getEdgeRing() == null) {
-        EdgeRing er = new MaximalEdgeRing(de, geometryFactory, cga);
-        edgeRings.add(er);
+      if (de.isInResult()
+         && de.getEdgeRing() == null) {
+        MaximalEdgeRing er = new MaximalEdgeRing(de, geometryFactory, cga);
+
+        er.linkDirectedEdgesForMinimalEdgeRings();
+        List minEdgeRings = er.buildMinimalRings();
+        edgeRings.addAll(minEdgeRings);
       }
     }
     return edgeRings;
@@ -137,7 +145,9 @@ public class ConnectedInteriorTester {
 
   /**
    * Mark all the edges for the edgeRings corresponding to the shells
-   * of the input polygons.  Note only ONE ring gets marked for each shell.
+   * of the input polygons.
+   * Only ONE ring gets marked for each shell - if there are others which remain unmarked
+   * this indicates a disconnected interior.
    */
   private void visitShellInteriors(Geometry g, PlanarGraph graph)
   {
@@ -176,16 +186,15 @@ public class ConnectedInteriorTester {
 
     visitLinkedDirectedEdges(intDe);
   }
+
   protected void visitLinkedDirectedEdges(DirectedEdge start)
   {
     DirectedEdge startDe = start;
     DirectedEdge de = start;
-//Debug.println(de);
     do {
       Assert.isTrue(de != null, "found null Directed Edge");
       de.setVisited(true);
       de = de.getNext();
-//Debug.println(de);
     } while (de != startDe);
   }
 
@@ -203,14 +212,19 @@ public class ConnectedInteriorTester {
   {
     for (int i = 0; i < edgeRings.size(); i++) {
       EdgeRing er = (EdgeRing) edgeRings.get(i);
-      if (er.isHole()) continue;
+      // don't check hole rings
+      if (er.isHole())
+        continue;
       List edges = er.getEdges();
       DirectedEdge de = (DirectedEdge) edges.get(0);
       // don't check CW rings which are holes
+      // (MD - this check may now be irrelevant)
       if (de.getLabel().getLocation(0, Position.RIGHT) != Location.INTERIOR) continue;
 
-      // must have a CW ring which surrounds the INT of the area, so check all
-      // edges have been visited
+      /**
+       * the edgeRing is CW ring which surrounds the INT of the area, so check all
+       * edges have been visited.  If any are unvisited, this is a disconnected part of the interior
+       */
       for (int j = 0; j < edges.size(); j++) {
         de = (DirectedEdge) edges.get(j);
 //Debug.print("visted? "); Debug.println(de);

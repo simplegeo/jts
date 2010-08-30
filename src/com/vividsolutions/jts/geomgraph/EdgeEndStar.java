@@ -38,7 +38,7 @@ package com.vividsolutions.jts.geomgraph;
 import java.io.PrintStream;
 import java.util.*;
 import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.algorithm.SimplePointInAreaLocator;
+import com.vividsolutions.jts.algorithm.*;
 import com.vividsolutions.jts.util.*;
 
 /**
@@ -126,9 +126,9 @@ abstract public class EdgeEndStar
     return (EdgeEnd) edgeList.get(iNextCW);
   }
 
-  public void computeLabelling(GeometryGraph[] geom)
+  public void computeLabelling(GeometryGraph[] geomGraph)
   {
-    computeEdgeEndLabels();
+    computeEdgeEndLabels(geomGraph[0].getBoundaryNodeRule());
     // Propagate side labels  around the edges in the star
     // for each parent Geometry
 //Debug.print(this);
@@ -190,7 +190,7 @@ abstract public class EdgeEndStar
           }
           else {
             Coordinate p = e.getCoordinate();
-            loc = getLocation(geomi, p, geom);
+            loc = getLocation(geomi, p, geomGraph);
           }
           label.setAllLocationsIfNull(geomi, loc);
         }
@@ -201,12 +201,12 @@ abstract public class EdgeEndStar
 //Debug.printIfWatch(this);
   }
 
-  private void computeEdgeEndLabels()
+  private void computeEdgeEndLabels(BoundaryNodeRule boundaryNodeRule)
   {
     // Compute edge label for each EdgeEnd
     for (Iterator it = iterator(); it.hasNext(); ) {
       EdgeEnd ee = (EdgeEnd) it.next();
-      ee.computeLabel();
+      ee.computeLabel(boundaryNodeRule);
     }
   }
   int getLocation(int geomIndex, Coordinate p, GeometryGraph[] geom)
@@ -218,9 +218,9 @@ abstract public class EdgeEndStar
     return ptInAreaLocation[geomIndex];
   }
 
-  public boolean isAreaLabelsConsistent()
+  public boolean isAreaLabelsConsistent(GeometryGraph geomGraph)
   {
-    computeEdgeEndLabels();
+    computeEdgeEndLabels(geomGraph.getBoundaryNodeRule());
     return checkAreaLabelsConsistent(0);
   }
 

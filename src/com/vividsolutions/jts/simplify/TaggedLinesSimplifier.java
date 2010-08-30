@@ -4,8 +4,10 @@ import java.util.*;
 import com.vividsolutions.jts.algorithm.*;
 
 /**
- * Simplifies a collection of TaggedLineStrings, preserving topology
+ * Simplifies a collection of {@link TaggedLineString}s, preserving topology
  * (in the sense that no new intersections are introduced).
+ * This class is essentially just a container for the common
+ * indexes used by {@link TaggedLineStringSimplifier}.
  */
 public class TaggedLinesSimplifier
 {

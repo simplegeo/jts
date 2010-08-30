@@ -280,7 +280,8 @@ public abstract class AbstractSTRtree {
   }
 
   /**
-   *  Also builds the tree, if necessary.
+   * Removes an item from the tree.
+   * (Builds the tree, if necessary.)
    */
   protected boolean remove(Object searchBounds, Object item) {
     if (!built) { build(); }

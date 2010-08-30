@@ -47,7 +47,7 @@ import com.vividsolutions.jts.util.*;
 
 /**
  * A connected subset of the graph of
- * {@link DirectedEdges} and {@link Node}s.
+ * {@link DirectedEdge}s and {@link Node}s.
  * Its edges will generate either
  * <ul>
  * <li> a single polygon in the complete buffer, with zero or more holes, or

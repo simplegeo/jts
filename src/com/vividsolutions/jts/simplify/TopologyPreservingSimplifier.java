@@ -21,6 +21,8 @@ import com.vividsolutions.jts.util.Debug;
  * (although they may touch at fewer points)
  * </ul>
  *
+ * @author Martin Davis
+ *
  */
 public class TopologyPreservingSimplifier
 {
@@ -38,9 +40,7 @@ public class TopologyPreservingSimplifier
   public TopologyPreservingSimplifier(Geometry inputGeom)
   {
     this.inputGeom = inputGeom;
-    //TESTING: slightly faster, but probably not enough to bother with
-    //inputIndex = new LineSegmentIndex(new STRtree());
-  }
+ }
 
   /**
    * Sets the distance tolerance for the simplification.

@@ -77,6 +77,8 @@ public class Node
 
   protected boolean isSearchMatch(Interval itemInterval)
   {
+//    System.out.println(itemInterval + " overlaps " + interval + " : "
+//                       + itemInterval.overlaps(interval));
     return itemInterval.overlaps(interval);
   }
 

@@ -47,6 +47,7 @@ public class CommonBits {
   /**
    * Computes the bit pattern for the sign and exponent of a
    * double-precision number.
+   * 
    * @param num
    * @return the bit pattern for the sign and exponent
    */
@@ -61,7 +62,9 @@ public class CommonBits {
  * It does not count the hidden bit, which is always 1.
  * It does not determine whether the numbers have the same exponent - if they do
  * not, the value computed by this function is meaningless.
- * @param db
+ * 
+ * @param num1 the first number
+ * @param num2 the second number
  * @return the number of common most-significant mantissa bits
  */
   public static int numCommonMostSigMantissaBits(long num1, long num2)
@@ -78,8 +81,8 @@ public class CommonBits {
 
   /**
    * Zeroes the lower n bits of a bitstring.
+   * 
    * @param bits the bitstring to alter
-   * @param i the number of bits to zero
    * @return the zeroed bitstring
    */
   public static long zeroLowerBits(long bits, int nBits)
@@ -92,6 +95,7 @@ public class CommonBits {
 
   /**
    * Extracts the i'th bit of a bitstring.
+   * 
    * @param bits the bitstring to extract from
    * @param i the bit to extract
    * @return the value of the extracted bit

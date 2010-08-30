@@ -33,7 +33,7 @@
 package com.vividsolutions.jts.geom;
 
 import com.vividsolutions.jts.algorithm.CGAlgorithms;
-import com.vividsolutions.jts.operation.IsSimpleOp;
+import com.vividsolutions.jts.operation.BoundaryOp;
 
 /**
  *  Basic implementation of <code>LineString</code>.
@@ -164,21 +164,15 @@ public class LineString extends Geometry {
    return CGAlgorithms.length(points);
   }
 
-  public boolean isSimple()
-  {
-    return (new IsSimpleOp()).isSimple(this);
-  }
-
+  /**
+   * Gets the boundary of this geometry.
+   * The boundary of a lineal geometry is always a zero-dimensional geometry (which may be empty).
+   *
+   * @return the boundary geometry
+   * @see Geometry#getBoundary
+   */
   public Geometry getBoundary() {
-    if (isEmpty()) {
-      return getFactory().createGeometryCollection(null);
-    }
-    if (isClosed()) {
-      return getFactory().createMultiPoint((Coordinate[])null);
-    }
-    return getFactory().createMultiPoint(new Point[]{
-        getStartPoint(), getEndPoint()
-        });
+    return (new BoundaryOp(this)).getBoundary();
   }
 
   /**
@@ -240,6 +234,19 @@ public class LineString extends Geometry {
       }
   }
 
+  public void apply(CoordinateSequenceFilter filter) 
+  {
+    if (points.size() == 0)
+      return;
+    for (int i = 0; i < points.size(); i++) {
+      filter.filter(points, i);
+      if (filter.isDone())
+        break;
+    }
+    if (filter.isGeometryChanged())
+      geometryChanged();
+  }
+
   public void apply(GeometryFilter filter) {
     filter.filter(this);
   }
@@ -248,6 +255,12 @@ public class LineString extends Geometry {
     filter.filter(this);
   }
 
+  /**
+   * Creates and returns a full copy of this {@link LineString} object.
+   * (including all coordinates contained by it).
+   *
+   * @return a clone of this instance
+   */
   public Object clone() {
     LineString ls = (LineString) super.clone();
     ls.points = (CoordinateSequence) points.clone();

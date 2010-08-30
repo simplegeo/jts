@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
 /**
  * An <code>BinTree</code> (or "Binary Interval Tree")
  * is a 1-dimensional version of a quadtree.
@@ -48,6 +49,14 @@ import java.util.List;
  * This implementation does not require specifying the extent of the inserted
  * items beforehand.  It will automatically expand to accomodate any extent
  * of dataset.
+ * <p>
+ * The bintree structure is used to provide a primary filter
+ * for interval queries.  The query() method returns a list of
+ * all objects which <i>may</i> intersect the query interval.
+ * Note that it may return objects which do not in fact intersect.
+ * A secondary filter is required to test for exact intersection.
+ * Of course, this secondary filter may consist of other tests besides
+ * intersection, such as testing other kinds of spatial relationships.
  * <p>
  * This index is different to the Interval Tree of Edelsbrunner
  * or the Segment Tree of Bentley.

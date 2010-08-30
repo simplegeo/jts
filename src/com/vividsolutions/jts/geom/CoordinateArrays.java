@@ -56,7 +56,7 @@ public class CoordinateArrays {
   {
     for (int i = 0; i < testPts.length; i++) {
       Coordinate testPt = testPts[i];
-      if (CoordinateArrays.indexOf(testPt, pts) >= 0)
+      if (CoordinateArrays.indexOf(testPt, pts) < 0)
           return testPt;
     }
     return null;

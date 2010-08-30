@@ -13,7 +13,7 @@ for %%i in (..\lib\*.*) do (
  call :setclass
 )  
 
-java com.vividsolutions.jtstest.testrunner.TopologyTestApp -Files ..\test\validate
+java com.vividsolutions.jtstest.testrunner.TopologyTestApp -Files ..\testxml\validate ..\testxml\general
 pause
 
 goto :eof

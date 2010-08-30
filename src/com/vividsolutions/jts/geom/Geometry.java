@@ -38,9 +38,11 @@ import java.util.Iterator;
 
 import com.vividsolutions.jts.algorithm.*;
 import com.vividsolutions.jts.io.WKTWriter;
+import com.vividsolutions.jts.operation.*;
 import com.vividsolutions.jts.operation.buffer.BufferOp;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 import com.vividsolutions.jts.operation.overlay.OverlayOp;
+import com.vividsolutions.jts.operation.overlay.snap.SnapIfNeededOverlayOp;
 import com.vividsolutions.jts.operation.predicate.RectangleIntersects;
 import com.vividsolutions.jts.operation.predicate.RectangleContains;
 import com.vividsolutions.jts.operation.relate.RelateOp;
@@ -130,11 +132,6 @@ public abstract class Geometry
 {
     private static final long serialVersionUID = 8763622679187376702L;
 
-  /**
-   *  The bounding box of this <code>Geometry</code>.
-   */
-  protected Envelope envelope;
-
   private final static Class[] sortedClasses = new Class[] {
       Point.class,
       MultiPoint.class,
@@ -152,20 +149,30 @@ public abstract class Geometry
     }
   };
 
-  public Geometry(GeometryFactory factory) {
-    this.factory = factory;
-    this.SRID = factory.getSRID();
-  }
+  /**
+   *  The bounding box of this <code>Geometry</code>.
+   */
+  protected Envelope envelope;
 
-  private GeometryFactory factory;
-
-  // MD - no longer used.  Remove in next version
-  //private static final GeometryFactory INTERNAL_GEOMETRY_FACTORY = new GeometryFactory();
+  /**
+   * The {@link GeometryFactory} used to create this Geometry
+   */
+  protected final GeometryFactory factory;
 
   /**
    *  The ID of the Spatial Reference System used by this <code>Geometry</code>
    */
   protected int SRID;
+
+  /**
+   * Creates a new <tt>Geometry</tt> via the specified GeometryFactory.
+   *
+   * @param factory
+   */
+  public Geometry(GeometryFactory factory) {
+    this.factory = factory;
+    this.SRID = factory.getSRID();
+  }
 
   /**
    *  Returns the name of this object's <code>com.vivid.jts.geom</code>
@@ -174,9 +181,6 @@ public abstract class Geometry
    *@return    the name of this <code>Geometry</code>s most specific <code>com.vividsolutions.jts.geom</code>
    *      interface
    */
-  //I wonder if we need this method, now that we have renamed the classes to
-  //what their old interfaces were named. Now we can perhaps simply use
-  //getClass().getName(). Who calls this method anyway? [Jon Aquino]
   public abstract String getGeometryType();
 
   /**
@@ -354,7 +358,12 @@ public abstract class Geometry
    *      self-tangency, self-intersection or other anomalous points
    * @see #isValid
    */
-  public abstract boolean isSimple();
+  public boolean isSimple()
+  {
+    checkNotGeometryCollection(this);
+    IsSimpleOp op = new IsSimpleOp(this);
+    return op.isSimple();
+  }
 
   /**
    *  Tests the validity of this <code>Geometry</code>.
@@ -403,11 +412,13 @@ public abstract class Geometry
     double envDist = getEnvelopeInternal().distance(geom.getEnvelopeInternal());
     if (envDist > distance)
       return false;
-    // NOTE: this could be implemented more efficiently
+    return DistanceOp.isWithinDistance(this, geom, distance);
+    /*
     double geomDist = this.distance(geom);
     if (geomDist > distance)
       return false;
     return true;
+    */
   }
 
   public boolean isRectangle()
@@ -510,11 +521,15 @@ public abstract class Geometry
    *      or not this object is the empty geometry
    */
   public abstract int getDimension();
+
   /**
-   *  Returns the boundary, or the empty geometry if this <code>Geometry</code>
-   *  is empty. For a discussion of this function, see the OpenGIS Simple
-   *  Features Specification. As stated in SFS Section 2.1.13.1, "the boundary
-   *  of a Geometry is a set of Geometries of the next lower dimension."
+   * Returns the boundary, or an empty geometry of appropriate dimension
+   * if this <code>Geometry</code>  is empty.
+   * (In the case of zero-dimensional geometries, '
+   * an empty GeometryCollection is returned.)
+   * For a discussion of this function, see the OpenGIS Simple
+   * Features Specification. As stated in SFS Section 2.1.13.1, "the boundary
+   * of a Geometry is a set of Geometries of the next lower dimension."
    *
    *@return    the closure of the combinatorial boundary of this <code>Geometry</code>
    */
@@ -841,7 +856,7 @@ public abstract class Geometry
    * (<code>coveredBy</code> is the inverse of <code>covers</code>)
    * </ul>
    * Note the difference between <code>coveredBy</code> and <code>within</code>
-   * - <code>coveredBy</code> is a more inclusive relation
+   * - <code>coveredBy</code> is a more inclusive relation.
    *
    *@param  g  the <code>Geometry</code> with which to compare this <code>Geometry</code>
    *@return        <code>true</code> if this <code>Geometry</code> is covered by <code>g</code>
@@ -943,6 +958,8 @@ public abstract class Geometry
    *@param  distance  the width of the buffer (may be positive, negative or 0)
    *@return an area geometry representing the buffer region
    *
+   * @throws TopologyException if a robustness error occurs
+   *
    * @see #buffer(double, int)
    * @see #buffer(double, int, int)
    */
@@ -963,6 +980,8 @@ public abstract class Geometry
    *@param  distance  the width of the buffer (may be positive, negative or 0)
    *@param quadrantSegments the number of line segments used to represent a quadrant of a circle
    *@return an area geometry representing the buffer region
+   *
+   * @throws TopologyException if a robustness error occurs
    *
    * @see #buffer(double)
    * @see #buffer(double, int, int)
@@ -994,6 +1013,8 @@ public abstract class Geometry
    *@param quadrantSegments the number of line segments used to represent a quadrant of a circle
    *@param endCapStyle the end cap style to use
    *@return an area geometry representing the buffer region
+   *
+   * @throws TopologyException if a robustness error occurs
    *
    * @see #buffer(double)
    * @see #buffer(double, int)
@@ -1045,11 +1066,20 @@ public abstract class Geometry
    *      intersection
    * @return        the points common to the two <code>Geometry</code>s
    * @throws TopologyException if a robustness error occurs
+   * @throws IllegalArgumentException if either input is a non-empty GeometryCollection
    */
-  public Geometry intersection(Geometry other) {
+  public Geometry intersection(Geometry other)
+  {
+  	/**
+  	 * TODO: MD - add optimization for P-A case using Point-In-Polygon
+  	 */
+    // special case: if one input is empty ==> empty
+    if (this.isEmpty()) return this.getFactory().createGeometryCollection(null);
+    if (other.isEmpty()) return this.getFactory().createGeometryCollection(null);
+
     checkNotGeometryCollection(this);
     checkNotGeometryCollection(other);
-    return OverlayOp.overlayOp(this, other, OverlayOp.INTERSECTION);
+    return SnapIfNeededOverlayOp.overlayOp(this, other, OverlayOp.INTERSECTION);
   }
 
   /**
@@ -1060,11 +1090,17 @@ public abstract class Geometry
    *@return        a set combining the points of this <code>Geometry</code> and
    *      the points of <code>other</code>
    * @throws TopologyException if a robustness error occurs
+   * @throws IllegalArgumentException if either input is a non-empty GeometryCollection
    */
-  public Geometry union(Geometry other) {
+  public Geometry union(Geometry other)
+  {
+    // special case: if either input is empty ==> other input
+    if (this.isEmpty()) return (Geometry) other.clone();
+    if (other.isEmpty()) return (Geometry) clone();
+
     checkNotGeometryCollection(this);
     checkNotGeometryCollection(other);
-    return OverlayOp.overlayOp(this, other, OverlayOp.UNION);
+    return SnapIfNeededOverlayOp.overlayOp(this, other, OverlayOp.UNION);
   }
 
   /**
@@ -1077,11 +1113,17 @@ public abstract class Geometry
    *@return        the point set difference of this <code>Geometry</code> with
    *      <code>other</code>
    * @throws TopologyException if a robustness error occurs
+   * @throws IllegalArgumentException if either input is a non-empty GeometryCollection
    */
-  public Geometry difference(Geometry other) {
+  public Geometry difference(Geometry other)
+  {
+    // special case: if A.isEmpty ==> empty; if B.isEmpty ==> A
+    if (this.isEmpty()) return this.getFactory().createGeometryCollection(null);
+    if (other.isEmpty()) return (Geometry) clone();
+
     checkNotGeometryCollection(this);
     checkNotGeometryCollection(other);
-    return OverlayOp.overlayOp(this, other, OverlayOp.DIFFERENCE);
+    return SnapIfNeededOverlayOp.overlayOp(this, other, OverlayOp.DIFFERENCE);
   }
 
   /**
@@ -1095,11 +1137,17 @@ public abstract class Geometry
    *@return        the point set symmetric difference of this <code>Geometry</code>
    *      with <code>other</code>
    * @throws TopologyException if a robustness error occurs
+   * @throws IllegalArgumentException if either input is a non-empty GeometryCollection
    */
-  public Geometry symDifference(Geometry other) {
+  public Geometry symDifference(Geometry other)
+  {
+    // special case: if either input is empty ==> other input
+    if (this.isEmpty()) return (Geometry) other.clone();
+    if (other.isEmpty()) return (Geometry) clone();
+
     checkNotGeometryCollection(this);
     checkNotGeometryCollection(other);
-    return OverlayOp.overlayOp(this, other, OverlayOp.SYMDIFFERENCE);
+    return SnapIfNeededOverlayOp.overlayOp(this, other, OverlayOp.SYMDIFFERENCE);
   }
 
   /**
@@ -1147,8 +1195,10 @@ public abstract class Geometry
 
   /**
    *  Performs an operation with or on this <code>Geometry</code>'s
-   *  coordinates. If you are using this method to modify the geometry, be sure
-   *  to call #geometryChanged() afterwards. Note that you cannot use this
+   *  coordinates. 
+   *  If this method modifies any coordinate values,
+   *  #geometryChanged() must be called to update the geometry state. 
+   *  Note that you cannot use this
    *  method to
    *  modify this Geometry if its underlying CoordinateSequence's #get method
    *  returns a copy of the Coordinate, rather than the actual Coordinate stored
@@ -1158,6 +1208,16 @@ public abstract class Geometry
    *      coordinates
    */
   public abstract void apply(CoordinateFilter filter);
+
+  /**
+   *  Performs an operation on the coordinates in this <code>Geometry</code>'s
+   *  {@link CoordinateSequence}s. 
+   *  If this method modifies any coordinate values,
+   *  #geometryChanged() must be called to update the geometry state. 
+   *
+   *@param  filter  the filter to apply
+   */
+  public abstract void apply(CoordinateSequenceFilter filter);
 
   /**
    *  Performs an operation with or on this <code>Geometry</code> and its
@@ -1180,6 +1240,14 @@ public abstract class Geometry
    */
   public abstract void apply(GeometryComponentFilter filter);
 
+  /**
+   * Creates and returns a full copy of this {@link Geometry} object
+   * (including all coordinates contained by it).
+   * Subclasses are responsible for overriding this method and copying
+   * their internal data.  Overrides should call this method first.
+   *
+   * @return a clone of this instance
+   */
   public Object clone() {
     try {
       Geometry clone = (Geometry) super.clone();

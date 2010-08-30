@@ -183,7 +183,7 @@ public class DirectedEdge
    * <li>first compare the quadrants. If the quadrants are different, it it
    * trivial to determine which vector is "greater".
    * <li>if the vectors lie in the same quadrant, the robust
-   * {@link RobustCGAlgorithms#computeOrientation(Coordinate, Coordinate, Coordinate)}
+   * {@link CGAlgorithms#computeOrientation(Coordinate, Coordinate, Coordinate)}
    * function can be used to decide the relative orientation of the vectors.
    * </ul>
    */
@@ -204,7 +204,7 @@ public class DirectedEdge
    * <li>first compare the quadrants. If the quadrants are different, it it
    * trivial to determine which vector is "greater".
    * <li>if the vectors lie in the same quadrant, the robust
-   * {@link RobustCGAlgorithms#computeOrientation(Coordinate, Coordinate, Coordinate)}
+   * {@link CGAlgorithms#computeOrientation(Coordinate, Coordinate, Coordinate)}
    * function can be used to decide the relative orientation of the vectors.
    * </ul>
    */
