@@ -67,6 +67,12 @@ public class OffsetCurveBuilder
   private static final double CURVE_VERTEX_SNAP_DISTANCE_FACTOR = 1.0E-6;
   
   /**
+   * Factor which controls how close offset segments can be to
+   * skip adding a filler or mitre.
+   */
+  private static final double OFFSET_SEGMENT_SEPARATION_FACTOR = 1.0E-3;
+  
+  /**
    * Factor which controls how close curve vertices on inside turns can be to be snapped 
    */
   private static final double INSIDE_TURN_VERTEX_SNAP_DISTANCE_FACTOR = 1.0E-3;
@@ -207,9 +213,10 @@ public class OffsetCurveBuilder
    * Use a value which results in a potential distance error which is
    * significantly less than the error due to 
    * the quadrant segment discretization.
-   * For QS = 8 a value of 400 is reasonable.
+   * For QS = 8 a value of 100 is reasonable.
+   * This should produce a maximum of 1% distance error.
    */
-  private static final double SIMPLIFY_FACTOR = 400.0;
+  private static final double SIMPLIFY_FACTOR = 100.0;
   
   /**
    * Computes the distance tolerance to use during input
@@ -358,6 +365,10 @@ public class OffsetCurveBuilder
   
   private void addCollinear(boolean addStartPoint)
   {
+  	/**
+  	 * This test could probably be done more efficiently,
+  	 * but the situation of exact collinearity should be fairly rare.
+  	 */
 		li.computeIntersection(s0, s1, s1, s2);
 		int numInt = li.getIntersectionNum();
 		/**
@@ -395,14 +406,16 @@ public class OffsetCurveBuilder
   private void addOutsideTurn(int orientation, boolean addStartPoint)
   {
   	/**
-  	 * If offset endpoints are very close together, just snap them together.
-  	 * This avoids problems with computing mitre corners in degenerate cases.
+  	 * Heuristic: If offset endpoints are very close together, 
+  	 * just use one of them as the corner vertex.
+  	 * This avoids problems with computing mitre corners in the case
+  	 * where the two segments are almost parallel 
+  	 * (which is hard to compute a robust intersection for).
   	 */
-    if (offset0.p1.distance(offset1.p0) < distance * CURVE_VERTEX_SNAP_DISTANCE_FACTOR) {
+    if (offset0.p1.distance(offset1.p0) < distance * OFFSET_SEGMENT_SEPARATION_FACTOR) {
     	vertexList.addPt(offset0.p1);
     	return;
     }
-  	
   	
 		if (bufParams.getJoinStyle() == BufferParameters.JOIN_MITRE) {
 			addMitreJoin(s1, offset0, offset1, distance);
@@ -420,7 +433,7 @@ public class OffsetCurveBuilder
   }
   
   /**
-   * Adds the offset points for an inside (concave) turn
+   * Adds the offset points for an inside (concave) turn.
    * 
    * @param orientation
    * @param addStartPoint
@@ -437,13 +450,22 @@ public class OffsetCurveBuilder
       /**
        * If no intersection is detected, it means the angle is so small and/or the offset so
        * large that the offsets segments don't intersect. In this case we must
-       * add a "closing segment" to make sure the buffer line is continuous
+       * add a "closing segment" to make sure the buffer curve is continuous,
+       * fairly smooth (e.g. no sharp reversals in direction)
        * and tracks the buffer correctly around the corner. The curve connects
        * the endpoints of the segment offsets to points
        * which lie toward the centre point of the corner.
        * The joining curve will not appear in the final buffer outline, since it
        * is completely internal to the buffer polygon.
        * 
+       * In complex buffer cases the closing segment may cut across many other
+       * segments in the generated offset curve.  In order to improve the 
+       * performance of the noding, the closing segment should be kept as short as possible.
+       * (But not too short, since that would defeat it's purpose).
+       * This is the purpose of the closingSegFactor heuristic value.
+       */ 
+    	
+       /** 
        * The intersection test above is vulnerable to robustness errors; i.e. it
        * may be that the offsets should intersect very close to their endpoints,
        * but aren't reported as such due to rounding. To handle this situation
@@ -458,7 +480,9 @@ public class OffsetCurveBuilder
         // add endpoint of this segment offset
         vertexList.addPt(offset0.p1);
         
-        // add closing segments of required length
+        /**
+         * Add "closing segment" of required length.
+         */
         if (closingSegFactor > 0) {
           Coordinate mid0 = new Coordinate((closingSegFactor * offset0.p1.x + s1.x)/(closingSegFactor + 1), 
               (closingSegFactor*offset0.p1.y + s1.y)/(closingSegFactor + 1));
@@ -577,10 +601,10 @@ public class OffsetCurveBuilder
   	boolean isMitreWithinLimit = true;
   	Coordinate intPt = null;
   
-  	/*
-  	 * This computation is unstable if the offset segments are nearly collinear, 
-  	 * but this case should be eliminated earlier by the check if 
-  	 * the offset segment endpoints are almost coincident
+  	/**
+  	 * This computation is unstable if the offset segments are nearly collinear.
+  	 * Howver, this situation should have been eliminated earlier by the check for 
+  	 * whether the offset segment endpoints are almost coincident
   	 */
   	try {
   	 intPt = HCoordinate.intersection(offset0.p0, 

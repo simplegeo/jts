@@ -89,7 +89,7 @@ import java.util.ArrayList;
  *
  * <i>WKTPolygon:</i> <b>POLYGON</b> <i>CoordinateSequenceList</i>
  *
- * <i>WKTMultiPoint:</i> <b>MULTIPOINT</b> <i>CoordinateSequence</i>
+ * <i>WKTMultiPoint:</i> <b>MULTIPOINT</b> <i>CoordinateSingletonList</i>
  *
  * <i>WKTMultiLineString:</i> <b>MULTILINESTRING</b> <i>CoordinateSequenceList</i>
  *
@@ -99,11 +99,21 @@ import java.util.ArrayList;
  * <i>WKTGeometryCollection: </i>
  *         <b>GEOMETRYCOLLECTION (</b> <i>WKTGeometry {</i> , <i>WKTGeometry }</i> <b>)</b>
  *
+ * <i>CoordinateSingletonList:</i>
+ *         <b>(</b> <i>CoordinateSingleton {</i> <b>,</b> <i>CoordinateSingleton }</i> <b>)</b>
+ *         | <b>EMPTY</b>
+ *         
+ * <i>CoordinateSingleton:</i>
+ *         <b>(</b> <i>Coordinate <b>)</b>
+ *         | <b>EMPTY</b>
+ *
  * <i>CoordinateSequenceList:</i>
  *         <b>(</b> <i>CoordinateSequence {</i> <b>,</b> <i>CoordinateSequence }</i> <b>)</b>
+ *         | <b>EMPTY</b>
  *
  * <i>CoordinateSequence:</i>
  *         <b>(</b> <i>Coordinate {</i> , <i>Coordinate }</i> <b>)</b>
+ *         | <b>EMPTY</b>
  *
  * <i>Coordinate:
  *         Number Number Number<sub>opt</sub></i>
@@ -210,23 +220,34 @@ public class WKTReader
    *@throws  IOException     if an I/O error occurs
    *@throws  ParseException  if an unexpected token was encountered
    */
-  private Coordinate[] getCoordinates()
-      throws IOException, ParseException
-  {
-    String nextToken = getNextEmptyOrOpener();
-    if (nextToken.equals(EMPTY)) {
-      return new Coordinate[]{};
-    }
-    ArrayList coordinates = new ArrayList();
-    coordinates.add(getPreciseCoordinate());
-    nextToken = getNextCloserOrComma();
-    while (nextToken.equals(COMMA)) {
-      coordinates.add(getPreciseCoordinate());
-      nextToken = getNextCloserOrComma();
-    }
-    Coordinate[] array = new Coordinate[coordinates.size()];
-    return (Coordinate[]) coordinates.toArray(array);
-  }
+  private Coordinate[] getCoordinates() throws IOException, ParseException {
+		String nextToken = getNextEmptyOrOpener();
+		if (nextToken.equals(EMPTY)) {
+			return new Coordinate[] {};
+		}
+		ArrayList coordinates = new ArrayList();
+		coordinates.add(getPreciseCoordinate());
+		nextToken = getNextCloserOrComma();
+		while (nextToken.equals(COMMA)) {
+			coordinates.add(getPreciseCoordinate());
+			nextToken = getNextCloserOrComma();
+		}
+		Coordinate[] array = new Coordinate[coordinates.size()];
+		return (Coordinate[]) coordinates.toArray(array);
+	}
+
+	private Coordinate[] getCoordinatesNoLeftParen() throws IOException, ParseException {
+		String nextToken = null;
+		ArrayList coordinates = new ArrayList();
+		coordinates.add(getPreciseCoordinate());
+		nextToken = getNextCloserOrComma();
+		while (nextToken.equals(COMMA)) {
+			coordinates.add(getPreciseCoordinate());
+			nextToken = getNextCloserOrComma();
+		}
+		Coordinate[] array = new Coordinate[coordinates.size()];
+		return (Coordinate[]) coordinates.toArray(array);
+	}
 
   private Coordinate getPreciseCoordinate()
       throws IOException, ParseException
@@ -364,6 +385,21 @@ public class WKTReader
   }
 
   /**
+   *  Returns the next word in the stream.
+   *
+   *@param  tokenizer        tokenizer over a stream of text in Well-known Text
+   *      format. The next token must be a word.
+   *@return                  the next word in the stream as uppercase text
+   *@throws  ParseException  if the next token is not a word
+   *@throws  IOException     if an I/O error occurs
+   */
+  private String lookaheadWord() throws IOException, ParseException {
+  	String nextWord = getNextWord();
+  	tokenizer.pushBack();
+    return nextWord;
+  }
+
+  /**
    * Throws a formatted ParseException for the current token.
    *
    * @param expected a description of what was expected
@@ -424,7 +460,7 @@ public class WKTReader
     	return null;
     }
     
-    if (type.equals("POINT")) {
+    if (type.equalsIgnoreCase("POINT")) {
       return readPointText();
     }
     else if (type.equalsIgnoreCase("LINESTRING")) {
@@ -503,8 +539,16 @@ public class WKTReader
     return geometryFactory.createLinearRing(getCoordinates());
   }
 
+  /*
+  private MultiPoint OLDreadMultiPointText() throws IOException, ParseException {
+    return geometryFactory.createMultiPoint(toPoints(getCoordinates()));
+  }
+  */
+  
+  private static final boolean ALLOW_OLD_JTS_MULTIPOINT_SYNTAX = true;
+
   /**
-   *  Creates a <code>MultiPoint</code> using the next token in the stream.
+   *  Creates a <code>MultiPoint</code> using the next tokens in the stream.
    *
    *@param  tokenizer        tokenizer over a stream of text in Well-known Text
    *      format. The next tokens must form a &lt;MultiPoint Text&gt;.
@@ -513,8 +557,33 @@ public class WKTReader
    *@throws  IOException     if an I/O error occurs
    *@throws  ParseException  if an unexpected token was encountered
    */
-  private MultiPoint readMultiPointText() throws IOException, ParseException {
-    return geometryFactory.createMultiPoint(toPoints(getCoordinates()));
+  private MultiPoint readMultiPointText() throws IOException, ParseException 
+  {
+    String nextToken = getNextEmptyOrOpener();
+    if (nextToken.equals(EMPTY)) {
+      return geometryFactory.createMultiPoint(new Point[0]);
+    }
+    
+    // check for old-style JTS syntax and parse it if present
+  	// MD 2009-02-21 - this is only provided for backwards compatibility for a few versions
+  	if (ALLOW_OLD_JTS_MULTIPOINT_SYNTAX) {
+  		String nextWord = lookaheadWord();
+  		if (nextWord != L_PAREN) {
+  			return geometryFactory.createMultiPoint(toPoints(getCoordinatesNoLeftParen()));
+  		}
+  	}
+  	
+    ArrayList points = new ArrayList();
+    Point point = readPointText();
+    points.add(point);
+    nextToken = getNextCloserOrComma();
+    while (nextToken.equals(COMMA)) {
+    	point = readPointText();
+      points.add(point);
+      nextToken = getNextCloserOrComma();
+    }
+    Point[] array = new Point[points.size()];
+    return geometryFactory.createMultiPoint((Point[]) points.toArray(array));
   }
 
   /**

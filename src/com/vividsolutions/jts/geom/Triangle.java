@@ -87,6 +87,10 @@ public class Triangle
    * Computes the circumcentre of a triangle.
    * The circumcentre is the centre of the circumcircle,
    * the smallest circle which encloses the triangle.
+   * It is also the common intersection point of the
+   * perpendicular bisectors of the sides of the triangle,
+   * and is the only point which has equal distance to all three
+   * vertices of the triangle.
    *
    * @param a a vertx of the triangle
    * @param b a vertx of the triangle
@@ -313,7 +317,7 @@ public class Triangle
 
   /**
    * Computes the incentre of a triangle.
-   * The <i>inCentre</i> of a triangle is the point which is equidistant
+   * The <i>incentre</i> of a triangle is the point which is equidistant
    * from the sides of the triangle.
    * It is also the point at which the bisectors
    * of the triangle's angles meet.

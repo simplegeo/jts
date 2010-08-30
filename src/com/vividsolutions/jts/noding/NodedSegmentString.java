@@ -36,6 +36,8 @@ package com.vividsolutions.jts.noding;
 import java.util.*;
 import com.vividsolutions.jts.algorithm.LineIntersector;
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
+import com.vividsolutions.jts.io.WKTWriter;
 
 /**
  * Represents a list of contiguous line segments,
@@ -52,6 +54,11 @@ import com.vividsolutions.jts.geom.Coordinate;
 public class NodedSegmentString
 	implements NodableSegmentString
 {
+	/**
+	 * 
+	 * @param segStrings a Collection of NodedSegmentStrings
+	 * @return a Collection of NodedSegmentStrings representing the substrings
+	 */
   public static List getNodedSubstrings(Collection segStrings)
   {
     List resultEdgelist = new ArrayList();
@@ -59,7 +66,12 @@ public class NodedSegmentString
     return resultEdgelist;
   }
 
-  public static void getNodedSubstrings(Collection segStrings, Collection resultEdgelist)
+	/**
+	 * 
+	 * @param segStrings a Collection of NodedSegmentStrings
+	 * @param resultEdgelist a List which will collect the NodedSegmentStrings representing the substrings
+	 */
+ public static void getNodedSubstrings(Collection segStrings, Collection resultEdgelist)
   {
     for (Iterator i = segStrings.iterator(); i.hasNext(); ) {
       NodedSegmentString ss = (NodedSegmentString) i.next();
@@ -190,4 +202,9 @@ public class NodedSegmentString
 		SegmentNode ei = nodeList.add(intPt, normalizedSegmentIndex);
 		return ei;
 	}
+  
+  public String toString()
+  {
+  	return WKTWriter.toLineString(new CoordinateArraySequence(pts));
+  }
 }

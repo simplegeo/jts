@@ -275,6 +275,8 @@ public class LineSegment
    * @param offsetDistance the distance the point is offset from the segment
    *    (positive is to the left, negative is to the right)
    * @return the point at that distance and offset
+   * 
+   * @throws IllegalStateException if the segment has zero length
    */
   public Coordinate pointAlongOffset(double segmentLengthFraction, double offsetDistance)
   {
@@ -285,9 +287,16 @@ public class LineSegment
     double dx = p1.x - p0.x;
     double dy = p1.y - p0.y;
     double len = Math.sqrt(dx * dx + dy * dy);
-    // u is the vector that is the length of the offset, in the direction of the segment
-    double ux = offsetDistance * dx / len;
-    double uy = offsetDistance * dy / len;
+    double ux = 0.0;
+    double uy = 0.0;
+    if (offsetDistance != 0.0) {
+      if (len <= 0.0)
+        throw new IllegalStateException("Cannot compute offset from zero-length line segment");
+
+      // u is the vector that is the length of the offset, in the direction of the segment
+      ux = offsetDistance * dx / len;
+      uy = offsetDistance * dy / len;
+    }
     
     // the offset point is the seg point plus the offset vector rotated 90 degrees CCW
     double offsetx = segx - uy;
@@ -481,7 +490,7 @@ public class LineSegment
    * more information is required about the details of the intersection,
    * the {@link RobustLineIntersector} class should be used.
    *
-   * @param line
+   * @param line a line segment
    * @return an intersection point, or <code>null</code> if there is none
    * 
    * @see RobustLineIntersector
@@ -495,6 +504,45 @@ public class LineSegment
     return null;
   }
 
+  /**
+   * Computes the intersection point of the lines defined
+   * by two segments, if there is one.
+   * There may be 0, 1 or an infinite number of intersection points 
+   * between two lines.
+   * If there is a unique intersection point, it is returned. 
+   * Otherwise, <tt>null</tt> is returned.
+   * If more information is required about the details of the intersection,
+   * the {@link RobustLineIntersector} class should be used.
+   *
+   * @param line a line segment defining a straight line
+   * @return an intersection point, or <code>null</code> if there is none
+   * or an infinite number
+   * 
+   * @see RobustLineIntersector
+   */
+  public Coordinate lineIntersection(LineSegment line)
+  {
+    try {
+      Coordinate intPt = HCoordinate.intersection(p0, p1, line.p0, line.p1);
+      return intPt;
+    }
+    catch (NotRepresentableException ex) {
+      // eat this exception, and return null;
+    }
+    return null;
+  }
+
+  /**
+   * Creates a LineString with the same coordinates as this segment
+   * 
+   * @param geomFactory the geometery factory to use
+   * @return a LineString with the same geometry as this segment
+   */
+  public LineString toGeometry(GeometryFactory geomFactory)
+  {
+    return geomFactory.createLineString(new Coordinate[] { p0, p1 });
+  }
+  
   /**
    *  Returns <code>true</code> if <code>other</code> has the same values for
    *  its points.
@@ -511,6 +559,23 @@ public class LineSegment
     return p0.equals(other.p0) && p1.equals(other.p1);
   }
 
+  /**
+   * Gets a hashcode for this object.
+   * 
+   * @return a hashcode for this object
+   */
+  public int hashCode() {
+    long bits0 = java.lang.Double.doubleToLongBits(p0.x);
+    bits0 ^= java.lang.Double.doubleToLongBits(p0.y) * 31;
+    int hash0 = (((int) bits0) ^ ((int) (bits0  >> 32)));
+    
+    long bits1 = java.lang.Double.doubleToLongBits(p1.x);
+    bits1 ^= java.lang.Double.doubleToLongBits(p1.y) * 31;
+    int hash1 = (((int) bits1) ^ ((int) (bits1  >> 32)));
+
+    // XOR is supposed to be a good way to combine hashcodes
+    return hash0 ^ hash1;
+  }
 
   /**
    *  Compares this object with the specified object for order.

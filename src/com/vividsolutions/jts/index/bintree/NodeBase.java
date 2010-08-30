@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.vividsolutions.jts.geom.Envelope;
+
 
 /**
  * The base class for nodes in a {@link Bintree}.
@@ -87,21 +89,73 @@ public abstract class NodeBase {
   }
   protected abstract boolean isSearchMatch(Interval interval);
 
-  public List addAllItemsFromOverlapping(Interval interval, Collection resultItems)
+  /**
+   * Adds items in the tree which potentially overlap the query interval
+   * to the given collection.
+   * If the query interval is <tt>null</tt>, add all items in the tree.
+   * 
+   * @param interval a query nterval, or null
+   * @param resultItems the candidate items found
+   */
+  public void addAllItemsFromOverlapping(Interval interval, Collection resultItems)
   {
-    if (! isSearchMatch(interval))
-      return items;
+    if (interval != null && ! isSearchMatch(interval))
+      return;
 
     // some of these may not actually overlap - this is allowed by the bintree contract
     resultItems.addAll(items);
 
+    if (subnode[0] != null) subnode[0].addAllItemsFromOverlapping(interval, resultItems);
+    if (subnode[1] != null) subnode[1].addAllItemsFromOverlapping(interval, resultItems);
+  }
+
+  /**
+   * Removes a single item from this subtree.
+   *
+   * @param itemInterval the envelope containing the item
+   * @param item the item to remove
+   * @return <code>true</code> if the item was found and removed
+   */
+  public boolean remove(Interval itemInterval, Object item)
+  {
+    // use interval to restrict nodes scanned
+    if (! isSearchMatch(itemInterval))
+      return false;
+
+    boolean found = false;
     for (int i = 0; i < 2; i++) {
       if (subnode[i] != null) {
-        subnode[i].addAllItemsFromOverlapping(interval, resultItems);
+        found = subnode[i].remove(itemInterval, item);
+        if (found) {
+          // trim subtree if empty
+          if (subnode[i].isPrunable())
+            subnode[i] = null;
+          break;
+        }
       }
     }
-    return items;
+    // if item was found lower down, don't need to search for it here
+    if (found) return found;
+    // otherwise, try and remove the item from the list of items in this node
+    found = items.remove(item);
+    return found;
   }
+
+  public boolean isPrunable()
+  {
+    return ! (hasChildren() || hasItems());
+  }
+
+  public boolean hasChildren()
+  {
+    for (int i = 0; i < 2; i++) {
+      if (subnode[i] != null)
+        return true;
+    }
+    return false;
+  }
+
+  public boolean hasItems() { return ! items.isEmpty(); }
 
   int depth()
   {

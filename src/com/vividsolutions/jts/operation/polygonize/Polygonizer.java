@@ -37,13 +37,14 @@ import java.util.*;
 import com.vividsolutions.jts.geom.*;
 
 /**
- * Polygonizes a set of Geometrys which contain linework that
+ * Polygonizes a set of {@link Geometry}s which contain linework that
  * represents the edges of a planar graph.
- * Any dimension of Geometry is handled - the constituent linework is extracted
- * to form the edges.
- * The edges must be correctly noded; that is, they must only meet
- * at their endpoints.  The Polygonizer will still run on incorrectly noded input
- * but will not form polygons from incorrected noded edges.
+ * All types of Geometry are accepted as input;  
+ * the constituent linework is extracted as the edges to be polygonized.
+ * The processed edges must be correctly noded; that is, they must only meet
+ * at their endpoints.  The Polygonizer will run on incorrectly noded input
+ * but will not form polygons from non-noded edges, 
+ * and will report them as errors.
  * <p>
  * The Polygonizer reports the follow kinds of errors:
  * <ul>
@@ -59,7 +60,7 @@ public class Polygonizer
 {
 
   /**
-   * Add every linear element in a geometry into the polygonizer graph.
+   * Adds every linear element in a {@link Geometry} into the polygonizer graph.
    */
   private class LineStringAdder
       implements GeometryComponentFilter
@@ -92,10 +93,10 @@ public class Polygonizer
   }
 
   /**
-   * Add a collection of geometries to be polygonized.
+   * Adds a collection of geometries to the edges to be polygonized.
    * May be called multiple times.
    * Any dimension of Geometry may be added;
-   * the constituent linework will be extracted and used
+   * the constituent linework will be extracted and used.
    *
    * @param geomList a list of {@link Geometry}s with linework to be polygonized
    */
@@ -108,7 +109,7 @@ public class Polygonizer
   }
 
   /**
-   * Add a geometry to the linework to be polygonized.
+   * Add a {@link Geometry} to the edges to be polygonized.
    * May be called multiple times.
    * Any dimension of Geometry may be added;
    * the constituent linework will be extracted and used
@@ -121,7 +122,7 @@ public class Polygonizer
   }
 
   /**
-   * Add a linestring to the graph of polygon edges.
+   * Adds a linestring to the graph of polygon edges.
    *
    * @param line the {@link LineString} to add
    */
@@ -144,7 +145,7 @@ public class Polygonizer
   }
 
   /**
-   * Get the list of dangling lines found during polygonization.
+   * Gets the list of dangling lines found during polygonization.
    * @return a collection of the input {@link LineString}s which are dangles
    */
   public Collection getDangles()
@@ -154,7 +155,7 @@ public class Polygonizer
   }
 
   /**
-   * Get the list of cut edges found during polygonization.
+   * Gets the list of cut edges found during polygonization.
    * @return a collection of the input {@link LineString}s which are cut edges
    */
   public Collection getCutEdges()
@@ -164,7 +165,7 @@ public class Polygonizer
   }
 
   /**
-   * Get the list of lines forming invalid rings found during polygonization.
+   * Gets the list of lines forming invalid rings found during polygonization.
    * @return a collection of the input {@link LineString}s which form invalid rings
    */
   public Collection getInvalidRingLines()
@@ -174,7 +175,7 @@ public class Polygonizer
   }
 
   /**
-   * Perform the polygonization, if it has not already been carried out.
+   * Performs the polygonization, if it has not already been carried out.
    */
   private void polygonize()
   {
@@ -182,7 +183,7 @@ public class Polygonizer
     if (polyList != null) return;
     polyList = new ArrayList();
 
-    // if no geometries were supplied it's possible graph could be null
+    // if no geometries were supplied it's possible that graph is null
     if (graph == null) return;
 
     dangles = graph.deleteDangles();

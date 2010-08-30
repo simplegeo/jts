@@ -48,6 +48,13 @@ import com.vividsolutions.jts.geom.*;
  * The first step in the algorithm is computing the convex hull of the Geometry.
  * If the input Geometry is known to be convex, a hint can be supplied to
  * avoid this computation.
+ * <p>
+ * This class can also be used to compute a line segment representing 
+ * the minimum diameter, the supporting line segment of the minimum diameter,
+ * and a minimum rectangle enclosing the input geometry.
+ * This rectangle will
+ * have width equal to the minimum diameter, and have one side
+ * parallel to the supporting segment.
  *
  * @see ConvexHull
  *
@@ -58,13 +65,14 @@ public class MinimumDiameter
   private final Geometry inputGeom;
   private final boolean isConvex;
 
+  private Coordinate[] convexHullPts = null;
   private LineSegment minBaseSeg = new LineSegment();
   private Coordinate minWidthPt = null;
   private int minPtIndex;
   private double minWidth = 0.0;
 
   /**
-   * Compute a minimum diameter for a giver {@link Geometry}.
+   * Compute a minimum diameter for a given {@link Geometry}.
    *
    * @param geom a Geometry
    */
@@ -153,35 +161,34 @@ public class MinimumDiameter
     }
   }
 
-  private void computeWidthConvex(Geometry geom)
+  private void computeWidthConvex(Geometry convexGeom)
   {
 //System.out.println("Input = " + geom);
-    Coordinate[] pts = null;
-    if (geom instanceof Polygon)
-      pts = ((Polygon) geom).getExteriorRing().getCoordinates();
+    if (convexGeom instanceof Polygon)
+      convexHullPts = ((Polygon) convexGeom).getExteriorRing().getCoordinates();
     else
-      pts = geom.getCoordinates();
+      convexHullPts = convexGeom.getCoordinates();
 
     // special cases for lines or points or degenerate rings
-    if (pts.length == 0) {
+    if (convexHullPts.length == 0) {
       minWidth = 0.0;
       minWidthPt = null;
       minBaseSeg = null;
     }
-    else if (pts.length == 1) {
+    else if (convexHullPts.length == 1) {
       minWidth = 0.0;
-      minWidthPt = pts[0];
-      minBaseSeg.p0 = pts[0];
-      minBaseSeg.p1 = pts[0];
+      minWidthPt = convexHullPts[0];
+      minBaseSeg.p0 = convexHullPts[0];
+      minBaseSeg.p1 = convexHullPts[0];
     }
-    else if (pts.length == 2 || pts.length == 3) {
+    else if (convexHullPts.length == 2 || convexHullPts.length == 3) {
       minWidth = 0.0;
-      minWidthPt = pts[0];
-      minBaseSeg.p0 = pts[0];
-      minBaseSeg.p1 = pts[1];
+      minWidthPt = convexHullPts[0];
+      minBaseSeg.p0 = convexHullPts[0];
+      minBaseSeg.p1 = convexHullPts[1];
     }
     else
-      computeConvexRingMinDiameter(pts);
+      computeConvexRingMinDiameter(convexHullPts);
   }
 
   /**
@@ -193,7 +200,6 @@ public class MinimumDiameter
    */
   private void computeConvexRingMinDiameter(Coordinate[] pts)
   {
-    //if (
     // for each segment in the ring
     minWidth = Double.MAX_VALUE;
     int currMaxIndex = 1;
@@ -237,5 +243,98 @@ public class MinimumDiameter
     index++;
     if (index >= pts.length) index = 0;
     return index;
+  }
+  
+  /**
+   * Gets the minimum rectangular {@link Polygon} which encloses the input geometry.
+   * The rectangle has width equal to the minimum diameter, 
+   * and a longer length.
+   * If the convex hull of the input is degenerate (a line or point)
+   * a {@link LineString} or {@link Point} is returned.
+   * <p>
+   * The minimum rectangle can be used as an extremely generalized representation
+   * for the given geometry.
+   * 
+   * @return the minimum rectangle enclosing the input (or a line or point if degenerate)
+   */
+  public Geometry getMinimumRectangle()
+  {
+    computeMinimumDiameter();
+  
+    // check if minimum rectangle is degenerate (a point or line segment)
+    if (minWidth == 0.0) {
+      if (minBaseSeg.p0.equals2D(minBaseSeg.p1)) {
+        return inputGeom.getFactory().createPoint(minBaseSeg.p0);
+      }
+      return minBaseSeg.toGeometry(inputGeom.getFactory());
+    }
+    
+    // deltas for the base segment of the minimum diameter
+    double dx = minBaseSeg.p1.x - minBaseSeg.p0.x;
+    double dy = minBaseSeg.p1.y - minBaseSeg.p0.y;
+    
+    /*
+    double c0 = computeC(dx, dy, minBaseSeg.p0);
+    double c1 = computeC(dx, dy, minBaseSeg.p1);
+    */
+    
+    double minPara = Double.MAX_VALUE;
+    double maxPara = -Double.MAX_VALUE;
+    double minPerp = Double.MAX_VALUE;
+    double maxPerp = -Double.MAX_VALUE;
+    
+    // compute maxima and minima of lines parallel and perpendicular to base segment
+    for (int i = 0; i < convexHullPts.length; i++) {
+      
+      double paraC = computeC(dx, dy, convexHullPts[i]);
+      if (paraC > maxPara) maxPara = paraC;
+      if (paraC < minPara) minPara = paraC;
+      
+      double perpC = computeC(-dy, dx, convexHullPts[i]);
+      if (perpC > maxPerp) maxPerp = perpC;
+      if (perpC < minPerp) minPerp = perpC;
+    }
+    
+    // compute lines along edges of minimum rectangle
+    LineSegment maxPerpLine = computeSegmentForLine(-dx, -dy, maxPerp);
+    LineSegment minPerpLine = computeSegmentForLine(-dx, -dy, minPerp);
+    LineSegment maxParaLine = computeSegmentForLine(-dy, dx, maxPara);
+    LineSegment minParaLine = computeSegmentForLine(-dy, dx, minPara);
+    
+    // compute vertices of rectangle (where the para/perp max & min lines intersect)
+    Coordinate p0 = maxParaLine.lineIntersection(maxPerpLine);
+    Coordinate p1 = minParaLine.lineIntersection(maxPerpLine);
+    Coordinate p2 = minParaLine.lineIntersection(minPerpLine);
+    Coordinate p3 = maxParaLine.lineIntersection(minPerpLine);
+    
+    LinearRing shell = inputGeom.getFactory().createLinearRing(
+        new Coordinate[] { p0, p1, p2, p3, p0 });
+    return inputGeom.getFactory().createPolygon(shell, null);
+
+  }
+  
+  private static double computeC(double a, double b, Coordinate p)
+  {
+    return a * p.y - b * p.x;
+  }
+  
+  private static LineSegment computeSegmentForLine(double a, double b, double c)
+  {
+    Coordinate p0;
+    Coordinate p1;
+    /*
+    * Line eqn is ax + by = c
+    * Slope is a/b.
+    * If slope is steep, use y values as the inputs
+    */
+    if (Math.abs(b) > Math.abs(a)) {
+      p0 = new Coordinate(0.0, c/b);
+      p1 = new Coordinate(1.0, c/b - a/b);
+    }
+    else {
+      p0 = new Coordinate(c/a, 0.0);
+      p1 = new Coordinate(c/a - b/a, 1.0);
+    }
+    return new LineSegment(p0, p1);
   }
 }

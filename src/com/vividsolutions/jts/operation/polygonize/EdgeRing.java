@@ -196,7 +196,8 @@ public class EdgeRing {
 
   /**
    * Tests if the {@link LinearRing} ring formed by this edge ring is topologically valid.
-   * @return
+   * 
+   * @return true if the ring is valid
    */
   public boolean isValid()
   {

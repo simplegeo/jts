@@ -3,7 +3,7 @@ package com.vividsolutions.jts.geom.util;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.util.*;
 /**
- * Represents a affine transformation on the 2D Cartesian plane. 
+ * Represents an affine transformation on the 2D Cartesian plane. 
  * It can be used to transform a {@link Coordinate} or {@link Geometry}.
  * An affine transformation is a mapping of the 2D plane into itself
  * via a series of transformations of the following basic types:
@@ -172,6 +172,25 @@ public class AffineTransformation
     return trans;
   }
   
+  /**
+   * Creates a transformation for a scaling relative to the point (x,y).
+   * 
+   * @param xScale the value to scale by in the x direction
+   * @param yScale the value to scale by in the y direction
+   * @param x the x-ordinate of the point to scale around
+   * @param y the y-ordinate of the point to scale around
+   * @return a transformation for the scaling
+   */
+  public static AffineTransformation scaleInstance(double xScale, double yScale, double x, double y)
+  {
+    AffineTransformation trans = new AffineTransformation();
+    trans.translate(-x, -y);
+    trans.scale(xScale, yScale);
+    trans.translate(x, y);
+    return trans;
+  }
+  
+
   /**
    * Creates a transformation for a shear.
    * 
@@ -910,6 +929,20 @@ public class AffineTransformation
   }
   
   /**
+   * Cretaes a new @link Geometry which is the result
+   * of this transformation applied to the input Geometry.
+   * 
+   *@param seq  a <code>Geometry</code>
+   *@return a transformed Geometry
+   */
+  public Geometry transform(Geometry g)
+  {
+    Geometry g2 = (Geometry) g.clone();
+    g2.apply(this);
+    return g2;    
+  }
+  
+  /**
    * Applies this transformation to the i'th coordinate
    * in the given CoordinateSequence.
    * 
@@ -921,7 +954,7 @@ public class AffineTransformation
     double xp = m00 * seq.getOrdinate(i, 0) + m01 * seq.getOrdinate(i, 1) + m02;
     double yp = m10 * seq.getOrdinate(i, 0) + m11 * seq.getOrdinate(i, 1) + m12;
     seq.setOrdinate(i, 0, xp);
-    seq.setOrdinate(i, 1, yp);	
+    seq.setOrdinate(i, 1, yp);  
   }
   
   /**
@@ -973,7 +1006,7 @@ public class AffineTransformation
   */
   public boolean equals(Object obj)
   {
-    if (obj instanceof AffineTransformation)
+    if (! (obj instanceof AffineTransformation))
       return false;
     if (obj == null) return false;
     

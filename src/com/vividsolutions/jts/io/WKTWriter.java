@@ -40,18 +40,21 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 
 /**
- * Outputs the Well-Known Text representation of a {@link Geometry}.
- * The Well-known Text format is defined in the
+ * Writes the Well-Known Text representation of a {@link Geometry}.
+ * The Well-Known Text format is defined in the
  * <A HREF="http://www.opengis.org/techno/specs.htm">
  * OGC Simple Features Specification for SQL</A>.
  * <p>
  * The <code>WKTWriter</code> outputs coordinates rounded to the precision
- * model. No more than the maximum number of necessary decimal places will be
+ * model. Only the maximum number of decimal places 
+ * necessary to represent the ordinates to the required precision will be
  * output.
  * <p>
- * A non-standard <code>LINEARRING</code> tag is used for LinearRings.
- * The SFS WKT spec does not define a special tag for <code>LinearRing</code>s.
- * Under it, rings are output using <code>LINESTRING</code>.
+ * The SFS WKT spec does not define a special tag for {@link LinearRing}s.
+ * Under the spec, rings are output as <code>LINESTRING</code>s.
+ * In order to allow precisely specifying constructed geometries, 
+ * JTS supports a non-standard <code>LINEARRING</code> tag which is used 
+ * to output LinearRings.
  *
  * @version 1.7
  * @see WKTReader
@@ -629,7 +632,9 @@ public class WKTWriter
           writer.write(", ");
           indentCoords(i, level + 1, writer);
         }
+        writer.write("(");
         appendCoordinate(((Point) multiPoint.getGeometryN(i)).getCoordinate(), writer);
+        writer.write(")");
      }
       writer.write(")");
     }

@@ -35,6 +35,7 @@
 package com.vividsolutions.jts.geom;
 
 import com.vividsolutions.jts.util.Assert;
+import com.vividsolutions.jts.operation.valid.*;
 
 /**
  *  Basic implementation of <code>Point</code>.
@@ -104,7 +105,17 @@ public class Point
     return true;
   }
 
+  /**
+   * A Point is valid iff:
+   * <ul>
+   * <li>the coordinate which defines it is a valid coordinate (i.e does not have an NaN X or Y ordinate)
+   * </ul>
+   * 
+   * @return true iff the Point is valid
+   */
   public boolean isValid() {
+  	if (! IsValidOp.isValid(getCoordinate()))
+  		return false;
     return true;
   }
 

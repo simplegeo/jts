@@ -13,12 +13,14 @@ import com.vividsolutions.jts.util.Debug;
  * similar to the one used in the Douglas-Peucker algorithm.
  * <p>
  * In particular, if the input is an areal geometry
- * ( {@link Polygon} or {@link MultiPolygon} )
+ * ( {@link Polygon} or {@link MultiPolygon} ):
  * <ul>
  * <li>The result has the same number of shells and holes (rings) as the input,
  * in the same order
  * <li>The result rings touch at <b>no more</b> than the number of touching point in the input
- * (although they may touch at fewer points)
+ * (although they may touch at fewer points).  
+ * (The key implication of this constraint is that the 
+ * output will be topologically valid if the input was.) 
  * </ul>
  *
  * @author Martin Davis

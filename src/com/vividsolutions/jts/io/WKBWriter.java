@@ -59,7 +59,26 @@ import com.vividsolutions.jts.util.Assert;
  */
 public class WKBWriter
 {
+  /**
+   * Converts a byte array to a hexadecimal string.
+   * 
+   * @param bytes
+   * @return
+   * 
+   * @deprecated
+   */
   public static String bytesToHex(byte[] bytes)
+  {
+    return toHex(bytes);
+  }
+
+  /**
+   * Converts a byte array to a hexadecimal string.
+   * 
+   * @param bytes a byte array
+   * @return a string of hexadecimal digits
+   */
+  public static String toHex(byte[] bytes)
   {
     StringBuffer buf = new StringBuffer();
     for (int i = 0; i < bytes.length; i++) {

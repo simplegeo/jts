@@ -57,20 +57,23 @@ import com.vividsolutions.jts.algorithm.CGAlgorithms;
 import com.vividsolutions.jts.geom.*;
 
 /**
- * Creates a {@link Geometry} from an Oracle MDSYS.GEOMETRY object.
+ * Reads a {@link Geometry} from an Oracle <tt>MDSYS.GEOMETRY</tt> object.
  *
  * A {@link GeometryFactory} may be provided, otherwise
  * a default one will be used.
  * The provided GeometryFactory will be used, with the exception of the SRID field.
  * This will be extracted from the Geometry.
  * <p>
- * If a PrecisionModel is supplied it is the callers's responsibility
+ * If a {@link PrecisionModel} is supplied it is the callers's responsibility
  * to ensure that it matches the precision of the incoming data.
  * If a lower precision for the data is required, a subsequent
  * process must be run on the data to reduce its precision.
+ * <p>
+ * To use this class a suitable Oracle JDBC driver JAR must be present.
  *
  * @version 9i
  * @author David Zwiers, Vivid Solutions.
+ * @author Martin Davis
  */
 public class OraReader {
 	private GeometryFactory geometryFactory;
@@ -93,14 +96,31 @@ public class OraReader {
 	 * matches the precision of the incoming data -
 	 * coordinates are <b>not</b> made precise.
 	 *
-	 * @param gf
-	 *            A non-null geometry factory for later use.
-	 * @throw NullPointerException when the geometry factory is null.
+	 * @param gf A non-null geometry factory for later use.
+	 *
+	 * @throws NullPointerException when the geometry factory is null.
 	 */
 	public OraReader(GeometryFactory gf) {
 		if (gf == null)
 			throw new NullPointerException("Geometry Factory may not be Null");
 		this.geometryFactory = gf;
+	}
+	/**
+	 * Gets the number of coordinate dimensions which will be read.
+	 *
+	 * @return the dimension which will be read
+	 */
+	public int getDimension() {
+		return dimension;
+	}
+
+	/**
+	 * Sets the number of coordinate dimensions to read.
+	 *
+	 * @param dimension the dimension to read
+	 */
+	public void setDimension(int dimension) {
+		this.dimension = dimension;
 	}
 
 	/**
@@ -833,12 +853,5 @@ public class OraReader {
 		return array;
 	}
 
-	public int getDimension() {
-		return dimension;
-	}
-
-	public void setDimension(int dimension) {
-		this.dimension = dimension;
-	}
 
 }

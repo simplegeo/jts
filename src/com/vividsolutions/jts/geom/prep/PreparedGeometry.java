@@ -71,7 +71,7 @@ public interface PreparedGeometry
 	boolean contains(Geometry geom);
 
 	/**
-	 * Tests whether the base {@link Geometry} contains a given geometry.
+	 * Tests whether the base {@link Geometry} properly contains a given geometry.
 	 * <p>
 	 * The <code>containsProperly</code> predicate has the following equivalent definitions:
 	 * <ul>
@@ -79,18 +79,26 @@ public interface PreparedGeometry
 	 * <li>The DE-9IM Intersection Matrix for the two geometries matches 
 	 * <code>[T**FF*FF*]</code>
 	 * </ul>
-	 * The advantage to using this predicate is that it can be computed
-	 * efficiently, with no need to compute topology at individual points.
+	 * In other words, if the test geometry has any interaction with the boundary of the target
+	 * geometry the result of <tt>containsProperly</tt> is <tt>false</tt>. 
+	 * This is different semantics to the {@link Geometry#contains} predicate,
+	 * in which test geometries can intersect the target's boundary and still be contained.
 	 * <p>
-	 * An example use case for this predicate is computing the intersections
+	 * The advantage of using this predicate is that it can be computed
+	 * efficiently, since it avoids the need to compute the full topological relationship
+	 * of the input boundaries in cases where they intersect.
+	 * <p>
+	 * An example use case is computing the intersections
 	 * of a set of geometries with a large polygonal geometry.  
 	 * Since <tt>intersection</tt> is a fairly slow operation, it can be more efficient
 	 * to use <tt>containsProperly</tt> to filter out test geometries which lie
-	 * wholly inside the area.  In these cases the intersection 
-	 * known a priori to be simply the original test geometry. 
+	 * wholly inside the area.  In these cases the intersection is
+	 * known <i>a priori</i> to be exactly the original test geometry. 
 	 * 
 	 * @param geom the Geometry to test
 	 * @return true if this Geometry properly contains the given Geometry
+	 * 
+	 * @see Geometry#contains
 	 * 
 	 */
 	boolean containsProperly(Geometry geom);
