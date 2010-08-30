@@ -63,6 +63,10 @@ public class LineSegment
     this.p1 = p1;
   }
 
+  public LineSegment(double x0, double y0, double x1, double y1) {
+    this(new Coordinate(x0, y0), new Coordinate(x1, y1));
+  }
+
   public LineSegment(LineSegment ls) {
     this(ls.p0, ls.p1);
   }
@@ -145,6 +149,24 @@ public class LineSegment
     // points lie on opposite sides ==> indeterminate orientation
     return 0;
   }
+  
+  /**
+   * Determines the orientation index of a {@link Coordinate} relative to this segment.
+   * The orientation index is as defined in {@link CGAlgorithms#computeOrientation}.
+   *
+   * @param seg the LineSegment to compare
+   *
+   * @return 1 if <code>p</code> is to the left of this segment
+   * @return -1 if <code>p</code> is to the right of this segment
+   * @return 0 if <code>p</code> is collinear with this segment
+   * 
+   * @see CGAlgorithms#computeOrientation(Coordinate, Coordinate, Coordinate)
+   */
+  public int orientationIndex(Coordinate p)
+  {
+    return CGAlgorithms.orientationIndex(p0, p1, p);
+  }
+  
   /**
    * Reverses the direction of the line segment.
    */
@@ -226,6 +248,8 @@ public class LineSegment
    * fraction along the line defined by this segment.
    * A fraction of <code>0.0</code> returns the start point of the segment;
    * a fraction of <code>1.0</code> returns the end point of the segment.
+   * If the fraction is < 0.0 or > 1.0 the point returned 
+   * will lie before the start or beyond the end of the segment. 
    *
    * @param segmentLengthFraction the fraction of the segment length along the line
    * @return the point at that distance
@@ -239,11 +263,51 @@ public class LineSegment
   }
 
   /**
+   * Computes the {@link Coordinate} that lies a given
+   * fraction along the line defined by this segment and offset from 
+   * the segment by a given distance.
+   * A fraction of <code>0.0</code> offsets from the start point of the segment;
+   * a fraction of <code>1.0</code> offsets from the end point of the segment.
+   * The computed point is offset to the left of the line if the offset distance is
+   * positive, to the right if negative.
+   *
+   * @param segmentLengthFraction the fraction of the segment length along the line
+   * @param offsetDistance the distance the point is offset from the segment
+   *    (positive is to the left, negative is to the right)
+   * @return the point at that distance and offset
+   */
+  public Coordinate pointAlongOffset(double segmentLengthFraction, double offsetDistance)
+  {
+  	// the point on the segment line
+    double segx = p0.x + segmentLengthFraction * (p1.x - p0.x);
+    double segy = p0.y + segmentLengthFraction * (p1.y - p0.y);
+    
+    double dx = p1.x - p0.x;
+    double dy = p1.y - p0.y;
+    double len = Math.sqrt(dx * dx + dy * dy);
+    // u is the vector that is the length of the offset, in the direction of the segment
+    double ux = offsetDistance * dx / len;
+    double uy = offsetDistance * dy / len;
+    
+    // the offset point is the seg point plus the offset vector rotated 90 degrees CCW
+    double offsetx = segx - uy;
+    double offsety = segy + ux;
+
+    Coordinate coord = new Coordinate(offsetx, offsety);
+    return coord;
+  }
+
+  /**
    * Computes the Projection Factor for the projection of the point p
    * onto this LineSegment.  The Projection Factor is the constant r
    * by which the vector for this segment must be multiplied to
-   * equal the vector for the projection of p on the line
+   * equal the vector for the projection of <tt>p<//t> on the line
    * defined by this segment.
+   * <p>
+   * The projection factor returned will be in the range <tt>(-inf, +inf)</tt>.
+   * 
+   * @param p the point to compute the factor for
+   * @return the projection factor for the point
    */
   public double projectionFactor(Coordinate p)
   {
@@ -266,6 +330,29 @@ public class LineSegment
     double r = ( (p.x - p0.x) * dx + (p.y - p0.y) * dy )
               / len2;
     return r;
+  }
+
+  /**
+   * Computes the fraction of distance (in <tt>[0.0, 1.0]</tt>) 
+   * that the projection of a point occurs along this line segment.
+   * If the point is beyond either ends of the line segment,
+   * the closest fractional value (<tt>0.0</tt> or <tt>1.0</tt>) is returned.
+   * <p>
+   * Essentially, this is the {@link #projectionFactor} clamped to 
+   * the range <tt>[0.0, 1.0]</tt>.
+   *  
+   * @param inputPt the point
+   * @return the fraction along the line segment the projection of the point occurs
+   */
+  public double segmentFraction(
+      Coordinate inputPt)
+  {
+    double segFrac = projectionFactor(inputPt);
+    if (segFrac < 0.0)
+      segFrac = 0.0;
+    else if (segFrac > 1.0)
+      segFrac = 1.0;
+    return segFrac;
   }
 
   /**
@@ -396,6 +483,8 @@ public class LineSegment
    *
    * @param line
    * @return an intersection point, or <code>null</code> if there is none
+   * 
+   * @see RobustLineIntersector
    */
   public Coordinate intersection(LineSegment line)
   {

@@ -41,7 +41,10 @@ import java.util.ArrayList;
  *
  *@version 1.7
  */
-public class MultiPolygon extends GeometryCollection {
+public class MultiPolygon 
+	extends GeometryCollection 
+	implements Polygonal
+{
   private static final long serialVersionUID = -551033529766975875L;
   /**
    *  Constructs a <code>MultiPolygon</code>.

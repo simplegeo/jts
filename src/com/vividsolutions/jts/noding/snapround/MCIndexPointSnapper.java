@@ -77,7 +77,7 @@ public class MCIndexPointSnapper
 
     public void select(MonotoneChain mc, int startIndex)
     {
-      SegmentString ss = (SegmentString) mc.getContext();
+    	NodedSegmentString ss = (NodedSegmentString) mc.getContext();
       // don't snap a vertex to itself
       if (parentEdge != null) {
         if (ss == parentEdge && startIndex == vertexIndex)

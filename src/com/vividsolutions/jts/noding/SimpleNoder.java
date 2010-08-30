@@ -55,7 +55,7 @@ public class SimpleNoder
 
   public Collection getNodedSubstrings()
   {
-    return  SegmentString.getNodedSubstrings(nodedSegStrings);
+    return  NodedSegmentString.getNodedSubstrings(nodedSegStrings);
   }
 
   public void computeNodes(Collection inputSegStrings)

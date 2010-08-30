@@ -38,6 +38,7 @@ import javax.xml.parsers.*;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -118,7 +119,7 @@ public class GMLReader {
 			geometryFactory = new GeometryFactory();
 
 		GMLHandler gh = new GMLHandler(geometryFactory,null);
-		parser.parse(new InputSource(reader),gh);
+		parser.parse(new InputSource(reader), (DefaultHandler)gh);
 
 		return gh.getGeometry();
 	}

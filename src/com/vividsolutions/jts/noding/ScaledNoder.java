@@ -53,11 +53,12 @@ public class ScaledNoder
 
   private Collection scale(Collection segStrings)
   {
+//  	System.out.println("Scaled: scaleFactor = " + scaleFactor);
     return CollectionUtil.transform(segStrings,
                                     new CollectionUtil.Function() {
       public Object execute(Object obj) {
         SegmentString ss = (SegmentString) obj;
-        return new SegmentString(scale(ss.getCoordinates()), ss.getData());
+        return new NodedSegmentString(scale(ss.getCoordinates()), ss.getData());
       }
                                     }
       );
@@ -80,15 +81,16 @@ public class ScaledNoder
 
   private void rescale(Collection segStrings)
   {
-    CollectionUtil.apply(segStrings,
-                                    new CollectionUtil.Function() {
-      public Object execute(Object obj) {
-        SegmentString ss = (SegmentString) obj;
-        rescale(ss.getCoordinates());
-        return null;
-      }
-                                    }
-      );
+//  	System.out.println("Rescaled: scaleFactor = " + scaleFactor);
+  	CollectionUtil.apply(segStrings,
+  			new CollectionUtil.Function() {
+  		public Object execute(Object obj) {
+  			SegmentString ss = (SegmentString) obj;
+  			rescale(ss.getCoordinates());
+  			return null;
+  		}
+  	}
+  	);
   }
 
   private void rescale(Coordinate[] pts)

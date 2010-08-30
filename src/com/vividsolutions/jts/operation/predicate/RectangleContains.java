@@ -63,10 +63,16 @@ public class RectangleContains {
     return isPointContainedInBoundary(point.getCoordinate());
   }
 
+  /**
+   * Tests if a point is contained in the boundary of the target rectangle.
+   * @param pt the point to test
+   * @return true if the point is contained in the boundary
+   */
   private boolean isPointContainedInBoundary(Coordinate pt)
   {
-    // we already know that the point is contained in the rectangle envelope
-
+    /**
+     * We already know that the point is contained in the rectangle envelope.
+     */ 
     if (! (pt.x == rectEnv.getMinX() ||
            pt.x == rectEnv.getMaxX()) )
       return false;
@@ -77,6 +83,11 @@ public class RectangleContains {
     return true;
   }
 
+  /**
+   * Tests if a linestring is completely contained in the boundary of the target rectangle.
+   * @param line the linestring to test
+   * @return true if the linestring is contained in the boundary
+   */
   private boolean isLineStringContainedInBoundary(LineString line)
   {
     CoordinateSequence seq = line.getCoordinateSequence();
@@ -92,6 +103,12 @@ public class RectangleContains {
     return true;
   }
 
+  /**
+   * Tests if a line segment is contained in the boundary of the target rectangle.
+   * @param p0 an endpoint of the segment
+   * @param p1 an endpoint of the segment
+   * @return true if the line segment is contained in the boundary
+   */
   private boolean isLineSegmentContainedInBoundary(Coordinate p0, Coordinate p1)
   {
     if (p0.equals(p1))

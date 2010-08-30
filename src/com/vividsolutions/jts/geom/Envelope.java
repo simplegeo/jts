@@ -163,7 +163,7 @@ public class Envelope
    */
   public Envelope(Coordinate p1, Coordinate p2)
   {
-    init(p1, p2);
+    init(p1.x, p2.x, p1.y, p2.y);
   }
 
   /**
@@ -173,7 +173,7 @@ public class Envelope
    */
   public Envelope(Coordinate p)
   {
-    init(p);
+    init(p.x, p.x, p.y, p.y);
   }
 
   /**
@@ -498,34 +498,6 @@ public class Envelope
   }
 
 
-  /**
-   *  Returns <code>true</code> if the given point lies in or on the envelope.
-   *
-   *@param  p  the point which this <code>Envelope</code> is
-   *      being checked for containing
-   *@return    <code>true</code> if the point lies in the interior or
-   *      on the boundary of this <code>Envelope</code>.
-   */
-  public boolean contains(Coordinate p) {
-    return contains(p.x, p.y);
-  }
-
-  /**
-   *  Returns <code>true</code> if the given point lies in or on the envelope.
-   *
-   *@param  x  the x-coordinate of the point which this <code>Envelope</code> is
-   *      being checked for containing
-   *@param  y  the y-coordinate of the point which this <code>Envelope</code> is
-   *      being checked for containing
-   *@return    <code>true</code> if <code>(x, y)</code> lies in the interior or
-   *      on the boundary of this <code>Envelope</code>.
-   */
-  public boolean contains(double x, double y) {
-    return x >= minx &&
-        x <= maxx &&
-        y >= miny &&
-        y <= maxy;
-  }
 
   /**
    *  Check if the region defined by <code>other</code>
@@ -576,6 +548,7 @@ public class Envelope
    *@return        <code>true</code> if the point overlaps this <code>Envelope</code>
    */
   public boolean intersects(double x, double y) {
+  	if (isNull()) return false;
     return ! (x > maxx ||
         x < minx ||
         y > maxy ||
@@ -589,15 +562,95 @@ public class Envelope
   }
 
   /**
-   *  Returns <code>true</code> if the <code>Envelope other</code>
-   *  lies wholely inside this <code>Envelope</code> (inclusive of the boundary).
+   * Tests if the <code>Envelope other</code>
+   * lies wholely inside this <code>Envelope</code> (inclusive of the boundary).
+   * <p>
+   * Note that this is <b>not</b> the same definition as the SFS <tt>contains</tt>,
+   * which would exclude the envelope boundary.
    *
-   *@param  other  the <code>Envelope</code> which this <code>Envelope</code> is
-   *        being checked for containing
-   *@return        <code>true</code> if <code>other</code>
-   *              is contained in this <code>Envelope</code>
+   *@param  other the <code>Envelope</code> to check
+   *@return true if <code>other</code> is contained in this <code>Envelope</code>
+   *
+   *@see covers(Envelope)
    */
   public boolean contains(Envelope other) {
+  	return covers(other);
+  }
+
+  /**
+   * Tests if the given point lies in or on the envelope.
+   * <p>
+   * Note that this is <b>not</b> the same definition as the SFS <tt>contains</tt>,
+   * which would exclude the envelope boundary.
+   *
+   *@param  p  the point which this <code>Envelope</code> is
+   *      being checked for containing
+   *@return    <code>true</code> if the point lies in the interior or
+   *      on the boundary of this <code>Envelope</code>.
+   *      
+   *@see covers(Coordinate)
+   */
+  public boolean contains(Coordinate p) {
+    return covers(p);
+  }
+
+  /**
+   * Tests if the given point lies in or on the envelope.
+   * <p>
+   * Note that this is <b>not</b> the same definition as the SFS <tt>contains</tt>,
+   * which would exclude the envelope boundary.
+   *
+   *@param  x  the x-coordinate of the point which this <code>Envelope</code> is
+   *      being checked for containing
+   *@param  y  the y-coordinate of the point which this <code>Envelope</code> is
+   *      being checked for containing
+   *@return    <code>true</code> if <code>(x, y)</code> lies in the interior or
+   *      on the boundary of this <code>Envelope</code>.
+   *      
+   *@see covers(double, double)
+   */
+  public boolean contains(double x, double y) {
+  	return covers(x, y);
+  }
+
+  /**
+   * Tests if the given point lies in or on the envelope.
+   *
+   *@param  x  the x-coordinate of the point which this <code>Envelope</code> is
+   *      being checked for containing
+   *@param  y  the y-coordinate of the point which this <code>Envelope</code> is
+   *      being checked for containing
+   *@return    <code>true</code> if <code>(x, y)</code> lies in the interior or
+   *      on the boundary of this <code>Envelope</code>.
+   */
+  public boolean covers(double x, double y) {
+  	if (isNull()) return false;
+    return x >= minx &&
+        x <= maxx &&
+        y >= miny &&
+        y <= maxy;
+  }
+
+  /**
+   * Tests if the given point lies in or on the envelope.
+   *
+   *@param  p  the point which this <code>Envelope</code> is
+   *      being checked for containing
+   *@return    <code>true</code> if the point lies in the interior or
+   *      on the boundary of this <code>Envelope</code>.
+   */
+  public boolean covers(Coordinate p) {
+    return covers(p.x, p.y);
+  }
+
+  /**
+   * Tests if the <code>Envelope other</code>
+   * lies wholely inside this <code>Envelope</code> (inclusive of the boundary).
+   *
+   *@param  other the <code>Envelope</code> to check
+   *@return true if this <code>Envelope</code> covers the <code>other</code> 
+   */
+  public boolean covers(Envelope other) {
     if (isNull() || other.isNull()) { return false; }
     return other.getMinX() >= minx &&
         other.getMaxX() <= maxx &&

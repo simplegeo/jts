@@ -56,9 +56,9 @@ import com.vividsolutions.jts.geom.*;
  */
 public class GeometricShapeFactory
 {
-  private GeometryFactory geomFact;
-  private Dimensions dim = new Dimensions();
-  private int nPts = 100;
+  protected GeometryFactory geomFact;
+  protected Dimensions dim = new Dimensions();
+  protected int nPts = 100;
 
   /**
    * Create a shape factory which will create shapes using the default
@@ -148,22 +148,22 @@ public class GeometricShapeFactory
     for (i = 0; i < nSide; i++) {
       double x = env.getMinX() + i * XsegLen;
       double y = env.getMinY();
-      pts[ipt++] = new Coordinate(x, y);
+      pts[ipt++] = createCoord(x, y);
     }
     for (i = 0; i < nSide; i++) {
       double x = env.getMaxX();
       double y = env.getMinY() + i * YsegLen;
-      pts[ipt++] = new Coordinate(x, y);
+      pts[ipt++] = createCoord(x, y);
     }
     for (i = 0; i < nSide; i++) {
       double x = env.getMaxX() - i * XsegLen;
       double y = env.getMaxY();
-      pts[ipt++] = new Coordinate(x, y);
+      pts[ipt++] = createCoord(x, y);
     }
     for (i = 0; i < nSide; i++) {
       double x = env.getMinX();
       double y = env.getMaxY() - i * YsegLen;
-      pts[ipt++] = new Coordinate(x, y);
+      pts[ipt++] = createCoord(x, y);
     }
     pts[ipt++] = new Coordinate(pts[0]);
 
@@ -193,10 +193,9 @@ public class GeometricShapeFactory
         double ang = i * (2 * Math.PI / nPts);
         double x = xRadius * Math.cos(ang) + centreX;
         double y = yRadius * Math.sin(ang) + centreY;
-        Coordinate pt = new Coordinate(x, y);
-        pts[iPt++] = pt;
+        pts[iPt++] = createCoord(x, y);
     }
-    pts[iPt] = pts[0];
+    pts[iPt] = new Coordinate(pts[0]);
 
     LinearRing ring = geomFact.createLinearRing(pts);
     Polygon poly = geomFact.createPolygon(ring, null);
@@ -230,15 +229,20 @@ public class GeometricShapeFactory
          double ang = startAng + i * angInc;
          double x = xRadius * Math.cos(ang) + centreX;
          double y = yRadius * Math.sin(ang) + centreY;
-         Coordinate pt = new Coordinate(x, y);
-         geomFact.getPrecisionModel().makePrecise(pt);
-         pts[iPt++] = pt;
+         pts[iPt++] = createCoord(x, y);
      }
      LineString line = geomFact.createLineString(pts);
      return line;
    }
 
-  private class Dimensions
+  protected Coordinate createCoord(double x, double y)
+  {
+  	Coordinate pt = new Coordinate(x, y);
+    geomFact.getPrecisionModel().makePrecise(pt);
+    return pt;
+  }
+  
+  protected class Dimensions
   {
     public Coordinate base;
     public Coordinate centre;

@@ -59,17 +59,17 @@ public class Quadrant {
   {
     if (dx == 0.0 && dy == 0.0)
       throw new IllegalArgumentException("Cannot compute the quadrant for point ( "+ dx + ", " + dy + " )" );
-    if (dx >= 0) {
-      if (dy >= 0)
+    if (dx >= 0.0) {
+      if (dy >= 0.0)
         return 0;
       else
         return 3;
     }
     else {
-	if (dy >= 0)
-          return 1;
-	else
-          return 2;
+    	if (dy >= 0.0)
+    		return 1;
+    	else
+    		return 2;
     }
   }
 

@@ -72,7 +72,7 @@ public class SimpleSnapRounder
 
   public Collection getNodedSubstrings()
   {
-    return  SegmentString.getNodedSubstrings(nodedSegStrings);
+    return  NodedSegmentString.getNodedSubstrings(nodedSegStrings);
   }
 
   public void computeNodes(Collection inputSegmentStrings)
@@ -86,7 +86,7 @@ public class SimpleSnapRounder
 
   private void checkCorrectness(Collection inputSegmentStrings)
   {
-    Collection resultSegStrings = SegmentString.getNodedSubstrings(inputSegmentStrings);
+    Collection resultSegStrings = NodedSegmentString.getNodedSubstrings(inputSegmentStrings);
     NodingValidator nv = new NodingValidator(resultSegStrings);
     try {
       nv.checkValid();
@@ -126,12 +126,12 @@ public class SimpleSnapRounder
   private void computeSnaps(Collection segStrings, Collection snapPts)
   {
     for (Iterator i0 = segStrings.iterator(); i0.hasNext(); ) {
-      SegmentString ss = (SegmentString) i0.next();
+      NodedSegmentString ss = (NodedSegmentString) i0.next();
       computeSnaps(ss, snapPts);
     }
   }
 
-  private void computeSnaps(SegmentString ss, Collection snapPts)
+  private void computeSnaps(NodedSegmentString ss, Collection snapPts)
   {
     for (Iterator it = snapPts.iterator(); it.hasNext(); ) {
       Coordinate snapPt = (Coordinate) it.next();
@@ -151,9 +151,9 @@ public class SimpleSnapRounder
   public void computeVertexSnaps(Collection edges)
   {
     for (Iterator i0 = edges.iterator(); i0.hasNext(); ) {
-      SegmentString edge0 = (SegmentString) i0.next();
+      NodedSegmentString edge0 = (NodedSegmentString) i0.next();
       for (Iterator i1 = edges.iterator(); i1.hasNext(); ) {
-        SegmentString edge1 = (SegmentString) i1.next();
+        NodedSegmentString edge1 = (NodedSegmentString) i1.next();
         computeVertexSnaps(edge0, edge1);
       }
     }
@@ -163,7 +163,7 @@ public class SimpleSnapRounder
    * Performs a brute-force comparison of every segment in each {@link SegmentString}.
    * This has n^2 performance.
    */
-  private void computeVertexSnaps(SegmentString e0, SegmentString e1)
+  private void computeVertexSnaps(NodedSegmentString e0, NodedSegmentString e1)
   {
     Coordinate[] pts0 = e0.getCoordinates();
     Coordinate[] pts1 = e1.getCoordinates();
@@ -195,7 +195,7 @@ public class SimpleSnapRounder
    */
   public static boolean addSnappedNode(
       HotPixel hotPix,
-      SegmentString segStr,
+      NodedSegmentString segStr,
       int segIndex
       )
   {

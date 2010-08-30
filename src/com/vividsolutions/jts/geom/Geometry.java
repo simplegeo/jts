@@ -42,6 +42,7 @@ import com.vividsolutions.jts.operation.*;
 import com.vividsolutions.jts.operation.buffer.BufferOp;
 import com.vividsolutions.jts.operation.distance.DistanceOp;
 import com.vividsolutions.jts.operation.overlay.OverlayOp;
+import com.vividsolutions.jts.operation.union.UnaryUnionOp;
 import com.vividsolutions.jts.operation.overlay.snap.SnapIfNeededOverlayOp;
 import com.vividsolutions.jts.operation.predicate.RectangleIntersects;
 import com.vividsolutions.jts.operation.predicate.RectangleContains;
@@ -593,13 +594,14 @@ public abstract class Geometry
   }
 
   /**
-   * Returns <code>true</code> if this geometry is disjoint to the specified geometry.
+   * Tests whether this geometry is disjoint from the specified geometry.
    * <p>
    * The <code>disjoint</code> predicate has the following equivalent definitions:
    * <ul>
    * <li>The two geometries have no point in common
-   * <li>The DE-9IM Intersection Matrix for the two geometries is FF*FF****
-   * <li>! <code>g.intersects(this)</code>
+   * <li>The DE-9IM Intersection Matrix for the two geometries matches 
+   * <code>[FF*FF****]</code>
+   * <li><code>! g.intersects(this)</code>
    * (<code>disjoint</code> is the inverse of <code>intersects</code>)
    * </ul>
    *
@@ -614,14 +616,14 @@ public abstract class Geometry
   }
 
   /**
-   * Returns <code>true</code> if this geometry touches the
+   * Tests whether this geometry touches the
    * specified geometry.
    * <p>
    * The <code>touches</code> predicate has the following equivalent definitions:
    * <ul>
    * <li>The geometries have at least one point in common, but their interiors do not intersect.
-   * <li>The DE-9IM Intersection Matrix for the two geometries is
-   *   FT*******, F**T***** or F***T****
+   * <li>The DE-9IM Intersection Matrix for the two geometries matches
+   *   <code>[FT*******]</code> or <code>[F**T*****]</code> or <code>[F***T****]</code>
    * </ul>
    * If both geometries have dimension 0, this predicate returns <code>false</code>
    *
@@ -637,11 +639,16 @@ public abstract class Geometry
   }
 
   /**
-   * Returns <code>true</code> if this geometry intersects the specified geometry.
+   * Tests whether this geometry intersects the specified geometry.
    * <p>
    * The <code>intersects</code> predicate has the following equivalent definitions:
    * <ul>
    * <li>The two geometries have at least one point in common
+   * <li>The DE-9IM Intersection Matrix for the two geometries matches
+   *    <code>[T********]</code>
+   * or <code>[*T*******]</code>
+   * or <code>[***T*****]</code>
+   * or <code>[****T****]</code>
    * <li>! <code>g.disjoint(this)</code>
    * (<code>intersects</code> is the inverse of <code>disjoint</code>)
    * </ul>
@@ -685,24 +692,24 @@ public abstract class Geometry
   }
 
   /**
-   * Returns <code>true</code> if this geometry crosses the
+   * Tests whether this geometry crosses the
    * specified geometry.
    * <p>
    * The <code>crosses</code> predicate has the following equivalent definitions:
    * <ul>
    * <li>The geometries have some but not all interior points in common.
-   * <li>The DE-9IM Intersection Matrix for the two geometries is
+   * <li>The DE-9IM Intersection Matrix for the two geometries matches
    *   <ul>
-   *    <li>T*T****** (for P/L, P/A, and L/A situations)
-   *    <li>T*****T** (for L/P, L/A, and A/L situations)
-   *    <li>0******** (for L/L situations)
+   *    <li><code>[T*T******]</code> (for P/L, P/A, and L/A situations)
+   *    <li><code>[T*****T**]</code> (for L/P, L/A, and A/L situations)
+   *    <li><code>[0********]</code> (for L/L situations)
    *   </ul>
    * </ul>
    * For any other combination of dimensions this predicate returns <code>false</code>.
    * <p>
    * The SFS defined this predicate only for P/L, P/A, L/L, and L/A situations.
-   * JTS extends the definition to apply to L/P, A/P and A/L situations as well.
-   * This makes the relation symmetric.
+   * JTS extends the definition to apply to L/P, A/P and A/L situations as well,
+   * in order to make the relation symmetric.
    *
    *@param  g  the <code>Geometry</code> with which to compare this <code>Geometry</code>
    *@return        <code>true</code> if the two <code>Geometry</code>s cross.
@@ -715,16 +722,17 @@ public abstract class Geometry
   }
 
   /**
-   * Returns <code>true</code> if this geometry is within the
+   * Tests whether this geometry is within the
    * specified geometry.
    * <p>
    * The <code>within</code> predicate has the following equivalent definitions:
    * <ul>
    * <li>Every point of this geometry is a point of the other geometry,
    * and the interiors of the two geometries have at least one point in common.
-   * <li>The DE-9IM Intersection Matrix for the two geometries is T*F**F***
+   * <li>The DE-9IM Intersection Matrix for the two geometries matches 
+   * <code>[T*F**F***]</code>
    * <li><code>g.contains(this)</code>
-   * (<code>within</code> is the inverse of <code>contains</code>)
+   * (<code>within</code> is the converse of <code>contains</code>)
    * </ul>
    * An implication of the definition is that
    * "The boundary of a Polygon is not within the Polygon".
@@ -742,16 +750,17 @@ public abstract class Geometry
   }
 
   /**
-   * Returns <code>true</code> if this geometry contains the
+   * Tests whether this geometry contains the
    * specified geometry.
    * <p>
    * The <code>contains</code> predicate has the following equivalent definitions:
    * <ul>
    * <li>Every point of the other geometry is a point of this geometry,
    * and the interiors of the two geometries have at least one point in common.
-   * <li>The DE-9IM Intersection Matrix for the two geometries is <code>T*****FF*</code>
+   * <li>The DE-9IM Intersection Matrix for the two geometries matches 
+   * <code>[T*****FF*]</code>
    * <li><code>g.within(this)</code>
-   * (<code>contains</code> is the inverse of <code>within</code>)
+   * (<code>contains</code> is the converse of <code>within</code>)
    * </ul>
    * An implication of the definition is that "Polygons do not
    * contain their boundary".  In other words, if a geometry G is a subset of
@@ -775,7 +784,7 @@ public abstract class Geometry
   }
 
   /**
-   * Returns <code>true</code> if this geometry overlaps the
+   * Tests whether this geometry overlaps the
    * specified geometry.
    * <p>
    * The <code>overlaps</code> predicate has the following equivalent definitions:
@@ -784,9 +793,9 @@ public abstract class Geometry
    * they have the same dimension,
    * and the intersection of the interiors of the two geometries has
    * the same dimension as the geometries themselves.
-   * <li>The DE-9IM Intersection Matrix for the two geometries is
-   *   <code>T*T***T**</code> (for two points or two surfaces)
-   *   or <code>1*T***T**</code> (for two curves)
+   * <li>The DE-9IM Intersection Matrix for the two geometries matches
+   *   <code>[T*T***T**]</code> (for two points or two surfaces)
+   *   or <code>[1*T***T**]</code> (for two curves)
    * </ul>
    * If the geometries are of different dimension this predicate returns <code>false</code>.
    *
@@ -801,22 +810,24 @@ public abstract class Geometry
   }
 
   /**
-   * Returns <code>true</code> if this geometry covers the
+   * Tests whether this geometry covers the
    * specified geometry.
    * <p>
    * The <code>covers</code> predicate has the following equivalent definitions:
    * <ul>
    * <li>Every point of the other geometry is a point of this geometry.
-   * <li>The DE-9IM Intersection Matrix for the two geometries is
-   *    <code>T*****FF*</code>
-   * or <code>*T****FF*</code>
-   * or <code>***T**FF*</code>
-   * or <code>****T*FF*</code>
+   * <li>The DE-9IM Intersection Matrix for the two geometries matches
+   *    <code>[T*****FF*]</code>
+   * or <code>[*T****FF*]</code>
+   * or <code>[***T**FF*]</code>
+   * or <code>[****T*FF*]</code>
    * <li><code>g.coveredBy(this)</code>
-   * (<code>covers</code> is the inverse of <code>coverdBy</code>)
+   * (<code>covers</code> is the converse of <code>coveredBy</code>)
    * </ul>
-   * Note the difference between <code>covers</code> and <code>contains</code>
-   * - <code>covers</code> is a more inclusive relation.
+   * If either geometry is empty, the value of this predicate is <tt>false</tt>.
+   * <p>
+   * This predicate is similar to {@link #contains},
+   * but is more inclusive (i.e. returns <tt>true</tt> for more cases).
    * In particular, unlike <code>contains</code> it does not distinguish between
    * points in the boundary and in the interior of geometries.
    * For most situations, <code>covers</code> should be used in preference to <code>contains</code>.
@@ -831,32 +842,35 @@ public abstract class Geometry
    */
   public boolean covers(Geometry g) {
     // short-circuit test
-    if (! getEnvelopeInternal().contains(g.getEnvelopeInternal()))
+    if (! getEnvelopeInternal().covers(g.getEnvelopeInternal()))
       return false;
     // optimization for rectangle arguments
     if (isRectangle()) {
-      return getEnvelopeInternal().contains(g.getEnvelopeInternal());
+    	// since we have already tested that the test envelope is covered
+      return true;
     }
     return relate(g).isCovers();
   }
 
   /**
-   * Returns <code>true</code> if this geometry is covered by the
+   * Tests whether this geometry is covered by the
    * specified geometry.
    * <p>
    * The <code>coveredBy</code> predicate has the following equivalent definitions:
    * <ul>
    * <li>Every point of this geometry is a point of the other geometry.
-   * <li>The DE-9IM Intersection Matrix for the two geometries is
-   *    <code>T*F**F***</code>
-   * or <code>*TF**F***</code>
-   * or <code>**FT*F***</code>
-   * or <code>**F*TF***</code>
+   * <li>The DE-9IM Intersection Matrix for the two geometries matches
+   *    <code>[T*F**F***]</code>
+   * or <code>[*TF**F***]</code>
+   * or <code>[**FT*F***]</code>
+   * or <code>[**F*TF***]</code>
    * <li><code>g.covers(this)</code>
-   * (<code>coveredBy</code> is the inverse of <code>covers</code>)
+   * (<code>coveredBy</code> is the converse of <code>covers</code>)
    * </ul>
-   * Note the difference between <code>coveredBy</code> and <code>within</code>
-   * - <code>coveredBy</code> is a more inclusive relation.
+   * If either geometry is empty, the value of this predicate is <tt>false</tt>.
+   * <p>
+   * This predicate is similar to {@link #within},
+   * but is more inclusive (i.e. returns <tt>true</tt> for more cases).
    *
    *@param  g  the <code>Geometry</code> with which to compare this <code>Geometry</code>
    *@return        <code>true</code> if this <code>Geometry</code> is covered by <code>g</code>
@@ -869,7 +883,7 @@ public abstract class Geometry
   }
 
   /**
-   *  Returns <code>true</code> if the elements in the DE-9IM
+   * Tests whether the elements in the DE-9IM
    * {@link IntersectionMatrix} for the two <code>Geometry</code>s match the elements in <code>intersectionPattern</code>.
    * The pattern is a 9-character string, with symbols drawn from the following set:
    *  <UL>
@@ -909,7 +923,7 @@ public abstract class Geometry
   }
 
   /**
-   * Returns <code>true</code> if this geometry is equal to the
+   * Tests whether this geometry is equal to the
    * specified geometry.
    * <p>
    * The <code>equals</code> predicate has the following equivalent definitions:
@@ -918,6 +932,8 @@ public abstract class Geometry
    * and no point of either geometry lies in the exterior of the other geometry.
    * <li>The DE-9IM Intersection Matrix for the two geometries is T*F**FFF*
    * </ul>
+   * <b>Note</b> that this method computes topologically equality, not structural or
+   * point-wise equality.
    *
    *@param  other  the <code>Geometry</code> with which to compare this <code>Geometry</code>
    *@return        <code>true</code> if the two <code>Geometry</code>s are equal
@@ -928,8 +944,6 @@ public abstract class Geometry
       return false;
     return relate(g).isEquals(getDimension(), g.getDimension());
   }
-
-  //<<PERHAPS:DESIGN>> Override Object#equals [Jon Aquino]
 
   public String toString() {
     return toText();
@@ -948,44 +962,62 @@ public abstract class Geometry
   }
 
   /**
-   * Computes a buffer area around this geometry having the given
-   * width.
-   * The buffer of a Geometry is the Minkowski sum or difference
-   * of the geometry with a disc of radius <code>abs(distance)</code>.
-   * The buffer is constructed using 8 segments per quadrant to represent curves.
-   * The end cap style is <tt>CAP_ROUND</tt>.
-   *
-   *@param  distance  the width of the buffer (may be positive, negative or 0)
-   *@return an area geometry representing the buffer region
-   *
-   * @throws TopologyException if a robustness error occurs
-   *
-   * @see #buffer(double, int)
-   * @see #buffer(double, int, int)
-   */
-  public Geometry buffer(double distance) {
-    return BufferOp.bufferOp(this, distance);
-  }
+	 * Computes a buffer area around this geometry having the given width. The
+	 * buffer of a Geometry is the Minkowski sum or difference of the geometry
+	 * with a disc of radius <code>abs(distance)</code>.
+	 * <p> 
+	 * Mathematically-exact buffer area boundaries can contain circular arcs. 
+	 * To represent these arcs using linear geometry they must be approximated with line segments.
+	 * The buffer geometry is constructed using 8 segments per quadrant to approximate 
+	 * the circular arcs.
+	 * The end cap style is <tt>CAP_ROUND</tt>.
+	 * <p>
+	 * The buffer operation always returns a polygonal result. The negative or
+	 * zero-distance buffer of lines and points is always an empty {@link Polygon}.
+	 * 
+	 * @param distance
+	 *          the width of the buffer (may be positive, negative or 0)
+	 * @return a polygonal geometry representing the buffer region (which may be
+	 *         empty)
+	 * 
+	 * @throws TopologyException
+	 *           if a robustness error occurs
+	 * 
+	 * @see #buffer(double, int)
+	 * @see #buffer(double, int, int)
+	 */
+	public Geometry buffer(double distance) {
+		return BufferOp.bufferOp(this, distance);
+	}
 
   /**
-   * Computes a buffer area around this geometry having the given
-   * width and with a specified accuracy of approximation for circular arcs.
-   * <p>
-   * Buffer area boundaries can contain circular arcs.
-   * To represent these arcs using linear geometry they must be approximated with line segments.
-   * The <code>quadrantSegments</code> argument allows controlling the
-   * accuracy of the approximation
-   * by specifying the number of line segments used to represent a quadrant of a circle
-   *
-   *@param  distance  the width of the buffer (may be positive, negative or 0)
-   *@param quadrantSegments the number of line segments used to represent a quadrant of a circle
-   *@return an area geometry representing the buffer region
-   *
-   * @throws TopologyException if a robustness error occurs
-   *
-   * @see #buffer(double)
-   * @see #buffer(double, int, int)
-   */
+	 * Computes a buffer area around this geometry having the given width and with
+	 * a specified accuracy of approximation for circular arcs.
+	 * <p>
+	 * Mathematically-exact buffer area boundaries can contain circular arcs. 
+	 * To represent these arcs
+	 * using linear geometry they must be approximated with line segments. The
+	 * <code>quadrantSegments</code> argument allows controlling the accuracy of
+	 * the approximation by specifying the number of line segments used to
+	 * represent a quadrant of a circle
+	 * <p>
+	 * The buffer operation always returns a polygonal result. The negative or
+	 * zero-distance buffer of lines and points is always an empty {@link Polygon}.
+	 * 
+	 * @param distance
+	 *          the width of the buffer (may be positive, negative or 0)
+	 * @param quadrantSegments
+	 *          the number of line segments used to represent a quadrant of a
+	 *          circle
+	 * @return a polygonal geometry representing the buffer region (which may be
+	 *         empty)
+	 * 
+	 * @throws TopologyException
+	 *           if a robustness error occurs
+	 * 
+	 * @see #buffer(double)
+	 * @see #buffer(double, int, int)
+	 */
   public Geometry buffer(double distance, int quadrantSegments) {
     return BufferOp.bufferOp(this, distance, quadrantSegments);
   }
@@ -995,7 +1027,7 @@ public abstract class Geometry
    * width and with a specified accuracy of approximation for circular arcs,
    * and using a specified end cap style.
    * <p>
-   * Buffer area boundaries can contain circular arcs.
+   * Mathematically-exact buffer area boundaries can contain circular arcs.
    * To represent these arcs using linear geometry they must be approximated with line segments.
    * The <code>quadrantSegments</code> argument allows controlling the
    * accuracy of the approximation
@@ -1008,11 +1040,14 @@ public abstract class Geometry
    * <li><tt>BufferOp.CAP_BUTT</tt> - a straight line perpendicular to the end segment
    * <li><tt>BufferOp.CAP_SQUARE</tt> - a half-square
    * </ul>
+	 * <p>
+	 * The buffer operation always returns a polygonal result. The negative or
+	 * zero-distance buffer of lines and points is always an empty {@link Polygon}.
    *
    *@param  distance  the width of the buffer (may be positive, negative or 0)
    *@param quadrantSegments the number of line segments used to represent a quadrant of a circle
    *@param endCapStyle the end cap style to use
-   *@return an area geometry representing the buffer region
+   *@return a polygonal geometry representing the buffer region (which may be empty)
    *
    * @throws TopologyException if a robustness error occurs
    *
@@ -1098,6 +1133,8 @@ public abstract class Geometry
     if (this.isEmpty()) return (Geometry) other.clone();
     if (other.isEmpty()) return (Geometry) clone();
 
+    // TODO: optimize if envelopes of geometries do not intersect
+    
     checkNotGeometryCollection(this);
     checkNotGeometryCollection(other);
     return SnapIfNeededOverlayOp.overlayOp(this, other, OverlayOp.UNION);
@@ -1150,6 +1187,27 @@ public abstract class Geometry
     return SnapIfNeededOverlayOp.overlayOp(this, other, OverlayOp.SYMDIFFERENCE);
   }
 
+	/**
+	 * Computes the union of all the elements of this geometry. Heterogeneous
+	 * {@link GeometryCollection}s are fully supported.
+	 * <p>
+	 * The result obeys the following contract:
+	 * <ul>
+	 * <li>Unioning a set of {@link LineString}s has the effect of fully noding
+	 * and dissolving the linework.
+	 * <li>Unioning a set of {@link Polygon}s will always 
+	 * return a {@link Polygonal} geometry (unlike {link #union(Geometry)},
+	 * which may return geometrys of lower dimension if a topology collapse occurred.
+	 * </ul>
+	 * 
+	 * @return
+	 * 
+	 * @see UnaryUnionOp
+	 */
+	public Geometry union() {
+		return UnaryUnionOp.union(this);
+	}
+  
   /**
    * Returns true if the two <code>Geometry</code>s are exactly equal,
    * up to a specified distance tolerance.

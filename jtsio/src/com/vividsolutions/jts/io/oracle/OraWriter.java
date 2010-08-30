@@ -450,7 +450,8 @@ public class OraWriter {
 
             for (int i = 0; i < geoms.getNumGeometries(); i++) {
                 geom = geoms.getGeometryN(i);
-                elemInfo(elemInfoList, geom, offset, gtype);
+                // MD  20/3/07 modified to provide gType of component geometry
+                elemInfo(elemInfoList, geom, offset, gType(geom));
                 if( geom instanceof Polygon && isRectangle( (Polygon) geom )){
                     offset += (2 * len);                
                 }

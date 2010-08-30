@@ -33,7 +33,6 @@
 package com.vividsolutions.jts.algorithm;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateSequence;
 
 /**
  * Non-robust versions of various fundamental Computational Geometric algorithms,

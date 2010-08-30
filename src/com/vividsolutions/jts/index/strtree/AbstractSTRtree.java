@@ -280,6 +280,51 @@ public abstract class AbstractSTRtree {
   }
 
   /**
+   * Gets a tree structure (as a nested list) 
+   * corresponding to the structure of the items and nodes in this tree.
+   * <p>
+   * The returned {@link List}s contain either {@link Object} items, 
+   * or Lists which correspond to subtrees of the tree
+   * Subtrees which do not contain any items are not included.
+   * <p>
+   * Builds the tree if necessary.
+   * 
+   * @return a List of items and/or Lists
+   */
+  public List itemsTree()
+  {
+    if (!built) { build(); }
+
+    List valuesTree = itemsTree(root);
+    if (valuesTree == null)
+      return new ArrayList();
+    return valuesTree;
+  }
+  
+  private List itemsTree(AbstractNode node) 
+  {
+    List valuesTreeForNode = new ArrayList();
+    for (Iterator i = node.getChildBoundables().iterator(); i.hasNext(); ) {
+      Boundable childBoundable = (Boundable) i.next();
+      if (childBoundable instanceof AbstractNode) {
+        List valuesTreeForChild = itemsTree((AbstractNode) childBoundable);
+        // only add if not null (which indicates an item somewhere in this tree
+        if (valuesTreeForChild != null)
+          valuesTreeForNode.add(valuesTreeForChild);
+      }
+      else if (childBoundable instanceof ItemBoundable) {
+        valuesTreeForNode.add(((ItemBoundable)childBoundable).getItem());
+      }
+      else {
+        Assert.shouldNeverReachHere();
+      }
+    }
+    if (valuesTreeForNode.size() <= 0) 
+      return null;
+    return valuesTreeForNode;
+  }
+
+  /**
    * Removes an item from the tree.
    * (Builds the tree, if necessary.)
    */

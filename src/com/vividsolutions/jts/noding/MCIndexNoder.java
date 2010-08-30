@@ -67,7 +67,7 @@ public class MCIndexNoder
 
   public Collection getNodedSubstrings()
   {
-    return  SegmentString.getNodedSubstrings(nodedSegStrings);
+    return  NodedSegmentString.getNodedSubstrings(nodedSegStrings);
   }
 
   public void computeNodes(Collection inputSegStrings)
@@ -97,6 +97,9 @@ public class MCIndexNoder
           queryChain.computeOverlaps(testChain, overlapAction);
           nOverlaps++;
         }
+        // short-circuit if possible
+        if (segInt.isDone())
+        	return;
       }
     }
   }

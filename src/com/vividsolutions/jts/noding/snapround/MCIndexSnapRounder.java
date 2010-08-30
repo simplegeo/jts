@@ -75,7 +75,7 @@ public class MCIndexSnapRounder
 
   public Collection getNodedSubstrings()
   {
-    return  SegmentString.getNodedSubstrings(nodedSegStrings);
+    return  NodedSegmentString.getNodedSubstrings(nodedSegStrings);
   }
 
   public void computeNodes(Collection inputSegmentStrings)
@@ -91,7 +91,7 @@ public class MCIndexSnapRounder
 
   private void checkCorrectness(Collection inputSegmentStrings)
   {
-    Collection resultSegStrings = SegmentString.getNodedSubstrings(inputSegmentStrings);
+    Collection resultSegStrings = NodedSegmentString.getNodedSubstrings(inputSegmentStrings);
     NodingValidator nv = new NodingValidator(resultSegStrings);
     try {
       nv.checkValid();
@@ -144,7 +144,7 @@ public class MCIndexSnapRounder
   public void computeVertexSnaps(Collection edges)
   {
     for (Iterator i0 = edges.iterator(); i0.hasNext(); ) {
-      SegmentString edge0 = (SegmentString) i0.next();
+      NodedSegmentString edge0 = (NodedSegmentString) i0.next();
       computeVertexSnaps(edge0);
     }
   }
@@ -153,7 +153,7 @@ public class MCIndexSnapRounder
    * Performs a brute-force comparison of every segment in each {@link SegmentString}.
    * This has n^2 performance.
    */
-  private void computeVertexSnaps(SegmentString e)
+  private void computeVertexSnaps(NodedSegmentString e)
   {
     Coordinate[] pts0 = e.getCoordinates();
     for (int i = 0; i < pts0.length - 1; i++) {

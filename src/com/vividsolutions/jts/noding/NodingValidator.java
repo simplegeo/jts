@@ -50,26 +50,14 @@ public class NodingValidator {
 
   private Collection segStrings;
 
-  /**
-   * Creates a new validator for the given collection 
-   * of {@link SegmentString}s.
-   * 
-   * @param segStrings a collection of SegmentStrings
-   */
   public NodingValidator(Collection segStrings)
   {
     this.segStrings = segStrings;
   }
 
-  /**
-   * Checks whether the supplied segment strings
-   * are correctly noded.  Throws an exception if they are not.
-   * 
-   * @throws RuntimeException if the SegmentStrings are not correctly noded
-   *
-   */
   public void checkValid()
   {
+  	// MD - is this call required?  Or could it be done in the Interior Intersection code?
     checkEndPtVertexIntersections();
     checkInteriorIntersections();
     checkCollapses();

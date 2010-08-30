@@ -35,8 +35,6 @@ package com.vividsolutions.jtsexample.operation.polygonize;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.operation.polygonize.Polygonizer;
 

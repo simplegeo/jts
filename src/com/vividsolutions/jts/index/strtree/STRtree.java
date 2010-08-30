@@ -140,14 +140,21 @@ public class STRtree extends AbstractSTRtree implements SpatialIndex {
     return slices;
   }
 
+  private static final int DEFAULT_NODE_CAPACITY = 10;
   /**
    * Constructs an STRtree with the default node capacity.
    */
-  public STRtree() { this(10); }
+  public STRtree() 
+  { 
+    this(DEFAULT_NODE_CAPACITY); 
+  }
 
   /**
    * Constructs an STRtree with the given maximum number of child nodes that
-   * a node may have
+   * a node may have.
+   * <p>
+   * The minimum recommended capacity setting is 4.
+   * 
    */
   public STRtree(int nodeCapacity) {
     super(nodeCapacity);

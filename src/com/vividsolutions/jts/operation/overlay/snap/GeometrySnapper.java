@@ -85,9 +85,14 @@ public class GeometrySnapper
   
   private Geometry srcGeom;
 
-  public GeometrySnapper(Geometry g)
+  /**
+   * Creates a new snapper acting on the given geometry
+   * 
+   * @param srcGeom the geometry to snap
+   */
+  public GeometrySnapper(Geometry srcGeom)
   {
-    srcGeom = g;
+    this.srcGeom = srcGeom;
   }
 
   /**
@@ -118,14 +123,14 @@ public class GeometrySnapper
   /**
    * Snaps the vertices in the component {@link LineString}s
    * of the source geometry
-   * to the vertices of the given geometry.
+   * to the vertices of the given snap geometry.
    *
-   * @param g
+   * @param snapGeom a geometry to snap the source to
    * @return a new snapped Geometry
    */
-  public Geometry snapTo(Geometry g, double snapTolerance)
+  public Geometry snapTo(Geometry snapGeom, double snapTolerance)
   {
-    Coordinate[] snapPts = extractTargetCoordinates(g);
+    Coordinate[] snapPts = extractTargetCoordinates(snapGeom);
 
     SnapTransformer snapTrans = new SnapTransformer(snapTolerance, snapPts);
     return snapTrans.transform(srcGeom);

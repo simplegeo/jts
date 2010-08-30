@@ -43,20 +43,16 @@ import com.vividsolutions.jts.algorithm.*;
  */
 public class Triangle
 {
-  public Coordinate p0, p1, p2;
-
-  public Triangle(Coordinate p0, Coordinate p1, Coordinate p2)
-  {
-    this.p0 = p0;
-    this.p1 = p1;
-    this.p2 = p2;
-  }
 
 
   /**
-   * Tests whether the triangle is acute.
+   * Tests whether a triangle is acute.
    * A triangle is acute iff all interior angles are acute.
-   *
+   * This is a strict test - right triangles will return <tt>false</tt>
+   * A triangle which is not acute is either right or obtuse.
+   * <p>
+   * Note: this implementation is not robust for angles very close to 90 degrees.
+   * 
    * @param a a vertex of the triangle
    * @param b a vertex of the triangle
    * @param c a vertex of the triangle
@@ -119,13 +115,13 @@ public class Triangle
 
   /**
    * Computes the incentre of a triangle.
-   * The inCentre of a triangle is the point which is equidistant
+   * The <i>inCentre</i> of a triangle is the point which is equidistant
    * from the sides of the triangle.
    * It is also the point at which the bisectors
    * of the triangle's angles meet.
-   * It is the centre of the incircle, which
-   * is the unique circle that is tangent to each of the triangle's three sides.
-   *
+   * It is the centre of the triangle's <i>incircle</i>,
+   * which is the unique circle that is tangent to each of the triangle's three sides.
+    *
    * @param a a vertx of the triangle
    * @param b a vertx of the triangle
    * @param c a vertx of the triangle
@@ -150,6 +146,7 @@ public class Triangle
    * medians intersect (a triangle median is the segment from a vertex of the triangle to the
    * midpoint of the opposite side).
    * The centroid divides each median in a ratio of 2:1.
+   * The centroid always lies within the triangle.
    *
    *
    * @param a a vertex of the triangle
@@ -213,30 +210,116 @@ public class Triangle
   }
 
   /**
-   * Computes the area of a triangle.
+   * Computes the 2D area of a triangle.
+   * The area value is always non-negative.
    *
    * @param a a vertex of the triangle
    * @param b a vertex of the triangle
    * @param c a vertex of the triangle
    * @return the area of the triangle
+   * 
+   * @see signedArea
    */
   public static double area(Coordinate a, Coordinate b, Coordinate c)
   {
-    return Math.abs(
-          a.x * (c.y - b.y)
-        + b.x * (a.y - c.y)
-        + c.x * (b.y - a.y))
-        / 2.0;
+    return Math.abs(((c.x - a.x) * (b.y - a.y) - (b.x - a.x) * (c.y - a.y)) / 2);
+  }
+
+  /**
+   * Computes the signed 2D area of a triangle.
+   * The area value is positive if the triangle is oriented CW,
+   * and negative if it is oriented CCW.
+   * <p>
+   * The signed area value can be used to determine point orientation, but 
+   * the implementation in this method
+   * is susceptible to round-off errors.  
+   * Use {@link CGAlgorithms#orientationIndex)} for robust orientation
+   * calculation.
+   *
+   * @param a a vertex of the triangle
+   * @param b a vertex of the triangle
+   * @param c a vertex of the triangle
+   * @return the signed 2D area of the triangle
+   * 
+   * @see CGAlgorithms#orientationIndex
+   */
+  public static double signedArea(Coordinate a, Coordinate b, Coordinate c)
+  {
+		/**
+		 * Uses the formula 1/2 * | u x v |
+		 * where
+		 * 	u,v are the side vectors of the triangle
+		 *  x is the vector cross-product
+		 * For 2D vectors, this formual simplifies to the expression below
+		 */
+    return ((c.x - a.x) * (b.y - a.y) - (b.x - a.x) * (c.y - a.y)) / 2;
+  }
+
+	/**
+	 * Computes the 3D area of a triangle.
+	 * The value computed is alway non-negative.
+	 * 
+   * @param a a vertex of the triangle
+   * @param b a vertex of the triangle
+   * @param c a vertex of the triangle
+   * @return the 3D area of the triangle
+	 */
+	public static double area3D(Coordinate a, Coordinate b, Coordinate c)
+	{
+		/**
+		 * Uses the formula 1/2 * | u x v |
+		 * where
+		 * 	u,v are the side vectors of the triangle
+		 *  x is the vector cross-product
+		 */
+		// side vectors u and v
+		double ux = b.x - a.x;
+		double uy = b.y - a.y;
+		double uz = b.z - a.z;
+		
+		double vx = c.x - a.x;
+		double vy = c.y - a.y;
+		double vz = c.z - a.z;
+		
+		// cross-product = u x v 
+		double crossx = uy * vz - uz * vy;
+		double crossy = uz * vx - ux * vz;
+		double crossz = ux * vy - uy * vx;
+		
+		// tri area = 1/2 * | u x v |
+		double absSq = crossx * crossx + crossy * crossy + crossz * crossz;
+		double area3D = Math.sqrt(absSq) / 2;
+		
+		return area3D;
+	}
+	
+	/**
+	 * The coordinates of the vertices of the triangle
+	 */
+  public Coordinate p0, p1, p2;
+
+  /**
+   * Creates a new triangle with the given vertices.
+   * 
+   * @param p0 a vertex
+   * @param p1 a vertex
+   * @param p2 a vertex
+   */
+  public Triangle(Coordinate p0, Coordinate p1, Coordinate p2)
+  {
+    this.p0 = p0;
+    this.p1 = p1;
+    this.p2 = p2;
   }
 
   /**
    * Computes the incentre of a triangle.
-   * The inCentre of a triangle is the point which is equidistant
+   * The <i>inCentre</i> of a triangle is the point which is equidistant
    * from the sides of the triangle.
    * It is also the point at which the bisectors
    * of the triangle's angles meet.
-   * It is the centre of the incircle, which
-   * is the unique circle that is tangent to each of the triangle's three sides.
+   * It is the centre of the triangle's <i>incircle</i>,
+   * which is the unique circle that is tangent to each of the triangle's three sides.
    *
    * @return the point which is the inCentre of the triangle
    */

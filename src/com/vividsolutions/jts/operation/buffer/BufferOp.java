@@ -51,7 +51,8 @@ import com.vividsolutions.jts.noding.snapround.*;
  * In the CAD/CAM world buffers are known as </i>offset curves</i>.
  * In morphological analysis they are known as <i>erosion</i> and <i>dilation</i>
  * <p>
- * The negative buffer of lines and points is always empty geometry.
+ * The buffer operation always returns a polygonal result.
+ * The negative or zero-distance buffer of lines and points is always an empty {@link Polygon}.
  * <p>
  * Since true buffer curves may contain circular arcs,
  * computed buffer polygons can only be approximations to the true geometry.
@@ -73,17 +74,32 @@ public class BufferOp
 {
   /**
    * Specifies a round line buffer end cap style.
+   * @deprecated use BufferParameters
    */
-  public static final int CAP_ROUND = 1;
+  public static final int CAP_ROUND = BufferParameters.CAP_ROUND;
   /**
    * Specifies a butt (or flat) line buffer end cap style.
+   * @deprecated use BufferParameters
    */
-  public static final int CAP_BUTT = 2;
+  public static final int CAP_BUTT = BufferParameters.CAP_FLAT;
+  
+  /**
+   * Specifies a butt (or flat) line buffer end cap style.
+   * @deprecated use BufferParameters
+   */
+  public static final int CAP_FLAT = BufferParameters.CAP_FLAT;
   /**
    * Specifies a square line buffer end cap style.
+   * @deprecated use BufferParameters
    */
-  public static final int CAP_SQUARE = 3;
-
+  public static final int CAP_SQUARE = BufferParameters.CAP_SQUARE;
+  
+  /**
+   * A number of digits of precision which leaves some computational "headroom"
+   * for floating point operations.
+   * 
+   * This value should be less than the decimal precision of double-precision values (16).
+   */
   private static int MAX_PRECISION_DIGITS = 12;
 
   /**
@@ -139,6 +155,23 @@ public class BufferOp
    *
    * @param g the geometry to buffer
    * @param distance the buffer distance
+   * @param params the buffer parameters to use
+   * @return the buffer of the input geometry
+   *
+   */
+  public static Geometry bufferOp(Geometry g, double distance, BufferParameters params)
+  {
+    BufferOp bufOp = new BufferOp(g, params);
+    Geometry geomBuf = bufOp.getResultGeometry(distance);
+    return geomBuf;
+  }
+  
+  /**
+   * Comutes the buffer for a geometry for a given buffer distance
+   * and accuracy of approximation.
+   *
+   * @param g the geometry to buffer
+   * @param distance the buffer distance
    * @param quadrantSegments the number of segments used to approximate a quarter circle
    * @return the buffer of the input geometry
    *
@@ -176,8 +209,8 @@ public class BufferOp
 
   private Geometry argGeom;
   private double distance;
-  private int quadrantSegments = OffsetCurveBuilder.DEFAULT_QUADRANT_SEGMENTS;
-  private int endCapStyle = BufferOp.CAP_ROUND;
+  
+  private BufferParameters bufParams = new BufferParameters();
 
   private Geometry resultGeometry = null;
   private RuntimeException saveException;   // debugging only
@@ -192,6 +225,18 @@ public class BufferOp
   }
 
   /**
+   * Initializes a buffer computation for the given geometry
+   * with the given set of parameters
+   *
+   * @param g the geometry to buffer
+   * @param bufParams the buffer parameters to use
+   */
+  public BufferOp(Geometry g, BufferParameters bufParams) {
+    argGeom = g;
+    this.bufParams = bufParams;
+  }
+
+  /**
    * Specifies the end cap style of the generated buffer.
    * The styles supported are {@link #CAP_ROUND}, {@link #CAP_BUTT}, and {@link #CAP_SQUARE}.
    * The default is CAP_ROUND.
@@ -200,7 +245,7 @@ public class BufferOp
    */
   public void setEndCapStyle(int endCapStyle)
   {
-    this.endCapStyle = endCapStyle;
+    bufParams.setEndCapStyle(endCapStyle);
   }
 
   /**
@@ -210,7 +255,7 @@ public class BufferOp
    */
   public void setQuadrantSegments(int quadrantSegments)
   {
-    this.quadrantSegments = quadrantSegments;
+    bufParams.setQuadrantSegments(quadrantSegments);
   }
 
   /**
@@ -260,9 +305,7 @@ public class BufferOp
   {
     try {
       // use fast noding by default
-      BufferBuilder bufBuilder = new BufferBuilder();
-      bufBuilder.setQuadrantSegments(quadrantSegments);
-      bufBuilder.setEndCapStyle(endCapStyle);
+      BufferBuilder bufBuilder = new BufferBuilder(bufParams);
       resultGeometry = bufBuilder.buffer(argGeom, distance);
     }
     catch (RuntimeException ex) {
@@ -288,11 +331,9 @@ public class BufferOp
     Noder noder = new ScaledNoder(new MCIndexSnapRounder(new PrecisionModel(1.0)),
                                   fixedPM.getScale());
 
-    BufferBuilder bufBuilder = new BufferBuilder();
+    BufferBuilder bufBuilder = new BufferBuilder(bufParams);
     bufBuilder.setWorkingPrecisionModel(fixedPM);
     bufBuilder.setNoder(noder);
-    bufBuilder.setQuadrantSegments(quadrantSegments);
-    bufBuilder.setEndCapStyle(endCapStyle);
     // this may throw an exception, if robustness errors are encountered
     resultGeometry = bufBuilder.buffer(argGeom, distance);
   }

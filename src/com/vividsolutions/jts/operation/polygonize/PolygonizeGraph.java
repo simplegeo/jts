@@ -111,6 +111,9 @@ class PolygonizeGraph
   {
     if (line.isEmpty()) { return; }
     Coordinate[] linePts = CoordinateArrays.removeRepeatedPoints(line.getCoordinates());
+    
+    if (linePts.length < 2) { return; }
+    
     Coordinate startPt = linePts[0];
     Coordinate endPt = linePts[linePts.length - 1];
 

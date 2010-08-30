@@ -34,7 +34,7 @@ package com.vividsolutions.jts.algorithm;
 
 /**
  * An interface for rules which determine whether node points
- * which are in boundaries of lineal geometry components
+ * which are in boundaries of {@link Lineal} geometry components
  * are in the boundary of the parent geometry collection.
  * The SFS specifies a single kind of boundary node rule,
  * the {@link Mod2BoundaryNodeRule} rule.
@@ -49,10 +49,19 @@ package com.vividsolutions.jts.algorithm;
  *
  * @see RelateOp
  * @see IsSimpleOp
+ * @see PointLocator
  */
 public interface BoundaryNodeRule
 {
 
+	/**
+	 * Tests whether a point that lies in <tt>boundaryCount</tt>
+	 * geometry component boundaries is considered to form part of the boundary
+	 * of the parent geometry.
+	 * 
+	 * @param boundaryCount the number of component boundaries that this point occurs in
+	 * @return true if points in this number of boundaries lie in the parent boundary
+	 */
   boolean isInBoundary(int boundaryCount);
 
   /**

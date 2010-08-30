@@ -50,7 +50,7 @@ public class SubgraphDepthLocater
 {
   private Collection subgraphs;
   private LineSegment seg = new LineSegment();
-  private CGAlgorithms cga = new RobustCGAlgorithms();
+  private CGAlgorithms cga = new CGAlgorithms();
 
   public SubgraphDepthLocater(List subgraphs)
   {

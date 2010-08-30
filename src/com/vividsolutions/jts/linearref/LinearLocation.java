@@ -32,6 +32,8 @@ public class LinearLocation
    * point of the segment is returned.
    * If the fraction is less than or equal to 0.0 the first point
    * of the segment is returned.
+   * The Z ordinate is interpolated from the Z-ordinates of the given points,
+   * if they are specified.
    *
    * @param p0 the first point of the line segment
    * @param p1 the last point of the line segment
@@ -45,7 +47,9 @@ public class LinearLocation
 
     double x = (p1.x - p0.x) * frac + p0.x;
     double y = (p1.y - p0.y) * frac + p0.y;
-    return new Coordinate(x, y);
+    // interpolate Z value. If either input Z is NaN, result z will be NaN as well.
+    double z = (p1.z - p0.z) * frac + p0.z;
+    return new Coordinate(x, y, z);
   }
 
   private int componentIndex = 0;
@@ -123,7 +127,7 @@ public class LinearLocation
   /**
    * Snaps the value of this location to
    * the nearest vertex on the given linear {@link Geometry},
-   * if the vertex is closer than <tt>maxDistance</tt>.
+   * if the vertex is closer than <tt>minDistance</tt>.
    *
    * @param linearGeom a linear geometry
    * @param minDistance the minimum allowable distance to a vertex
@@ -228,6 +232,26 @@ public class LinearLocation
   }
 
   /**
+   * Gets a {@link LineSegment} representing the segment of the 
+   * given linear {@link Geometry} which contains this location.
+   *
+   * @param linearGeom a linear geometry
+   * @return the <tt>LineSegment</tt> containing the location
+   */
+  public LineSegment getSegment(Geometry linearGeom)
+  {
+    LineString lineComp = (LineString) linearGeom.getGeometryN(componentIndex);
+    Coordinate p0 = lineComp.getCoordinateN(segmentIndex);
+    // check for endpoint - return last segment of the line if so
+    if (segmentIndex >= lineComp.getNumPoints() - 1) {
+    	Coordinate prev = lineComp.getCoordinateN(lineComp.getNumPoints() - 2);
+      return new LineSegment(prev, p0);
+    }
+    Coordinate p1 = lineComp.getCoordinateN(segmentIndex + 1);
+    return new LineSegment(p0, p1);
+  }
+
+  /**
    * Tests whether this location refers to a valid
    * location on the given linear {@link Geometry}.
    *
@@ -240,9 +264,9 @@ public class LinearLocation
       return false;
 
     LineString lineComp = (LineString) linearGeom.getGeometryN(componentIndex);
-    if (segmentIndex < 0 || segmentIndex > lineComp.getNumGeometries())
+    if (segmentIndex < 0 || segmentIndex > lineComp.getNumPoints())
       return false;
-    if (segmentIndex == lineComp.getNumGeometries() && segmentFraction != 0.0)
+    if (segmentIndex == lineComp.getNumPoints() && segmentFraction != 0.0)
       return false;
 
     if (segmentFraction < 0.0 || segmentFraction > 1.0)
@@ -327,12 +351,32 @@ public class LinearLocation
   }
 
   /**
+   * Tests whether two locations
+   * are on the same segment in the parent {@link Geometry}.
+   * 
+   * @param loc a location on the same geometry
+   * @return true if the locations are on the same segment of the parent geometry
+   */
+  public boolean isOnSameSegment(LinearLocation loc)
+  {
+  	if (componentIndex != loc.componentIndex) return false;
+  	if (segmentIndex == loc.segmentIndex) return true;
+  	if (loc.segmentIndex - segmentIndex == 1 
+  			&& loc.segmentFraction == 0.0) 
+  		return true;
+  	if (segmentIndex - loc.segmentIndex == 1 
+  			&& segmentFraction == 0.0) 
+  		return true;
+  	return false;
+  }
+
+  /**
    * Copies this location
    *
    * @return a copy of this location
    */
   public Object clone()
   {
-    return new LinearLocation(segmentIndex, segmentFraction);
+    return new LinearLocation(componentIndex, segmentIndex, segmentFraction);
   }
 }

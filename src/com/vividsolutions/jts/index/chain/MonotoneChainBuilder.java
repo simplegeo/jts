@@ -39,8 +39,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geomgraph.Quadrant;
 
 /**
- * A MonotoneChainBuilder implements functions to determine the monotone chains
- * in a sequence of points.
+ * Constructs {@link MonotoneChain}s
+ * for sequences of {@link Coordinate}s.
  *
  * @version 1.7
  */
@@ -98,17 +98,36 @@ public class MonotoneChainBuilder {
   }
 
   /**
-   * @return the index of the last point in the monotone chain starting at <code>start</code>.
+   * Finds the index of the last point in a monotone chain
+   * starting at a given point.
+   * Any repeated points (0-length segments) will be included
+   * in the monotone chain returned.
+   * 
+   * @return the index of the last point in the monotone chain 
+   * starting at <code>start</code>.
    */
   private static int findChainEnd(Coordinate[] pts, int start)
   {
-    // determine quadrant for chain
-    int chainQuad = Quadrant.quadrant(pts[start], pts[start + 1]);
+  	int safeStart = start;
+  	// skip any zero-length segments at the start of the sequence
+  	// (since they cannot be used to establish a quadrant)
+  	while (safeStart < pts.length - 1 && pts[safeStart].equals2D(pts[safeStart + 1])) {
+  		safeStart++;
+  	}
+  	// check if there are NO non-zero-length segments
+  	if (safeStart >= pts.length - 1) {
+  		return pts.length - 1;
+  	}
+    // determine overall quadrant for chain (which is the starting quadrant)
+    int chainQuad = Quadrant.quadrant(pts[safeStart], pts[safeStart + 1]);
     int last = start + 1;
     while (last < pts.length) {
-      // compute quadrant for next possible segment in chain
-      int quad = Quadrant.quadrant(pts[last - 1], pts[last]);
-      if (quad != chainQuad) break;
+    	// skip zero-length segments, but include them in the chain
+    	if (! pts[last - 1].equals2D(pts[last])) {
+        // compute quadrant for next possible segment in chain
+    		int quad = Quadrant.quadrant(pts[last - 1], pts[last]);
+      	if (quad != chainQuad) break;
+    	}
       last++;
     }
     return last - 1;

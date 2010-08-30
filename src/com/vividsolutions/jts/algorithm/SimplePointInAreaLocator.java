@@ -1,6 +1,3 @@
-
-
-
 /*
  * The JTS Topology Suite is a collection of Java classes that
  * implement the fundamental operations required to validate a given
@@ -39,20 +36,28 @@ import java.util.Iterator;
 import com.vividsolutions.jts.geom.*;
 
 /**
- * Computes whether a point
- * lies in the interior of an area {@link Geometry}.
+ * Computes the location of points
+ * relative to an areal {@link Geometry},
+ * using a simple O(n) algorithm.
+ * This algorithm is suitable for use in cases where
+ * only one or a few points will be tested against a given area.
+ * <p>
  * The algorithm used is only guaranteed to return correct results
  * for points which are <b>not</b> on the boundary of the Geometry.
  *
  * @version 1.7
  */
 public class SimplePointInAreaLocator
+	implements PointInAreaLocator
 {
 
   /**
-   * locate is the main location function.  It handles both single-element
-   * and multi-element Geometries.  The algorithm for multi-element Geometries
-   * is more complex, since it has to take into account the boundaryDetermination rule
+   * Determines the {@link Location} of a point in an areal {@link Geometry}.
+   * Currently this will never return a value of BOUNDARY.  
+   * 
+   * @param p the point to test
+   * @param geom the areal geometry to test
+   * @return the Location of the point in the geometry  
    */
   public static int locate(Coordinate p, Geometry geom)
   {
@@ -84,14 +89,39 @@ public class SimplePointInAreaLocator
   {
     if (poly.isEmpty()) return false;
     LinearRing shell = (LinearRing) poly.getExteriorRing();
-    if (! CGAlgorithms.isPointInRing(p, shell.getCoordinates())) return false;
+    if (! isPointInRing(p, shell)) return false;
     // now test if the point lies in or on the holes
     for (int i = 0; i < poly.getNumInteriorRing(); i++) {
       LinearRing hole = (LinearRing) poly.getInteriorRingN(i);
-      if (CGAlgorithms.isPointInRing(p, hole.getCoordinates())) return false;
+      if (isPointInRing(p, hole)) return false;
     }
     return true;
   }
 
+  /**
+   * Determines whether a point lies in a LinearRing,
+   * using the ring envelope to short-circuit if possible.
+   * 
+   * @param p the point to test
+   * @param ring a linear ring
+   * @return true if the point lies inside the ring
+   */
+  private static boolean isPointInRing(Coordinate p, LinearRing ring)
+  {
+  	// short-circuit if point is not in ring envelope
+  	if (! ring.getEnvelopeInternal().intersects(p))
+  		return false;
+  	return CGAlgorithms.isPointInRing(p, ring.getCoordinates());
+  }
+
+	private Geometry geom;
+
+	public SimplePointInAreaLocator(Geometry geom) {
+		this.geom = geom;
+	}
+
+	public int locate(Coordinate p) {
+		return SimplePointInAreaLocator.locate(p, geom);
+	}
 
 }

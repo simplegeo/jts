@@ -2,7 +2,6 @@ package com.vividsolutions.jtsexample.technique;
 
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.io.WKTReader;
-import java.util.*;
 
 /**
  * Shows a technique for using a zero-width buffer to compute

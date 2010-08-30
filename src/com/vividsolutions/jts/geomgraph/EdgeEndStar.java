@@ -39,6 +39,7 @@ import java.io.PrintStream;
 import java.util.*;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.algorithm.*;
+import com.vividsolutions.jts.algorithm.locate.SimplePointInAreaLocator;
 import com.vividsolutions.jts.util.*;
 
 /**
