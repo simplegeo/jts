@@ -49,7 +49,7 @@ public class Edge
 
   /**
    * The two DirectedEdges associated with this Edge.
-   * 0 is forward, 1 is reverse
+   * Index 0 is forward, 1 is reverse.
    */
   protected DirectedEdge[] dirEdge;
 

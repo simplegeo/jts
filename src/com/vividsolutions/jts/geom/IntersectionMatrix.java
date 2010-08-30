@@ -430,8 +430,8 @@ public class IntersectionMatrix implements Cloneable {
    * or <code>**FT*F***</code>
    * or <code>**F*TF***</code>
    *
-   *@return    <code>true</code> if the first <code>Geometry</code> covers the
-   *      second
+   *@return    <code>true</code> if the first <code>Geometry</code>
+   * is covered by the second
    */
   public boolean isCoveredBy() {
     boolean hasPointInCommon =

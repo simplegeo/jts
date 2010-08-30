@@ -93,9 +93,15 @@ public class MultiPolygon extends GeometryCollection {
     return true;
   }
 
+  /**
+   * Computes the boundary of this geometry
+   *
+   * @return a lineal geometry (which may be empty)
+   * @see Geometry#getBoundary
+   */
   public Geometry getBoundary() {
     if (isEmpty()) {
-      return getFactory().createGeometryCollection(null);
+      return getFactory().createMultiLineString(null);
     }
     ArrayList allRings = new ArrayList();
     for (int i = 0; i < geometries.length; i++) {

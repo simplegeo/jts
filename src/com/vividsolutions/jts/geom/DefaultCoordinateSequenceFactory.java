@@ -51,10 +51,8 @@ public class DefaultCoordinateSequenceFactory
   public DefaultCoordinateSequenceFactory() {
   }
 
-  /**
-   * @see http://www.javaworld.com/javaworld/javatips/jw-javatip122.html
-   */
   private Object readResolve() {
+  	// see http://www.javaworld.com/javaworld/javatips/jw-javatip122.html
     return DefaultCoordinateSequenceFactory.instance();
   }
 

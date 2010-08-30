@@ -175,10 +175,9 @@ public class OffsetCurveBuilder {
     // check that points are a ring - add the startpoint again if they are not
     if (ptList.size() > 1) {
       Coordinate start  = (Coordinate) ptList.get(0);
-      Coordinate end    = (Coordinate) ptList.get(1);
+      Coordinate end    = (Coordinate) ptList.get(ptList.size() - 1);
       if (! start.equals(end) ) addPt(start);
     }
-
     Coordinate[] coord = (Coordinate[]) ptList.toArray(arrayTypeCoordinate);
     return coord;
   }

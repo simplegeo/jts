@@ -129,6 +129,7 @@ public class Node
     else
       label.setLocation(argIndex, onLocation);
   }
+
   /**
    * Updates the label of a node to BOUNDARY,
    * obeying the mod-2 boundaryDetermination rule.

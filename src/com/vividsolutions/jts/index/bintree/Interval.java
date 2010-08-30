@@ -97,4 +97,9 @@ public class Interval {
   {
     return (p >= this.min && p <= this.max);
   }
+
+  public String toString()
+  {
+    return "[" + min + ", " + max + "]";
+  }
 }

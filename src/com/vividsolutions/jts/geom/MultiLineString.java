@@ -35,8 +35,7 @@
 package com.vividsolutions.jts.geom;
 
 import com.vividsolutions.jts.geomgraph.GeometryGraph;
-import com.vividsolutions.jts.operation.IsSimpleOp;
-
+import com.vividsolutions.jts.operation.BoundaryOp;
 
 /**
  *  Basic implementation of <code>MultiLineString</code>.
@@ -102,18 +101,16 @@ public class MultiLineString extends GeometryCollection {
     return true;
   }
 
-  public boolean isSimple()
+  /**
+   * Gets the boundary of this geometry.
+   * The boundary of a lineal geometry is always a zero-dimensional geometry (which may be empty).
+   *
+   * @return the boundary geometry
+   * @see Geometry#getBoundary
+   */
+  public Geometry getBoundary()
   {
-    return (new IsSimpleOp()).isSimple(this);
-  }
-
-  public Geometry getBoundary() {
-    if (isEmpty()) {
-      return getFactory().createGeometryCollection(null);
-    }
-    GeometryGraph g = new GeometryGraph(0, this);
-    Coordinate[] pts = g.getBoundaryPoints();
-    return getFactory().createMultiPoint(pts);
+    return (new BoundaryOp(this)).getBoundary();
   }
 
   /**

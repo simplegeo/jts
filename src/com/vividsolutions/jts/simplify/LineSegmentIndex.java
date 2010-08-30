@@ -6,7 +6,10 @@ import com.vividsolutions.jts.index.*;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 
 /**
- * An index of {@link LineSegments}.
+ * An spatial index on a set of {@link LineSegment}s.
+ * Supports adding and removing items.
+ *
+ * @author Martin Davis
  */
 public class LineSegmentIndex
 {

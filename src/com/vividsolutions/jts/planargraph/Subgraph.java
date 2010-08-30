@@ -4,7 +4,7 @@ import java.util.*;
 
 /**
  * A subgraph of a {@link PlanarGraph}.
- * A subgraph may contain any subset of {@link Edges}
+ * A subgraph may contain any subset of {@link Edge}s
  * from the parent graph.
  * It will also automatically contain all {@link DirectedEdge}s
  * and {@link Node}s associated with those edges.
@@ -76,7 +76,7 @@ public class Subgraph
   public Iterator edgeIterator()  {    return edges.iterator();  }
 
   /**
-   * Returns an {@link Iterator} over the {@link Nodes} in this graph.
+   * Returns an {@link Iterator} over the {@link Node}s in this graph.
    * @return an iterator over the nodes
    */
   public Iterator nodeIterator()  {    return nodeMap.iterator();  }

@@ -1,6 +1,3 @@
-
-
-
 /*
  * The JTS Topology Suite is a collection of Java classes that
  * implement the fundamental operations required to validate a given
@@ -63,10 +60,10 @@ import com.vividsolutions.jts.geom.*;
  *
  * @version 1.7
  */
-public class PlanarGraph {
+public class PlanarGraph
+{
 
   public static final CGAlgorithms cga = new CGAlgorithms();
-  //public static final LineIntersector li = new RobustLineIntersector();
 
   /**
    * For nodes in the Collection, link the DirectedEdges at the node that are in the result.

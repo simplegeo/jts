@@ -43,6 +43,11 @@ import com.vividsolutions.jts.util.Assert;
 /**
  * Supplies a set of utility methods for building Geometry objects from lists
  * of Coordinates.
+ * <p>
+ * Note that the factory constructor methods do <b>not</b> change the input coordinates in any way.
+ * In particular, they are not rounded to the supplied <tt>PrecisionModel</tt>.
+ * It is assumed that input Coordinates meet the given precision.
+ *
  *
  * @version 1.7
  */
@@ -320,22 +325,23 @@ public class GeometryFactory
   }
 
   /**
-   * Creates a MultiPoint using the given Points; a null or empty array will
-   * create an empty MultiPoint.
-   * @param coordinates an array without null elements, or an empty array, or null
+   * Creates a MultiPoint using the given Points.
+   * A null or empty array will create an empty MultiPoint.
+   *
+   * @param coordinates an array (without null elements), or an empty array, or <code>null</code>
+   * @return a MultiPoint object
    */
   public MultiPoint createMultiPoint(Point[] point) {
   	return new MultiPoint(point, this);
   }
 
   /**
-   * Creates a MultiPoint using the given Coordinates; a null or empty array
-   * will create an empty MultiPoint.
+   * Creates a {@link MultiPoint} using the given {@link Coordinate}s.
+   * A null or empty array will create an empty MultiPoint.
    *
-   * @param coordinates
-   *            an array without null elements, or an empty array, or null
+   * @param coordinates an array (without null elements), or an empty array, or <code>null</code>
+   * @return a MultiPoint object
    */
-
   public MultiPoint createMultiPoint(Coordinate[] coordinates) {
       return createMultiPoint(coordinates != null
                               ? getCoordinateSequenceFactory().create(coordinates)
@@ -343,9 +349,11 @@ public class GeometryFactory
   }
 
   /**
-   * Creates a MultiPoint using the given CoordinateSequence; a null or empty CoordinateSequence will
-   * create an empty MultiPoint.
-   * @param coordinates a CoordinateSequence possibly empty, or null
+   * Creates a MultiPoint using the given CoordinateSequence.
+   * A a null or empty CoordinateSequence will create an empty MultiPoint.
+   *
+   * @param coordinates a CoordinateSequence (possibly empty), or <code>null</code>
+   * @return a MultiPoint object
    */
   public MultiPoint createMultiPoint(CoordinateSequence coordinates) {
     if (coordinates == null) {
@@ -357,8 +365,6 @@ public class GeometryFactory
     }
     return createMultiPoint(points);
   }
-
-
 
   /**
    * Constructs a <code>Polygon</code> with the given exterior boundary and
@@ -407,6 +413,7 @@ public class GeometryFactory
   public Geometry buildGeometry(Collection geomList) {
     Class geomClass = null;
     boolean isHeterogeneous = false;
+    boolean hasGeometryCollection = false;
     for (Iterator i = geomList.iterator(); i.hasNext(); ) {
       Geometry geom = (Geometry) i.next();
       Class partClass = geom.getClass();
@@ -416,12 +423,14 @@ public class GeometryFactory
       if (partClass != geomClass) {
         isHeterogeneous = true;
       }
+      if (geom instanceof GeometryCollection)
+        hasGeometryCollection = true;
     }
     // for the empty geometry, return an empty GeometryCollection
     if (geomClass == null) {
       return createGeometryCollection(null);
     }
-    if (isHeterogeneous) {
+    if (isHeterogeneous || hasGeometryCollection) {
       return createGeometryCollection(toGeometryArray(geomList));
     }
     // at this point we know the collection is hetereogenous.
@@ -439,7 +448,7 @@ public class GeometryFactory
       else if (geom0 instanceof Point) {
         return createMultiPoint(toPointArray(geomList));
       }
-      Assert.shouldNeverReachHere();
+      Assert.shouldNeverReachHere("Unhandled class: " + geom0.getClass().getName());
     }
     return geom0;
   }

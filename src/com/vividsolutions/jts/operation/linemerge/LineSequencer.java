@@ -80,7 +80,7 @@ public class LineSequencer
 {
   /**
    * Tests whether a {@link Geometry} is sequenced correctly.
-   * {@llink LineString}s are trivially sequenced.
+   * {@link LineString}s are trivially sequenced.
    * {@link MultiLineString}s are checked for correct sequencing.
    * Otherwise, <code>isSequenced</code> is defined
    * to be <code>true</code> for geometries that are not lineal.

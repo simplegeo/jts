@@ -178,6 +178,12 @@ public class Polygon extends Geometry {
     return shell.isEmpty();
   }
 
+  /**
+   * Tests if a valid polygon is simple.
+   * This method always returns true, since a valid polygon is always simple
+   *
+   * @return <code>true</code>
+   */
   public boolean isSimple() {
     return true;
   }
@@ -195,7 +201,7 @@ public class Polygon extends Geometry {
     for (int i = 0; i < 5; i++) {
       double x = seq.getX(i);
       if (! (x == env.getMinX() || x == env.getMaxX())) return false;
-      double y = seq.getX(i);
+      double y = seq.getY(i);
       if (! (y == env.getMinY() || y == env.getMaxY())) return false;
     }
 
@@ -261,15 +267,22 @@ public class Polygon extends Geometry {
     return len;
   }
 
+  /**
+   * Computes the boundary of this geometry
+   *
+   * @return a lineal geometry (which may be empty)
+   * @see Geometry#getBoundary
+   */
   public Geometry getBoundary() {
     if (isEmpty()) {
-      return getFactory().createGeometryCollection(null);
+      return getFactory().createMultiLineString(null);
     }
     LinearRing[] rings = new LinearRing[holes.length + 1];
     rings[0] = shell;
     for (int i = 0; i < holes.length; i++) {
       rings[i + 1] = holes[i];
     }
+    // create LineString or MultiLineString as appropriate
     if (rings.length <= 1)
       return getFactory().createLinearRing(rings[0].getCoordinateSequence());
     return getFactory().createMultiLineString(rings);
@@ -304,11 +317,25 @@ public class Polygon extends Geometry {
   }
 
   public void apply(CoordinateFilter filter) {
-    shell.apply(filter);
-    for (int i = 0; i < holes.length; i++) {
-      holes[i].apply(filter);
-    }
-  }
+	    shell.apply(filter);
+	    for (int i = 0; i < holes.length; i++) {
+	      holes[i].apply(filter);
+	    }
+	  }
+
+  public void apply(CoordinateSequenceFilter filter) 
+  {
+	    shell.apply(filter);
+      if (! filter.isDone()) {
+        for (int i = 0; i < holes.length; i++) {
+          holes[i].apply(filter);
+          if (filter.isDone()) 
+            break;
+        }
+      }
+      if (filter.isGeometryChanged())
+        geometryChanged();
+	  }
 
   public void apply(GeometryFilter filter) {
     filter.filter(this);
@@ -322,6 +349,12 @@ public class Polygon extends Geometry {
     }
   }
 
+  /**
+   * Creates and returns a full copy of this {@link Polygon} object.
+   * (including all coordinates contained by it).
+   *
+   * @return a clone of this instance
+   */
   public Object clone() {
     Polygon poly = (Polygon) super.clone();
     poly.shell = (LinearRing) shell.clone();

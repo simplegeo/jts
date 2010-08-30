@@ -39,12 +39,13 @@ import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.noding.*;
 
 /**
- * Validates that a collection of SegmentStrings is correctly noded.
+ * Validates that a collection of {@link Edge}s is correctly noded.
  * Throws an appropriate exception if an noding error is found.
  *
  * @version 1.7
  */
-public class EdgeNodingValidator {
+public class EdgeNodingValidator 
+{
 
   private static Collection toSegmentStrings(Collection edges)
   {
@@ -59,11 +60,22 @@ public class EdgeNodingValidator {
 
   private NodingValidator nv;
 
+  /**
+   * Creates a new validator for the given collection of {@link Edge}s.
+   * 
+   * @param edges a collection of Edges.
+   */
   public EdgeNodingValidator(Collection edges)
   {
     nv = new NodingValidator(toSegmentStrings(edges));
   }
 
+  /**
+   * Checks whether the supplied edges
+   * are correctly noded.  Throws an exception if they are not.
+   * 
+   * @throws RuntimeException if the SegmentStrings are not correctly noded
+   */
   public void checkValid()
   {
     nv.checkValid();

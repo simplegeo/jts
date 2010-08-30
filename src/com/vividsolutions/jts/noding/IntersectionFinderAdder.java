@@ -65,4 +65,12 @@ public class IntersectionFinderAdder
       }
     }
   }
+  
+  /**
+   * Always process all intersections
+   * 
+   * @return false always
+   */
+  public boolean isDone() { return false; }
+
 }

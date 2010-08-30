@@ -180,6 +180,17 @@ public class LineSegment
   }
 
   /**
+   * Computes the midpoint of the segment
+   *
+   * @return the midpoint of the segment
+   */
+  public Coordinate midPoint()
+  {
+    return new Coordinate( (p0.x + p1.x) / 2,
+                           (p0.y + p1.y) / 2);
+  }
+
+  /**
    * Computes the distance between this line segment and another segment.
    *
    * @return the distance to the other segment

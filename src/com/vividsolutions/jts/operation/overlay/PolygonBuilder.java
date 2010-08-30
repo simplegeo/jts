@@ -212,6 +212,8 @@ public class PolygonBuilder {
    * properly contained (i.e. are connected to their
    * parent shell) would have formed part of a MaximalEdgeRing
    * and been handled in a previous step).
+   *
+   * @throws TopologyException if a hole cannot be assigned to a shell
    */
   private void placeFreeHoles(List shellList, List freeHoleList)
   {
@@ -220,11 +222,14 @@ public class PolygonBuilder {
       // only place this hole if it doesn't yet have a shell
       if (hole.getShell() == null) {
         EdgeRing shell = findEdgeRingContaining(hole, shellList);
-        Assert.isTrue(shell != null, "unable to assign hole to a shell");
+        if (shell == null)
+          throw new TopologyException("unable to assign hole to a shell", hole.getCoordinate(0));
+//        Assert.isTrue(shell != null, "unable to assign hole to a shell");
         hole.setShell(shell);
       }
     }
   }
+
   /**
    * Find the innermost enclosing shell EdgeRing containing the argument EdgeRing, if any.
    * The innermost enclosing ring is the <i>smallest</i> enclosing ring.

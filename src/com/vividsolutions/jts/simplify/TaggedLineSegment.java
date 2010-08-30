@@ -3,7 +3,7 @@ package com.vividsolutions.jts.simplify;
 import com.vividsolutions.jts.geom.*;
 
 /**
- * A {@link LineSegment} which is tagged with its location in a {@link Geometry}.
+ * A {@link LineSegment} which is tagged with its location in a parent {@link Geometry}.
  * Used to index the segments in a geometry and recover the segment locations
  * from the index.
  */

@@ -100,6 +100,16 @@ public class LinearRing extends LineString
   }
 
   /**
+   * Returns <code>Dimension.FALSE</code>, since by definition LinearRings do
+   * not have a boundary.
+   *
+   * @return Dimension.FALSE
+   */
+  public int getBoundaryDimension() {
+    return Dimension.FALSE;
+  }
+
+  /**
    * Returns <code>true</code>, since by definition LinearRings are always simple.
    * @return <code>true</code>
    *

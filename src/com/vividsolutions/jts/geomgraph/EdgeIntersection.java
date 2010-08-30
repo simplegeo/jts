@@ -62,6 +62,12 @@ public class EdgeIntersection
     this.dist = dist;
   }
 
+  public Coordinate getCoordinate() { return coord; }
+
+  public int getSegmentIndex() { return segmentIndex; }
+
+  public double getDistance() { return dist; }
+
   public int compareTo(Object obj)
   {
     EdgeIntersection other = (EdgeIntersection) obj;

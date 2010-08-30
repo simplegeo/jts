@@ -40,6 +40,9 @@ import com.vividsolutions.jts.geom.*;
  * Supports use of an {@link InStream}, which allows easy use
  * with arbitary byte stream sources.
  * <p>
+ * This class reads the format describe in {@link WKBWriter}.  It also partiually handles
+ * the Extended WKB format used by PostGIS (by reading SRID values)
+ * <p>
  * This class is designed to support reuse of a single instance to read multiple
  * geometries. This class is not thread-safe; each thread should create its own
  * instance.
@@ -48,6 +51,37 @@ import com.vividsolutions.jts.geom.*;
  */
 public class WKBReader
 {
+  /**
+   * Converts a hexadecimal string to a byte array.
+   *
+   * @param hex a string containing hex digits
+   */
+  public static byte[] hexToBytes(String hex)
+  {
+    int byteLen = hex.length() / 2;
+    byte[] bytes = new byte[byteLen];
+
+    for (int i = 0; i < hex.length() / 2; i++) {
+      int i2 = 2 * i;
+      if (i2 + 1 > hex.length())
+        throw new IllegalArgumentException("Hex string has odd length");
+
+      int nib1 = hexToInt(hex.charAt(i2));
+      int nib0 = hexToInt(hex.charAt(i2 + 1));
+      byte b = (byte) ((nib1 << 4) + (byte) nib0);
+      bytes[i] = b;
+    }
+    return bytes;
+  }
+
+  private static int hexToInt(char hex)
+  {
+    int nib = Character.digit(hex, 16);
+    if (nib < 0)
+      throw new IllegalArgumentException("Invalid hex digit");
+    return nib;
+  }
+
   private static final String INVALID_GEOM_TYPE_MSG
   = "Invalid geometry type encountered in ";
 
@@ -55,6 +89,8 @@ public class WKBReader
   private PrecisionModel precisionModel;
   // default dimension - will be set on read
   private int inputDimension = 2;
+  private boolean hasSRID = false;
+  private int SRID = 0;
   private ByteOrderDataInStream dis = new ByteOrderDataInStream();
   private double[] ordValues;
 
@@ -72,13 +108,18 @@ public class WKBReader
    *
    * @param bytes the byte array to read from
    * @return the geometry read
-   * @throws IOException if an input exception occurs
    * @throws ParseException if a parse exception occurs
    */
-  public Geometry read(byte[] bytes) throws IOException, ParseException
+  public Geometry read(byte[] bytes) throws ParseException
   {
     // possibly reuse the ByteArrayInStream?
-    return read(new ByteArrayInStream(bytes));
+    // don't throw IOExceptions, since we are not doing any I/O
+    try {
+      return read(new ByteArrayInStream(bytes));
+    }
+    catch (IOException ex) {
+      throw new RuntimeException("Unexpected IOException caught: " + ex.getMessage());
+    }
   }
 
   /**
@@ -93,9 +134,9 @@ public class WKBReader
   throws IOException, ParseException
   {
     dis.setInStream(is);
-
-
-    return readGeometry();
+    Geometry g = readGeometry();
+    setSRID(g);
+    return g;
   }
 
   private Geometry readGeometry()
@@ -109,8 +150,15 @@ public class WKBReader
 
     int typeInt = dis.readInt();
     int geometryType = typeInt & 0xff;
+    // determine if Z values are present
     boolean hasZ = (typeInt & 0x80000000) != 0;
     inputDimension =  hasZ ? 3 : 2;
+    // determine if SRIDs are present
+    hasSRID = (typeInt & 0x20000000) != 0;
+
+    if (hasSRID) {
+      SRID = dis.readInt();
+    }
 
     // only allocate ordValues buffer if necessary
     if (ordValues == null || ordValues.length < inputDimension)
@@ -134,6 +182,19 @@ public class WKBReader
     }
     throw new ParseException("Unknown WKB type " + geometryType);
     //return null;
+  }
+
+  /**
+   * Sets the SRID, if it was specified in the WKB
+   *
+   * @param g the geometry to update
+   * @return the geometry with an updated SRID value, if required
+   */
+  private Geometry setSRID(Geometry g)
+  {
+    if (SRID != 0)
+      g.setSRID(SRID);
+    return g;
   }
 
   private Point readPoint() throws IOException

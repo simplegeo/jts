@@ -42,19 +42,33 @@ import com.vividsolutions.jts.geomgraph.GeometryGraph;
 /**
  * Computes the topological relationship ({@link Location})
  * of a single point to a {@link Geometry}.
- * The algorithm obeys the SFS Boundary Determination Rule to determine
- * whether the point lies on the boundary or not.
+ * The algorithm obeys the <i>SFS Boundary Determination Rule</i>
+ * to determine whether the point lies on the boundary or not.
  * <p>
+ * Notes:
+ * <ul>
+ * <li>{@link LinearRing}s do not enclose any area - points inside the ring are still in the EXTERIOR of the ring.
+ * </ul>
  * Instances of this class are not reentrant.
  *
  * @version 1.7
  */
 public class PointLocator
 {
+  // default is to use OGC SFS rule
+  private BoundaryNodeRule boundaryRule = BoundaryNodeRule.ENDPOINT_BOUNDARY_RULE; //OGC_SFS_BOUNDARY_RULE;
+
   private boolean isIn;         // true if the point lies in or on any Geometry element
   private int numBoundaries;    // the number of sub-elements whose boundaries the point lies in
 
   public PointLocator() {
+  }
+
+  public PointLocator(BoundaryNodeRule boundaryRule)
+  {
+    if (boundaryRule == null)
+      throw new IllegalArgumentException("Rule must be non-null");
+    this.boundaryRule = boundaryRule;
   }
 
   /**
@@ -83,9 +97,6 @@ public class PointLocator
   {
     if (geom.isEmpty()) return Location.EXTERIOR;
 
-    if (geom instanceof LinearRing) {
-      return locate(p, (LinearRing) geom);
-    }
     if (geom instanceof LineString) {
       return locate(p, (LineString) geom);
     }
@@ -96,16 +107,16 @@ public class PointLocator
     isIn = false;
     numBoundaries = 0;
     computeLocation(p, geom);
-    if (GeometryGraph.isInBoundary(numBoundaries)) return Location.BOUNDARY;
-    if (numBoundaries > 0 || isIn) return Location.INTERIOR;
+    if (boundaryRule.isInBoundary(numBoundaries))
+      return Location.BOUNDARY;
+    if (numBoundaries > 0 || isIn)
+      return Location.INTERIOR;
+
     return Location.EXTERIOR;
   }
 
   private void computeLocation(Coordinate p, Geometry geom)
   {
-    if (geom instanceof LinearRing) {
-      updateLocationInfo(locate(p, (LinearRing) geom));
-    }
     if (geom instanceof LineString) {
       updateLocationInfo(locate(p, (LineString) geom));
     }
@@ -156,7 +167,7 @@ public class PointLocator
     return Location.EXTERIOR;
   }
 
-  private int locate(Coordinate p, LinearRing ring)
+  private int locateInPolygonRing(Coordinate p, LinearRing ring)
   {
     // can this test be folded into isPointInRing ?
     if (CGAlgorithms.isOnLine(p, ring.getCoordinates())) {
@@ -172,16 +183,19 @@ public class PointLocator
     if (poly.isEmpty()) return Location.EXTERIOR;
     LinearRing shell = (LinearRing) poly.getExteriorRing();
 
-    int shellLoc = locate(p, shell);
+    int shellLoc = locateInPolygonRing(p, shell);
     if (shellLoc == Location.EXTERIOR) return Location.EXTERIOR;
     if (shellLoc == Location.BOUNDARY) return Location.BOUNDARY;
     // now test if the point lies in or on the holes
     for (int i = 0; i < poly.getNumInteriorRing(); i++) {
       LinearRing hole = (LinearRing) poly.getInteriorRingN(i);
-      int holeLoc = locate(p, hole);
+      int holeLoc = locateInPolygonRing(p, hole);
       if (holeLoc == Location.INTERIOR) return Location.EXTERIOR;
       if (holeLoc == Location.BOUNDARY) return Location.BOUNDARY;
     }
     return Location.INTERIOR;
   }
+
+
+
 }

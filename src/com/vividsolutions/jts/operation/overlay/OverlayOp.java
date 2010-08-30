@@ -39,8 +39,8 @@ import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.util.*;
 import com.vividsolutions.jts.algorithm.*;
 import com.vividsolutions.jts.geomgraph.*;
-import com.vividsolutions.jts.geomgraph.index.SegmentIntersector;
 import com.vividsolutions.jts.operation.GeometryGraphOperation;
+import com.vividsolutions.jts.noding.*;
 
 /**
  * Computes the overlay of two {@link Geometry}s.  The overlay
@@ -158,8 +158,8 @@ public class OverlayOp
 //Debug.println(edgeList);
 
     // debugging only
-    //NodingValidator nv = new NodingValidator(edgeList.getEdges());
-    //nv.checkValid();
+    EdgeNodingValidator nv = new EdgeNodingValidator(edgeList.getEdges());
+    nv.checkValid();
 
     graph.addEdges(edgeList.getEdges());
     computeLabelling();
@@ -176,6 +176,7 @@ public class OverlayOp
      */
     findResultAreaEdges(opCode);
     cancelDuplicateResultEdges();
+
     PolygonBuilder polyBuilder = new PolygonBuilder(geomFact, cga);
     polyBuilder.add(graph);
     resultPolyList = polyBuilder.getPolygons();

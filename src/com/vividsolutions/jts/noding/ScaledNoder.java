@@ -68,11 +68,12 @@ public class ScaledNoder
     Coordinate[] roundPts = new Coordinate[pts.length];
     for (int i = 0; i < pts.length; i++) {
       roundPts[i] = new Coordinate(
-      Math.round((pts[i].x - offsetX) * scaleFactor),
-      Math.round((pts[i].y - offsetY) * scaleFactor)
+          Math.round((pts[i].x - offsetX) * scaleFactor),
+          Math.round((pts[i].y - offsetY) * scaleFactor)
         );
     }
-    return roundPts;
+    Coordinate[] roundPtsNoDup = CoordinateArrays.removeRepeatedPoints(roundPts);
+    return roundPtsNoDup;
   }
 
   //private double scale(double val) { return (double) Math.round(val * scaleFactor); }

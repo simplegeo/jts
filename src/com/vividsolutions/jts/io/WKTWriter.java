@@ -145,12 +145,71 @@ public class WKTWriter
     return buf.toString();
   }
 
+  private int outputDimension = 2;
   private DecimalFormat formatter;
   private boolean isFormatted = false;
+  private boolean useFormatting = false;
   private int level = 0;
+  private int coordsPerLine = -1;
+  private String indentTabStr = "  ";
 
+  /**
+   * Creates a new WKTWriter with default settings
+   */
   public WKTWriter()
   {
+  }
+
+  /**
+   * Creates a writer that writes {@link Geometry}s with
+   * the given output dimension (2 or 3).
+   * If the specified output dimension is 3, the Z value
+   * of coordinates will be written if it is present
+   * (i.e. if it is not <code>Double.NaN</code>).
+   *
+   * @param outputDimension the coordinate dimension to output (2 or 3)
+   */
+  public WKTWriter(int outputDimension) {
+    this.outputDimension = outputDimension;
+
+    if (outputDimension < 2 || outputDimension > 3)
+      throw new IllegalArgumentException("Invalid output dimension (must be 2 or 3)");
+  }
+
+  /**
+   * Sets whether the output will be formatted.
+   *
+   * @param isFormatted true if the output is to be formatted
+   */
+  public void setFormatted(boolean isFormatted)
+  {
+    this.isFormatted = isFormatted;
+  }
+
+  /**
+   * Sets the maximum number of coordinates per line
+   * written in formatted output.
+   * If the provided coordinate number is <= 0,
+   * coordinates will be written all on one line.
+   *
+   * @param coordsPerLine the number of coordinates per line to output.
+   */
+  public void setMaxCoordinatesPerLine(int coordsPerLine)
+  {
+    this.coordsPerLine = coordsPerLine;
+  }
+
+  /**
+   * Sets the tab size to use for indenting.
+   *
+   * @param size the number of spaces to use as the tab string
+   * @throws IllegalArgumentException if the size is non-positive
+   */
+  public void setTab(int size)
+  {
+    if(size <= 0)
+      throw new IllegalArgumentException("Tab count must be positive");
+    this.indentTabStr = stringOfChar(' ', size);
   }
 
   /**
@@ -164,7 +223,7 @@ public class WKTWriter
   {
     Writer sw = new StringWriter();
     try {
-      writeFormatted(geometry, false, sw);
+      writeFormatted(geometry, isFormatted, sw);
     }
     catch (IOException ex) {
       Assert.shouldNeverReachHere();
@@ -224,10 +283,10 @@ public class WKTWriter
    *@return           a <Geometry Tagged Text> string (see the OpenGIS Simple
    *      Features Specification)
    */
-  private void writeFormatted(Geometry geometry, boolean isFormatted, Writer writer)
+  private void writeFormatted(Geometry geometry, boolean useFormatting, Writer writer)
     throws IOException
   {
-    this.isFormatted = isFormatted;
+    this.useFormatting = useFormatting;
     formatter = createFormatter(geometry.getPrecisionModel());
     appendGeometryTaggedText(geometry, 0, writer);
   }
@@ -417,21 +476,28 @@ public class WKTWriter
   }
 
   /**
-   *  Appends the i'th coordinate from the sequence to the writer
+   * Appends the i'th coordinate from the sequence to the writer
    *
-   *@param  seq      the <code>CoordinateSequence</code> to process
-   * @param i the index of the coordinate to write
-   *@param  writer          the output writer to append to
+   * @param  seq  the <code>CoordinateSequence</code> to process
+   * @param i     the index of the coordinate to write
+   * @param  writer the output writer to append to
    */
   private void appendCoordinate(CoordinateSequence seq, int i, Writer writer)
-    throws IOException
+      throws IOException
   {
     writer.write(writeNumber(seq.getX(i)) + " " + writeNumber(seq.getY(i)));
+    if (outputDimension >= 3 && seq.getDimension() >= 3) {
+      double z = seq.getOrdinate(i, 3);
+      if (! Double.isNaN(z)) {
+        writer.write(" ");
+        writer.write(writeNumber(z));
+      }
+    }
   }
 
   /**
-   *  Converts a <code>Coordinate</code> to &lt;Point&gt; format, then appends
-   *  it to the writer.
+   *  Converts a <code>Coordinate</code> to <code>&lt;Point&gt;</code> format,
+   *  then appends it to the writer.
    *
    *@param  coordinate      the <code>Coordinate</code> to process
    *@param  writer          the output writer to append to
@@ -440,6 +506,10 @@ public class WKTWriter
     throws IOException
   {
     writer.write(writeNumber(coordinate.x) + " " + writeNumber(coordinate.y));
+    if (outputDimension >= 3 && ! Double.isNaN(coordinate.z)) {
+      writer.write(" ");
+      writer.write(writeNumber(coordinate.z));
+    }
   }
 
   /**
@@ -473,7 +543,10 @@ public class WKTWriter
       for (int i = 0; i < seq.size(); i++) {
         if (i > 0) {
           writer.write(", ");
-          if (i % 10 == 0) indent(level + 2, writer);
+          if (coordsPerLine > 0
+              && i % coordsPerLine == 0) {
+            indent(level + 1, writer);
+          }
         }
         appendCoordinate(seq, i, writer);
       }
@@ -500,7 +573,10 @@ public class WKTWriter
       for (int i = 0; i < lineString.getNumPoints(); i++) {
         if (i > 0) {
           writer.write(", ");
-          if (i % 10 == 0) indent(level + 2, writer);
+          if (coordsPerLine > 0
+              && i % coordsPerLine == 0) {
+            indent(level + 1, writer);
+          }
         }
         appendCoordinate(lineString.getCoordinateN(i), writer);
       }
@@ -551,9 +627,10 @@ public class WKTWriter
       for (int i = 0; i < multiPoint.getNumGeometries(); i++) {
         if (i > 0) {
           writer.write(", ");
+          indentCoords(i, level + 1, writer);
         }
         appendCoordinate(((Point) multiPoint.getGeometryN(i)).getCoordinate(), writer);
-      }
+     }
       writer.write(")");
     }
   }
@@ -645,12 +722,24 @@ public class WKTWriter
     }
   }
 
+  private void indentCoords(int coordIndex,  int level, Writer writer)
+    throws IOException
+  {
+    if (coordsPerLine <= 0
+        || coordIndex % coordsPerLine != 0)
+      return;
+    indent(level, writer);
+  }
+
   private void indent(int level, Writer writer)
     throws IOException
   {
-    if (! isFormatted || level <= 0) return;
+    if (! useFormatting || level <= 0)
+      return;
     writer.write("\n");
-    writer.write(stringOfChar(' ', INDENT * level));
+    for (int i = 0; i < level; i++) {
+      writer.write(indentTabStr);
+    }
   }
 
 

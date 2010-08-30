@@ -41,7 +41,9 @@ import java.util.List;
 
 import com.vividsolutions.jts.algorithm.CGAlgorithms;
 import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.util.Assert;
+import com.vividsolutions.jts.geom.impl.*;
+import com.vividsolutions.jts.io.*;
+import com.vividsolutions.jts.util.*;
 
 
 /**
@@ -114,6 +116,7 @@ public abstract class EdgeRing {
     }
     ring = geometryFactory.createLinearRing(coord);
     isHole = cga.isCCW(ring.getCoordinates());
+//Debug.println( (isHole ? "hole - " : "shell - ") + WKTWriter.toLineString(new CoordinateArraySequence(ring.getCoordinates())));
   }
   abstract public DirectedEdge getNext(DirectedEdge de);
   abstract public void setEdgeRing(DirectedEdge de, EdgeRing er);
@@ -133,7 +136,9 @@ public abstract class EdgeRing {
     DirectedEdge de = start;
     boolean isFirstEdge = true;
     do {
-      Assert.isTrue(de != null, "found null Directed Edge");
+//      Assert.isTrue(de != null, "found null Directed Edge");
+      if (de == null)
+        throw new TopologyException("Found null DirectedEdge");
       if (de.getEdgeRing() == this)
         throw new TopologyException("Directed Edge visited twice during ring-building at " + de.getCoordinate());
 

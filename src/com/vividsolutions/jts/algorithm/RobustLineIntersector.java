@@ -71,7 +71,7 @@ public class RobustLineIntersector
     result = DONT_INTERSECT;
   }
 
-  public int computeIntersect(
+  protected int computeIntersect(
                 Coordinate p1, Coordinate p2,
                 Coordinate q1, Coordinate q2  ) {
     isProper = false;
@@ -104,6 +104,12 @@ public class RobustLineIntersector
     if (collinear) {
       return computeCollinearIntersection(p1, p2, q1, q2);
     }
+    
+    /**
+     * At this point we know that there is a single intersection point
+     * (since the lines are not collinear).
+     */
+    
     /**
      *  Check if the intersection is an endpoint. If it is, copy the endpoint as
      *  the intersection point. Copying the point rather than computing it
@@ -114,16 +120,45 @@ public class RobustLineIntersector
      */
     if (Pq1 == 0 || Pq2 == 0 || Qp1 == 0 || Qp2 == 0) {
       isProper = false;
-      if (Pq1 == 0) {
+      
+      /**
+       * Check for two equal endpoints.  
+       * This is done explicitly rather than by the orientation tests
+       * below in order to improve robustness.
+       * 
+       * [An example where the orientation tests fail to be consistent is
+       * the following (where the true intersection is at the shared endpoint
+       * POINT (19.850257749638203 46.29709338043669)
+       * 
+       * LINESTRING ( 19.850257749638203 46.29709338043669, 20.31970698357233 46.76654261437082 ) 
+       * and 
+       * LINESTRING ( -48.51001596420236 -22.063180333403878, 19.850257749638203 46.29709338043669 )
+       * 
+       * which used to produce the INCORRECT result: (20.31970698357233, 46.76654261437082, NaN)
+       * 
+       */
+      if (p1.equals2D(q1) 
+      		|| p1.equals2D(q2)) {
+      	intPt[0] = p1;
+      }
+      else if (p2.equals2D(q1) 
+      		|| p2.equals2D(q2)) {
+      	intPt[0] = p2;
+      }
+      
+      /**
+       * Now check to see if any endpoint lies on the interior of the other segment.
+       */
+      else if (Pq1 == 0) {
         intPt[0] = new Coordinate(q1);
       }
-      if (Pq2 == 0) {
+      else if (Pq2 == 0) {
         intPt[0] = new Coordinate(q2);
       }
-      if (Qp1 == 0) {
+      else if (Qp1 == 0) {
         intPt[0] = new Coordinate(p1);
       }
-      if (Qp2 == 0) {
+      else if (Qp2 == 0) {
         intPt[0] = new Coordinate(p2);
       }
     }
@@ -133,16 +168,6 @@ public class RobustLineIntersector
     }
     return DO_INTERSECT;
   }
-
-/*
-  private boolean intersectsEnvelope(Coordinate p1, Coordinate p2, Coordinate q) {
-    if (((q.x >= Math.min(p1.x, p2.x)) && (q.x <= Math.max(p1.x, p2.x))) &&
-        ((q.y >= Math.min(p1.y, p2.y)) && (q.y <= Math.max(p1.y, p2.y)))) {
-      return true;
-    }
-    return false;
-  }
-*/
 
   private int computeCollinearIntersection(Coordinate p1, Coordinate p2,
       Coordinate q1, Coordinate q2) {
@@ -195,55 +220,81 @@ public class RobustLineIntersector
   private Coordinate intersection(
     Coordinate p1, Coordinate p2, Coordinate q1, Coordinate q2)
   {
-    Coordinate n1 = new Coordinate(p1);
-    Coordinate n2 = new Coordinate(p2);
-    Coordinate n3 = new Coordinate(q1);
-    Coordinate n4 = new Coordinate(q2);
-    Coordinate normPt = new Coordinate();
-    normalizeToEnvCentre(n1, n2, n3, n4, normPt);
-
-    Coordinate intPt = null;
-    try {
-      intPt = HCoordinate.intersection(n1, n2, n3, n4);
-    }
-    catch (NotRepresentableException e) {
-      Assert.shouldNeverReachHere("Coordinate for intersection is not calculable");
-    }
-
-    intPt.x += normPt.x;
-    intPt.y += normPt.y;
+    Coordinate intPt = intersectionWithNormalization(p1, p2, q1, q2);
+  	// testing only
+//    Coordinate intPt = safeHCoordinateIntersection(p1, p2, q1, q2);
 
     /**
-     *
+     * Due to rounding it can happen that the computed intersection is
+     * outside the envelopes of the input segments.  Clearly this
+     * is inconsistent. 
+     * This code checks this condition and forces a more reasonable answer
+     * 
      * MD - May 4 2005 - This is still a problem.  Here is a failure case:
      *
      * LINESTRING (2089426.5233462777 1180182.3877339689, 2085646.6891757075 1195618.7333999649)
      * LINESTRING (1889281.8148903656 1997547.0560044837, 2259977.3672235999 483675.17050843034)
      * int point = (2097408.2633752143,1144595.8008114607)
+     * 
+     * MD - Dec 14 2006 - This does not seem to be a failure case any longer
      */
     if (! isInSegmentEnvelopes(intPt)) {
-      System.out.println("Intersection outside segment envelopes: " + intPt);
+//      System.out.println("Intersection outside segment envelopes: " + intPt);
+//      System.out.println("Segments: " + this);
+      // compute a safer result
+      intPt = CentralEndpointIntersector.getIntersection(p1, p2, q1, q2);
+//      System.out.println("Snapped to " + intPt);
     }
-    /*
-     // disabled until a better solution is found
-    if (! isInSegmentEnvelopes(intPt)) {
-      System.out.println("first value outside segment envelopes: " + intPt);
-
-      IteratedBisectionIntersector ibi = new IteratedBisectionIntersector(p1, p2, q1, q2);
-      intPt = ibi.getIntersection();
-    }
-    if (! isInSegmentEnvelopes(intPt)) {
-      System.out.println("ERROR - outside segment envelopes: " + intPt);
-
-      IteratedBisectionIntersector ibi = new IteratedBisectionIntersector(p1, p2, q1, q2);
-      Coordinate testPt = ibi.getIntersection();
-    }
-    */
 
     if (precisionModel != null) {
       precisionModel.makePrecise(intPt);
     }
 
+    return intPt;
+  }
+
+  private Coordinate intersectionWithNormalization(
+    Coordinate p1, Coordinate p2, Coordinate q1, Coordinate q2)
+    {
+      Coordinate n1 = new Coordinate(p1);
+      Coordinate n2 = new Coordinate(p2);
+      Coordinate n3 = new Coordinate(q1);
+      Coordinate n4 = new Coordinate(q2);
+      Coordinate normPt = new Coordinate();
+      normalizeToEnvCentre(n1, n2, n3, n4, normPt);
+
+      Coordinate intPt = safeHCoordinateIntersection(n1, n2, n3, n4);
+
+      intPt.x += normPt.x;
+      intPt.y += normPt.y;
+      
+      return intPt;
+  }
+  
+  /**
+   * Computes a segment intersection using homogeneous coordinates.
+   * Round-off error can cause the raw computation to fail, 
+   * (usually due to the segments being approximately parallel).
+   * If this happens, a reasonable approximation is computed instead.
+   * 
+   * @param p1 a segment endpoint
+   * @param p2 a segment endpoint
+   * @param q1 a segment endpoint
+   * @param q2 a segment endpoint
+   * @return the computed intersection point
+   */
+  private Coordinate safeHCoordinateIntersection(Coordinate p1, Coordinate p2, Coordinate q1, Coordinate q2)
+  {
+    Coordinate intPt = null;
+    try {
+      intPt = HCoordinate.intersection(p1, p2, q1, q2);
+    }
+    catch (NotRepresentableException e) {
+//    	System.out.println("Not calculable: " + this);
+      // compute an approximate result
+      intPt = CentralEndpointIntersector.getIntersection(p1, p2, q1, q2);
+ //     System.out.println("Snapped to " + intPt);
+    }
     return intPt;
   }
 

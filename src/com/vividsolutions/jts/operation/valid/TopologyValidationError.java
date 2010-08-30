@@ -34,7 +34,7 @@
  */
 package com.vividsolutions.jts.operation.valid;
 
-import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.*;
 
 /**
  * Contains information about the nature and location of a {@link Geometry}
@@ -102,7 +102,7 @@ public class TopologyValidationError {
 
   /**
    * Indicates that the <code>X</code> or <code>Y</code> ordinate of
-   * a Coordinate is not a valid numeric value (e.g. {@link Double.Nan} )
+   * a Coordinate is not a valid numeric value (e.g. {@link Double#NaN} )
    */
   public static final int INVALID_COORDINATE      = 10;
 
@@ -140,7 +140,8 @@ public class TopologyValidationError {
   public TopologyValidationError(int errorType, Coordinate pt)
   {
     this.errorType = errorType;
-    this.pt = (Coordinate) pt.clone();
+    if (pt != null)
+      this.pt = (Coordinate) pt.clone();
   }
 
   /**

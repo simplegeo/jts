@@ -59,7 +59,27 @@ import com.vividsolutions.jts.util.Assert;
  */
 public class WKBWriter
 {
-  private int outputDimension;
+  public static String bytesToHex(byte[] bytes)
+  {
+    StringBuffer buf = new StringBuffer();
+    for (int i = 0; i < bytes.length; i++) {
+      byte b = bytes[i];
+      buf.append(toHexDigit((b >> 4) & 0x0F));
+      buf.append(toHexDigit(b & 0x0F));
+    }
+    return buf.toString();
+  }
+
+  private static char toHexDigit(int n)
+  {
+    if (n < 0 || n > 15)
+      throw new IllegalArgumentException("Nibble value out of range: " + n);
+    if (n <= 9)
+      return (char) ('0' + n);
+    return (char) ('A' + (n - 10));
+  }
+
+  private int outputDimension = 2;
   private int byteOrder;
   private ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
   private OutStream byteArrayOutStream = new OutputStreamOutStream(byteArrayOS);

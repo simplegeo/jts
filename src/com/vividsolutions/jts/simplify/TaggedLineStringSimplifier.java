@@ -10,6 +10,7 @@ import com.vividsolutions.jts.util.Debug;
  * (in the sense that no new intersections are introduced).
  * Uses the recursive Douglas-Peucker algorithm.
  *
+ * @author Martin Davis
  * @version 1.7
  */
 public class TaggedLineStringSimplifier
@@ -24,7 +25,6 @@ public class TaggedLineStringSimplifier
   public TaggedLineStringSimplifier(LineSegmentIndex inputIndex,
                                      LineSegmentIndex outputIndex)
   {
-    this.line = line;
     this.inputIndex = inputIndex;
     this.outputIndex = outputIndex;
   }

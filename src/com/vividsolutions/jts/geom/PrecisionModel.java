@@ -83,6 +83,21 @@ import java.util.Map;
  */
 public class PrecisionModel implements Serializable, Comparable
 {
+	/**
+	 * Determines which of two {@link PrecisionModel}s is the most precise
+	 * (allows the greatest number of significant digits).
+	 * 
+	 * @param pm1 a PrecisionModel
+	 * @param pm2 a PrecisionModel
+	 * @return the PrecisionModel which is most precise
+	 */
+	public static PrecisionModel mostPrecise(PrecisionModel pm1, PrecisionModel pm2)
+	{
+		if (pm1.compareTo(pm2) >= 0)
+			return pm1;
+		return pm2;
+	}
+	
   private static final long serialVersionUID = 7777263578777803835L;
 
   /**
@@ -228,17 +243,17 @@ public class PrecisionModel implements Serializable, Comparable
    *
    * @return the maximum number of decimal places provided by this precision model
    */
-  	public int getMaximumSignificantDigits() {
-		int maxSigDigits = 16;
-		if (modelType == FLOATING) {
-			maxSigDigits = 16;
-		} else if (modelType == FLOATING_SINGLE) {
-			maxSigDigits = 6;
-		} else if (modelType == FIXED) {
-			maxSigDigits = 1 + (int) Math.ceil(Math.log(getScale()) / Math.log(10));
-		}
-		return maxSigDigits;
-	}
+  public int getMaximumSignificantDigits() {
+    int maxSigDigits = 16;
+    if (modelType == FLOATING) {
+      maxSigDigits = 16;
+    } else if (modelType == FLOATING_SINGLE) {
+      maxSigDigits = 6;
+    } else if (modelType == FIXED) {
+      maxSigDigits = 1 + (int) Math.ceil(Math.log(getScale()) / Math.log(10));
+    }
+    return maxSigDigits;
+  }
 
   /**
    *  Returns the multiplying factor used to obtain a precise coordinate.
@@ -359,11 +374,11 @@ public class PrecisionModel implements Serializable, Comparable
 
   /**
    * Rounds a numeric value to the PrecisionModel grid.
-   * Symmetric Arithmetic Rounding is used, to provide
+   * Asymmetric Arithmetic Rounding is used, to provide
    * uniform rounding behaviour no matter where the number is
    * on the number line.
    * <p>
-   * <b>Note:</b> Java's <code>Math#rint</code> uses the "banker's rounding" algorithm,
+   * <b>Note:</b> Java's <code>Math#rint</code> uses the "Banker's Rounding" algorithm,
    * which is not suitable for precision operations elsewhere in JTS.
    */
   public double makePrecise(double val) {

@@ -166,8 +166,10 @@ public class CGAlgorithms
    * <ul>
    * <li>The list of points is assumed to have the first and last points equal.
    * <li>This will handle coordinate lists which contain repeated points.
-   * <li>If the ring is invalid, the answer returned may not be correct.
    * </ul>
+   * This algorithm is <b>only</b> guaranteed to work with valid rings.
+   * If the ring is invalid (e.g. self-crosses or touches),
+   * the computed result <b>may</b> not be correct.
    *
    * @param ring an array of coordinates forming a ring
    * @return <code>true</code> if the ring is oriented counter-clockwise.
@@ -177,28 +179,28 @@ public class CGAlgorithms
     int nPts = ring.length - 1;
 
     // find highest point
-    Coordinate hip = ring[0];
-    int hii = 0;
+    Coordinate hiPt = ring[0];
+    int hiIndex = 0;
     for (int i = 1; i <= nPts; i++) {
       Coordinate p = ring[i];
-      if (p.y > hip.y) {
-        hip = p;
-        hii = i;
+      if (p.y > hiPt.y) {
+        hiPt = p;
+        hiIndex = i;
       }
     }
 
     // find distinct point before highest point
-    int iPrev = hii;
+    int iPrev = hiIndex;
     do {
       iPrev = iPrev - 1;
       if (iPrev < 0) iPrev = nPts;
-    } while (ring[iPrev].equals(hip) && iPrev != hii);
+    } while (ring[iPrev].equals2D(hiPt) && iPrev != hiIndex);
 
     // find distinct point after highest point
-    int iNext = hii;
+    int iNext = hiIndex;
     do {
       iNext = (iNext + 1) % nPts;
-    } while (ring[iNext].equals(hip) && iNext != hii);
+    } while (ring[iNext].equals2D(hiPt) && iNext != hiIndex);
 
     Coordinate prev = ring[iPrev];
     Coordinate next = ring[iNext];
@@ -209,12 +211,10 @@ public class CGAlgorithms
      * (including the case where the input array has fewer than 4 elements),
      * or it contains coincident line segments.
      */
-    if (prev.equals(hip) || next.equals(hip) || prev.equals(next))
+    if (prev.equals2D(hiPt) || next.equals2D(hiPt) || prev.equals2D(next))
       return false;
-    // MD - don't bother throwing exception, since this isn't a complete check for ring validity
-//  throw new IllegalArgumentException("Invalid ring (contains repeated line segments)");
 
-    int disc = computeOrientation(prev, hip, next);
+    int disc = computeOrientation(prev, hiPt, next);
 
     /**
      *  If disc is exactly 0, lines are collinear.  There are two possible cases:

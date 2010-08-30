@@ -148,12 +148,6 @@ public class GeometryCollection extends Geometry {
     return "GeometryCollection";
   }
 
-  public boolean isSimple() {
-    checkNotGeometryCollection(this);
-    Assert.shouldNeverReachHere();
-    return false;
-  }
-
   public Geometry getBoundary() {
     checkNotGeometryCollection(this);
     Assert.shouldNeverReachHere();
@@ -163,7 +157,7 @@ public class GeometryCollection extends Geometry {
   /**
    *  Returns the area of this <code>GeometryCollection</code>
    *
-   *@return the area of the polygon
+   * @return the area of the polygon
    */
   public double getArea()
   {
@@ -200,9 +194,22 @@ public class GeometryCollection extends Geometry {
   }
 
   public void apply(CoordinateFilter filter) {
+	    for (int i = 0; i < geometries.length; i++) {
+	      geometries[i].apply(filter);
+	    }
+	  }
+
+  public void apply(CoordinateSequenceFilter filter) {
+    if (geometries.length == 0)
+      return;
     for (int i = 0; i < geometries.length; i++) {
       geometries[i].apply(filter);
+      if (filter.isDone()) {
+        break;
+      }
     }
+    if (filter.isGeometryChanged())
+      geometryChanged();
   }
 
   public void apply(GeometryFilter filter) {
@@ -219,6 +226,12 @@ public class GeometryCollection extends Geometry {
     }
   }
 
+  /**
+   * Creates and returns a full copy of this {@link GeometryCollection} object.
+   * (including all coordinates contained by it).
+   *
+   * @return a clone of this instance
+   */
   public Object clone() {
     GeometryCollection gc = (GeometryCollection) super.clone();
     gc.geometries = new Geometry[geometries.length];

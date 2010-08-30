@@ -35,32 +35,40 @@
  */
 package com.vividsolutions.jts.operation.relate;
 
-/**
- * A collection of EdgeStubs which obey the following invariant:
- * They originate at the same node and have the same direction.
- * @version 1.7
- */
 import java.io.PrintStream;
 import java.util.*;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geomgraph.*;
 import com.vividsolutions.jts.util.Assert;
-
+import com.vividsolutions.jts.algorithm.BoundaryNodeRule;
 
 /**
- * Contains all {@link EdgeEnd}s which start at the same point and are parallel.
+ * A collection of {@link EdgeEnd}s which obey the following invariant:
+ * They originate at the same node and have the same direction.
  *
  * @version 1.7
  */
 public class EdgeEndBundle
   extends EdgeEnd
 {
+//  private BoundaryNodeRule boundaryNodeRule;
   private List edgeEnds = new ArrayList();
 
-  public EdgeEndBundle(EdgeEnd e)
+  public EdgeEndBundle(BoundaryNodeRule boundaryNodeRule, EdgeEnd e)
   {
     super(e.getEdge(), e.getCoordinate(), e.getDirectedCoordinate(), new Label(e.getLabel()));
     insert(e);
+    /*
+    if (boundaryNodeRule != null)
+      this.boundaryNodeRule = boundaryNodeRule;
+    else
+      boundaryNodeRule = BoundaryNodeRule.OGC_SFS_BOUNDARY_RULE;
+    */
+  }
+
+  public EdgeEndBundle(EdgeEnd e)
+  {
+    this(null, e);
   }
 
   public Label getLabel() { return label; }
@@ -78,7 +86,7 @@ public class EdgeEndBundle
    * edges in this EdgeStubBundle.  It essentially merges
    * the ON and side labels for each edge.  These labels must be compatible
    */
-  public void computeLabel()
+  public void computeLabel(BoundaryNodeRule boundaryNodeRule)
   {
     // create the label.  If any of the edges belong to areas,
     // the label must be an area label
@@ -94,23 +102,23 @@ public class EdgeEndBundle
 
     // compute the On label, and the side labels if present
     for (int i = 0; i < 2; i++) {
-      computeLabelOn(i);
+      computeLabelOn(i, boundaryNodeRule);
       if (isArea)
         computeLabelSides(i);
     }
-
   }
+
   /**
    * Compute the overall ON location for the list of EdgeStubs.
    * (This is essentially equivalent to computing the self-overlay of a single Geometry)
    * edgeStubs can be either on the boundary (eg Polygon edge)
    * OR in the interior (e.g. segment of a LineString)
    * of their parent Geometry.
-   * In addition, GeometryCollections use the mod-2 rule to determine
+   * In addition, GeometryCollections use a {@link BoundaryNodeRule} to determine
    * whether a segment is on the boundary or not.
-   * Finally, in GeometryCollections it can still occur that an edge is both
+   * Finally, in GeometryCollections it can occur that an edge is both
    * on the boundary and in the interior (e.g. a LineString segment lying on
-   * top of a Polygon edge.) In this case as usual the Boundary is given precendence.
+   * top of a Polygon edge.) In this case the Boundary is given precendence.
    * <br>
    * These observations result in the following rules for computing the ON location:
    * <ul>
@@ -120,7 +128,7 @@ public class EdgeEndBundle
    * <li> otherwise, the attribute is NULL.
    * </ul>
    */
-  private void computeLabelOn(int geomIndex)
+  private void computeLabelOn(int geomIndex, BoundaryNodeRule boundaryNodeRule)
   {
     // compute the ON location value
     int boundaryCount = 0;
@@ -135,7 +143,7 @@ public class EdgeEndBundle
     int loc = Location.NONE;
     if (foundInterior)  loc = Location.INTERIOR;
     if (boundaryCount > 0) {
-        loc = GeometryGraph.determineBoundary(boundaryCount);
+      loc = GeometryGraph.determineBoundary(boundaryNodeRule, boundaryCount);
     }
     label.setLocation(geomIndex, loc);
 

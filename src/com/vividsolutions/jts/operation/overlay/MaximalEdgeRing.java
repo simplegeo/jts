@@ -40,8 +40,8 @@ import com.vividsolutions.jts.algorithm.*;
 import com.vividsolutions.jts.geomgraph.*;
 
 /**
- * A ring of {@link edges} which may contain nodes of degree > 2.
- * A MaximalEdgeRing may represent two different spatial entities:
+ * A ring of {@link DirectedEdge}s which may contain nodes of degree > 2.
+ * A <tt>MaximalEdgeRing</tt> may represent two different spatial entities:
  * <ul>
  * <li>a single polygon possibly containing inversions (if the ring is oriented CW)
  * <li>a single hole possibly containing exversions (if the ring is oriented CCW)
@@ -50,7 +50,7 @@ import com.vividsolutions.jts.geomgraph.*;
  * the interior of the polygon is strongly connected.
  * <p>
  * These are the form of rings used to define polygons under some spatial data models.
- * However, under the OGC SFS model, {@link MinimalEdgeRings} are required.
+ * However, under the OGC SFS model, {@link MinimalEdgeRing}s are required.
  * A MaximalEdgeRing can be converted to a list of MinimalEdgeRings using the
  * {@link #buildMinimalRings() } method.
  *
@@ -78,7 +78,7 @@ public class MaximalEdgeRing
    * For all nodes in this EdgeRing,
    * link the DirectedEdges at the node to form minimalEdgeRings
    */
-  void linkDirectedEdgesForMinimalEdgeRings()
+  public void linkDirectedEdgesForMinimalEdgeRings()
   {
     DirectedEdge de = startDe;
     do {
@@ -88,7 +88,7 @@ public class MaximalEdgeRing
     } while (de != startDe);
   }
 
-  List buildMinimalRings()
+  public List buildMinimalRings()
   {
     List minEdgeRings = new ArrayList();
     DirectedEdge de = startDe;
