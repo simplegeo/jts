@@ -141,12 +141,38 @@ public class CoordinateList
         if (last.equals2D(coord)) return;
       }
     }
-    super.add(coord);
-  }
-
-  /** Add an array of coordinates
-   * @param coll The coordinates
-   * @param allowRepeated if set to false, repeated coordinates are collapsed
+    super.add(coord);
+  }
+
+  /**
+   * Inserts the specified coordinate at the specified position in this list.
+   * 
+   * @param i the position at which to insert
+   * @param coord the coordinate to insert
+   * @param allowRepeated if set to false, repeated coordinates are collapsed
+   */
+  public void add(int i, Coordinate coord, boolean allowRepeated)
+  {
+    // don't add duplicate coordinates
+    if (! allowRepeated) {
+      int size = size();
+      if (size > 0) {
+        if (i > 0) {
+          Coordinate prev = (Coordinate) get(i - 1);
+          if (prev.equals2D(coord)) return;
+        }
+        if (i < size) {
+          Coordinate next = (Coordinate) get(i);
+          if (next.equals2D(coord)) return;
+        }
+      }
+    }
+    super.add(i, coord);
+  }
+
+  /** Add an array of coordinates
+   * @param coll The coordinates
+   * @param allowRepeated if set to false, repeated coordinates are collapsed
    * @return true (as by general collection contract)
    */
   public boolean addAll(Collection coll, boolean allowRepeated)
@@ -165,7 +191,7 @@ public class CoordinateList
   public void closeRing()
   {
     if (size() > 0)
-      add(get(0), false);
+      add(new Coordinate((Coordinate) get(0)), false);
   }
 
   /** Returns the Coordinates in this collection.
